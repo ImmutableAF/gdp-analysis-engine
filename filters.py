@@ -22,3 +22,6 @@ def filterBySpecificYear(df, year):
         raise ValueError(f"Year {year} not found in DataTable.")
     staticCol = [col for col in df.columns if not col.isdigit()]
     return df[staticCol + [year]]
+
+def filterByColumn(df, column, value):
+    return df[df[column] == value]
