@@ -9,7 +9,6 @@ df = fileReading.readCSVfile(filename)
 
 if df is not None:
     df = fileCleaning.cleanFile(df)
-    #print(df.head())
 while True:
     user_inputs = inputs.getFilterInputs()
 
