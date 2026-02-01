@@ -8,7 +8,4 @@ df = fileReading.readCSVfile(filename)
 
 if df is not None:
     df = fileCleaning.cleanFile(df)
-    #print(df.head())
-
-df_filtered = filters.filterYearRange(df, 1997, 2000)
-print(df_filtered)
+    print(df.head())
