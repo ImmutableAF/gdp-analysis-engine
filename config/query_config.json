@@ -1,0 +1,7 @@
+{
+  "region": "Europe",
+  "year": 2021,
+  "country": null,
+  "operation": "average",
+  "dashboard_charts": ["bar", "line"]
+}

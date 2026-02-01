@@ -1,0 +1,10 @@
+main.py
+│
+├─> arg_manager.py         # CLI parsing
+├─> config_loader.py       # Loads both configs
+│     └─> config_models.py  # Provides BaseConfig & QueryConfig
+├─> logging_factory.py     # Sets up logging
+├─> pipeline/pipeline.py   # Runs pipeline
+│     └─> loader_registry.py
+│           └─> loaders/*  # All discovered loader plugins
+└─> dashboard/dashboard.py # Receives processed data + query_config for visualization

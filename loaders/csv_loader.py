@@ -9,3 +9,6 @@ class CsvLoader(Loader):
 
     def load(self, file_path: Path) -> pd.DataFrame:
         return pd.read_csv(file_path)
+
+    def to_csv_dataframe(self, df: pd.DataFrame, file_path: Path) -> pd.DataFrame:
+        return df
