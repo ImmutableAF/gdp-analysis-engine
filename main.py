@@ -2,6 +2,7 @@ import fileCleaning
 import fileReading
 import filters
 import inputs
+import statisticalOperations
 
 filename = "gdp_with_continent_filled.csv"
 df = fileReading.readCSVfile(filename)
