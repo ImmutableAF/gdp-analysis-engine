@@ -8,16 +8,14 @@ def filterByCountry(df, newCount):
 
 def getYearColumns(df):
     
-    return [col for col in df.columns if col.isdigit()]
+    return list(filter(str.isdigit(), df.columns))
 
 def filterYearRange(df, startYear, endYear):
-    yearColumns = [
+    cols = [
         col for col in df.columns
-        if col.isdigit() and startYear <= int(col) <= endYear
+        if not col.isdigit() or startYear <= int(col) <= endYear
     ]
-    staticCol = getYearColumns(df)
-
-    return df[staticCol + yearColumns]
+    return df[cols]
 
 def filterBySpecificYear(df, year):
     year = str(year)
