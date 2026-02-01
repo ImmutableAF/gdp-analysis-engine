@@ -1,16 +1,13 @@
-import logging
 from pathlib import Path
-from data_loader import DataLoader
+import logging
+from loader_registry import LoaderRegistry
 
 
 def run_pipeline(file_path: Path) -> None:
     logger = logging.getLogger("pipeline")
 
-    logger.info("Pipeline started")
-
-    loader = DataLoader(file_path)
-    df = loader.load()
+    registry = LoaderRegistry()
+    df = registry.load(file_path)
 
     logger.info("Data loaded successfully")
     logger.debug(f"Shape: {df.shape}")
-    logger.debug(f"Columns: {list(df.columns)}")
