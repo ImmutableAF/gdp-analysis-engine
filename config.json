@@ -1,0 +1,14 @@
+{
+  "data_source": "csv",
+  "filepath": "data/gdp_with_continent_filled.csv",
+  "filters": {
+    "region": "South Asia",
+    "year": 2020,
+    "country": null
+  },
+  "operation": "average",
+  "visualizations": {
+    "region_chart": "bar",
+    "year_chart": "line"
+  }
+}
