@@ -1,8 +1,12 @@
 import streamlit as st
 import plotly.express as px
 import pandas as pd
-from main import load_metadata, run_query
 from pathlib import Path
+import sys
+
+sys.path.append(str(Path(__file__).resolve().parent.parent))
+
+from main import load_metadata, run_query
 
 # Page Config for a "Futuristic" feel
 st.set_page_config(page_title="GDP Analytics Engine", layout="wide", initial_sidebar_state="expanded")
