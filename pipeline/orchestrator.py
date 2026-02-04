@@ -3,11 +3,10 @@ from pathlib import Path
 import logging
 import pandas as pd
 
-from loader_registry import LoaderRegistry
+from loading_core.loader_registry import LoaderRegistry
 # Import the functional validator instead of the class
-from data_validator import validate_data 
-from config_models import QueryConfig
-
+from pipeline.data_validator import validate_data 
+from config_core.config_models import QueryConfig
 from pipeline.transform import transform_raw_gdp
 from pipeline.filter import filter_data
 from pipeline.aggregate import aggregate_data

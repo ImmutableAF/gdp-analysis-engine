@@ -1,7 +1,7 @@
 import logging
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
-from config_models import BaseConfig
+from config_core.config_models import BaseConfig
 
 
 def create_file_logger(base_config: BaseConfig, debug: bool = False) -> None:

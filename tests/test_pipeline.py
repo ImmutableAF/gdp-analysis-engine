@@ -3,7 +3,7 @@ import pytest
 import pandas as pd
 from pipeline.transform import transform_raw_gdp
 from pipeline.filter import filter_data
-from config_models import QueryConfig
+from config_core.config_models import QueryConfig
 
 def test_transform_raw_gdp():
     # Sample data

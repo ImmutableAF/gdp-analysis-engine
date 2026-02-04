@@ -1,6 +1,6 @@
 import json
 from pathlib import Path
-from config_models import BaseConfig, QueryConfig
+from .config_models import BaseConfig, QueryConfig
 
 def load_base_config(config_path: Path) -> BaseConfig:
     with open(config_path) as f:

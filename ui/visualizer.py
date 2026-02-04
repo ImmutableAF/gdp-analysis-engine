@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
 from typing import List
-from config_models import QueryConfig
+from config_core.config_models import QueryConfig
 
 def plot_bar(df: pd.DataFrame, config: QueryConfig):
     """Region-wise GDP Bar Chart."""

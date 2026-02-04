@@ -1,6 +1,6 @@
 import pandas as pd
 from pathlib import Path
-from loader_interface import Loader
+from ..loader_interface import Loader
 
 
 class ExcelLoader(Loader):

@@ -2,11 +2,11 @@ import logging
 from pathlib import Path
 from typing import Tuple, Any
 
-from config_loader import load_base_config, load_query_config
-from logging_factory import create_file_logger
-from pipeline.pipeline import run_pipeline
+from config_core.config_loader import load_base_config, load_query_config
+from utils.logging_factory import create_file_logger
+from pipeline.orchestrator import run_pipeline
 from utils.arg_manager import parse_args
-from config_models import BaseConfig, QueryConfig
+from config_core.config_models import BaseConfig, QueryConfig
 
 # main.py
 def load_metadata() -> Tuple[BaseConfig, QueryConfig, Any]:
@@ -15,8 +15,8 @@ def load_metadata() -> Tuple[BaseConfig, QueryConfig, Any]:
     base_dir = Path(__file__).resolve().parent
     
     # Re-insert the "config" folder into the path
-    base_config_path = base_dir / "config" / "base_config.json"
-    query_config_path = base_dir / "config" / "query_config.json"
+    base_config_path = base_dir / "config_core" / "config" / "base_config.json"
+    query_config_path = base_dir / "config_core" / "config" / "query_config.json"
 
     # Defensive check: provide a clear error if the folder is missing
     if not base_config_path.exists():

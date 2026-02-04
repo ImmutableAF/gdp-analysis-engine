@@ -1,6 +1,6 @@
 # pipeline/filter.py
 import pandas as pd
-from config_models import QueryConfig
+from config_core.config_models import QueryConfig
 
 
 def filter_data(df: pd.DataFrame, config: QueryConfig) -> pd.DataFrame:

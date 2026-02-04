@@ -5,8 +5,8 @@ import pandas as pd
 from pathlib import Path
 from typing import List
 
-from loader_interface import Loader
-import loaders  # the package
+from .loader_interface import Loader
+import loading_core.loaders  # the package
 
 
 class LoaderRegistry:
@@ -16,8 +16,8 @@ class LoaderRegistry:
 
     def _discover_plugins(self) -> None:
         """Dynamically discovers Loader subclasses in the loaders package."""
-        for module_info in pkgutil.iter_modules(loaders.__path__):
-            module = importlib.import_module(f"{loaders.__name__}.{module_info.name}")
+        for module_info in pkgutil.iter_modules(loading_core.loaders.__path__):
+            module = importlib.import_module(f"{loading_core.loaders.__name__}.{module_info.name}")
 
             for _, obj in inspect.getmembers(module, inspect.isclass):
                 if issubclass(obj, Loader) and obj is not Loader:

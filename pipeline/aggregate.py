@@ -1,6 +1,6 @@
 # pipeline/aggregate.py
 import pandas as pd
-from config_models import QueryConfig
+from config_core.config_models import QueryConfig
 
 
 def aggregate_data(df: pd.DataFrame, config: QueryConfig) -> pd.DataFrame:
