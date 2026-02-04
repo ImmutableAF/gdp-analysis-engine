@@ -1,10 +1,78 @@
+# Package Dependency Graph
+# Format: <Package/Module> -> <Depends On (Imports)>
+
+[Composition Root]
 main.py
-│
-├─> arg_manager.py         # CLI parsing
-├─> config_loader.py       # Loads both configs
-│     └─> config_models.py  # Provides BaseConfig & QueryConfig
-├─> logging_factory.py     # Sets up logging
-├─> pipeline/pipeline.py   # Runs pipeline
-│     └─> loader_registry.py
-│           └─> loaders/*  # All discovered loader plugins
-└─> dashboard/dashboard.py # Receives processed data + query_config for visualization
+    -> utils        (Args parsing, Logging setup)
+    -> config_core  (Load settings)
+    -> loading_core (Data ingestion)
+    -> pipeline     (Data processing)
+    -> ui           (Visualization)
+
+[Business Logic Layer]
+pipeline/   (Package)
+    -> config_core  (Needs rules/thresholds for validation & filtering)
+    -> utils        (Logging, specialized helpers)
+    -> loading_core
+
+loading_core/ (Package)
+    -> [LEAF NODE]  (Must NOT import other project packages to avoid circular deps)
+
+[Presentation Layer]
+ui/         (Package)
+    -> config_core  (Dashboard layout settings, colors)
+    -> main.py        
+
+[Foundation Layer]
+config_core/ (Package)
+    -> [LEAF NODE]  (Must NOT import other project packages to avoid circular deps)
+
+utils/      (Package)
+    -> config_core
+
+# Module Dependency Graph
+# format: <Module> -> <Depends On (Imports)>
+
+[Entry Point]
+main.py
+    -> arg_manager
+    -> config_loader
+    -> loader_registry
+    -> pipeline
+    -> dashboard
+    -> logging_factory
+
+[Core Logic]
+pipeline.py
+    -> data_validator
+    -> filter
+    -> transform
+    -> aggregate
+    -> logging_factory
+
+filter.py
+    -> config_models (BaseConfig, QueryConfig)
+transform.py
+    -> config_models (BaseConfig, QueryConfig)
+aggregate.py
+    -> config_models (BaseConfig, QueryConfig)
+
+[Configuration & Input]
+config_loader.py
+    -> config_models (BaseConfig, QueryConfig)
+
+loader_registry.py
+    -> loader_interface
+    -> x_loader (Concrete Loader implementations)
+
+[Visualization]
+dashboard.py
+    -> visualizer
+
+[Utilities]
+arg_manager.py     -> [None]
+data_validator.py  -> [None]
+config_models.py   -> [None]
+loader_interface.py-> [None]
+logging_factory.py
+    -> config_models (BaseConfig, QueryConfig)
