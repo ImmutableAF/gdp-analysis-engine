@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
+
 @dataclass(frozen=True)
 class BaseConfig:
     data_directory: Path
@@ -12,6 +13,7 @@ class BaseConfig:
 @dataclass(frozen=True)
 class QueryConfig:
     region: Optional[str]
-    year: Optional[int]
+    startYear: Optional[int]  
+    endYear: Optional[int]    
     country: Optional[str]
     operation: Optional[str]

@@ -19,16 +19,17 @@ def load_query_config(config_path: Path) -> QueryConfig:
         data = json.load(f)
     return QueryConfig(
         region=data.get("region"),
-        year=data.get("year"),
+        startYear=data.get("startYear"),
+        endYear=data.get("endYear"),      
         country=data.get("country"),
         operation=data.get("operation")
     )
 
 def load_default_config() -> BaseConfig:
     return BaseConfig(
-        data_directory= "data",
-        default_file= Path("gdp_with_continent_filled.csv"),
-        log_directory= Path("logs"),
-        max_log_size= 10000000,
-        logging_level= "INFO"
+        data_directory=Path("data"), 
+        default_file="gdp_with_continent_filled.csv", 
+        log_directory=Path("logs"),
+        max_log_size=10,
+        logging_level="INFO"
     )
