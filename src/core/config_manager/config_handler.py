@@ -16,7 +16,7 @@ def validate_base_config(config: BaseConfig) -> None:
 
     if not config.data_directory.is_dir():
         raise ValueError(f"data_directory is not a directory: {config.data_directory}")
-
+    
     default_path = config.data_directory / config.default_file
     if not default_path.is_file():
         raise FileNotFoundError(f"default_file not found: {default_path}")

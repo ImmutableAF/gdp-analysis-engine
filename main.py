@@ -11,7 +11,7 @@ from src.core.config_manager.config_handler import validate_base_config, sanatiz
 from src.core.config_manager.config_loader import load_base_config, load_default_config, load_query_config
 
 def get_paths() -> Tuple[Path, Path]:
-    base_dir = Path(__file__).resolve().parent
+    base_dir = Path(__file__).parent
 
     base_config_path = base_dir / "data" / "configs" / "base_config.json"
     query_config_path = base_dir / "data" / "configs" / "query_config.json"
@@ -23,7 +23,6 @@ def get_base_config(base_config_path: Path) -> BaseConfig:
         base_config = load_base_config(base_config_path)
         validate_base_config(base_config)
     except Exception as e:
-        print(f"Failed to load base config: {e}. Using defaults.")
         base_config = load_default_config()
 
     return base_config
@@ -55,8 +54,6 @@ if __name__ == "__main__":
 
     df = load_data(filepath)
     logger.info("data is not empty") if not df.empty else None
-    
+
     query_config = sanatize_query_config(load_query_config(get_paths()[1]), *get_valid_attr(df))
     logger.debug(f"query config : {query_config}")
-
-    print(df)

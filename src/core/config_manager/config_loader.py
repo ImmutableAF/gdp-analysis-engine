@@ -29,6 +29,5 @@ def load_default_config() -> BaseConfig:
         data_directory=Path("data"), 
         default_file="gdp_with_continent_filled.csv", 
         log_directory=Path("logs"),
-        max_log_size=1000000,
-        logging_level="INFO"
+        max_log_size=1000000
     )

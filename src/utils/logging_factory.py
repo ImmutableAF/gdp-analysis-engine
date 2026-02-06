@@ -19,11 +19,13 @@ def initialize_logging(base_config: BaseConfig, debug: bool = False) -> None:
     )
 
     formatter = logging.Formatter(
-        "%(asctime)s [%(levelname)s] %(name)s: %(message)s"
+        "%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+        datefmt="%H:%M:%S"
     )
     handler.setFormatter(formatter)
 
     root_logger = logging.getLogger()
+
     root_logger.setLevel(log_level)
 
     root_logger.handlers.clear()

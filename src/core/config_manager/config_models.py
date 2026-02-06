@@ -8,7 +8,6 @@ class BaseConfig:
     default_file: str
     log_directory: Path
     max_log_size: int
-    logging_level: str
 
 @dataclass(frozen=True)
 class QueryConfig:
