@@ -21,7 +21,7 @@ def load_query_config(config_path: Path) -> QueryConfig:
         region=data.get("region"),
         year=data.get("year"),
         country=data.get("country"),
-        operation=data["operation"]
+        operation=data.get("operation")
     )
 
 def load_default_config() -> BaseConfig:

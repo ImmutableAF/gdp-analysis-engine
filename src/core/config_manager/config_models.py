@@ -14,4 +14,4 @@ class QueryConfig:
     region: Optional[str]
     year: Optional[int]
     country: Optional[str]
-    operation: str
+    operation: Optional[str]

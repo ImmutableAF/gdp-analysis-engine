@@ -1,95 +1,47 @@
-from dataclasses import dataclass
-from typing import Optional
 import pandas as pd
+from pathlib import Path
+from core.data_loader.loader_registry import LoaderRegistry
+from core.config_manager.config_validator import validate_base_config, validate_query_config
+from core.config_manager.config_loader import load_base_config, load_default_config, load_query_config
+from core.config_manager.config_models import BaseConfig, QueryConfig
+filepath = Path("data/gdp_with_continent_filled.csv")
 
-@dataclass(frozen=True)
-class QueryConfig:
-    region: str
-    country: str
-    startYear: int
-    endYear: Optional[int] = None
 
-class WBFrame:
-    def __init__(self, csv_path: str):
-        df = pd.read_csv(csv_path)
+def load_metadata():
+    base_dir = Path(__file__).resolve.parent
+    base_config_path = base_dir / "data" / "configs" / "base_config.json"
+    query_config_path = base_dir / "data" / "configs" / "query_config.json"
+    try:
+        base_config = load_base_config(base_config_path)
+        validate_base_config(base_config)
+    except Exception:
+        base_config = load_default_config()
 
-        # Convert wide year columns -> long format
-        self.df = df.melt(
-            id_vars=[
-                "Country Name",
-                "Country Code",
-                "Indicator Name",
-                "Indicator Code",
-                "Continent",
-            ],
-            var_name="Year",
-            value_name="Value",
-        )
+    return base_config, query_config_path
 
-        # Clean types
-        self.df["Year"] = self.df["Year"].astype(int)
+def get_valid_attr(df):
+    regions = df["Continent"].unique().tolist()
+    countries = df["Country Name"].tolist()
 
-    def filter_by_region(self, region: str):
-        self.df = self.df[self.df["Continent"] == region]
-        return self
+    years = map(int, (filter(str.isdigit, df.columns)))
+    year_range = (min(years), max(years))
 
-    def filter_by_year(self, start_year: int, end_year: int | None = None):
-        """
-        filter_by_year(2010) -> only 2010
-        filter_by_year(2000, 2010) -> inclusive range
-        """
-        if end_year is None:
-            self.df = self.df[self.df["Year"] == start_year]
-        else:
-            self.df = self.df[
-                (self.df["Year"] >= start_year) &
-                (self.df["Year"] <= end_year)
-            ]
-        return self
+    return regions, countries, year_range
 
-    def filter_by_country(self, country: str):
-        self.df = self.df[self.df["Country Name"] == country]
-        return self
 
-    def drop_na(self):
-        self.df = self.df.dropna(subset=["Value"])
-        return self
-
-    def result(self) -> pd.DataFrame:
-        return self.df
-
+def load_data(file_path: Path):
+    registry = LoaderRegistry()
+    df = registry.load(file_path)
+    return df
 
 if __name__ == "__main__":
-    # --- CONFIG ---
-    query_config = QueryConfig(
-        region="Asia",
-        country="Pakistan",
-        startYear=2010,
-        endYear=2013,  # set to None for single-year behavior
-    )
-    
-    # Single year
-    single_year = (
-        WBFrame("data/gdp_with_continent_filled.csv")
-            .filter_by_region(query_config.region)
-            .filter_by_year(query_config.startYear)
-            .filter_by_country(query_config.country)
-            .drop_na()
-            .result()
-    )
+    base_config, query_config_path = load_metadata()
+    df = load_data(filepath)
 
-    print("Single year:")
-    print(single_year)  
+    regions, countries, year_range = get_valid_attr(df)
+    query_config = load_query_config(query_config_path)
 
-    # Year range
-    year_range = (
-        WBFrame("data/gdp_with_continent_filled.csv")
-            .filter_by_region(query_config.region)
-            .filter_by_year(query_config.startYear, query_config.endYear)
-            .filter_by_country(query_config.country)
-            .drop_na()
-            .result()
-    )
+    validate_query_config(query_config, regions, countries, year_range)
 
-    print("\nYear range:")
-    print(year_range)
+    print(query_config)
+    print(df)
