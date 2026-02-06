@@ -1,0 +1,9 @@
+-> config validation is silent 
+
+#
+try:
+    base_config = load_base_config(config_path)
+    validate_base_config(base_config)
+except Exception:
+    base_config = load_default_config()
+#
