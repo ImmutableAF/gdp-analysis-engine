@@ -10,8 +10,7 @@ def load_base_config(config_path: Path) -> BaseConfig:
         data_directory=Path(data["data_directory"]),
         default_file=data["default_file"],
         log_directory=Path(data["log_directory"]),
-        max_log_size=data["max_log_size"],
-        logging_level=data["logging_level"]
+        max_log_size=data["max_log_size"]
     )
 
 def load_query_config(config_path: Path) -> QueryConfig:
@@ -30,6 +29,6 @@ def load_default_config() -> BaseConfig:
         data_directory=Path("data"), 
         default_file="gdp_with_continent_filled.csv", 
         log_directory=Path("logs"),
-        max_log_size=10,
+        max_log_size=1000000,
         logging_level="INFO"
     )

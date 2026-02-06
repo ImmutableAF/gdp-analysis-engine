@@ -2,14 +2,28 @@ import logging
 from dataclasses import replace
 from .config_models import BaseConfig, QueryConfig
 
+from pathlib import Path
+
 def validate_base_config(config: BaseConfig) -> None:
     if config.max_log_size <= 0:
-        raise ValueError(f"max_log_size must be positive.")
+        raise ValueError("max_log_size must be positive")
+
     if not config.default_file or not config.default_file.strip():
-        raise ValueError(f"default_file cannot be empty.")
-    if not hasattr(logging, config.logging_level.upper()):
-        raise ValueError(f"Invalid logging_level: '{config.logging_level}'")
-    
+        raise ValueError("default_file cannot be empty")
+
+    if not config.data_directory.exists():
+        raise FileNotFoundError(f"data_directory does not exist: {config.data_directory}")
+
+    if not config.data_directory.is_dir():
+        raise ValueError(f"data_directory is not a directory: {config.data_directory}")
+
+    default_path = config.data_directory / config.default_file
+    if not default_path.is_file():
+        raise FileNotFoundError(f"default_file not found: {default_path}")
+
+    if config.log_directory.exists() and not config.log_directory.is_dir():
+        raise ValueError(f"log_directory is not a directory: {config.log_directory}")
+
 def sanatize_query_config(config: QueryConfig, regions, countries, year_range) -> QueryConfig:
     validated_region = config.region
     validated_country = config.country
