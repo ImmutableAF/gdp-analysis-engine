@@ -24,18 +24,14 @@ def validate_base_config(config: BaseConfig) -> None:
     if config.log_directory.exists() and not config.log_directory.is_dir():
         raise ValueError(f"log_directory is not a directory: {config.log_directory}")
 
-def sanatize_query_config(config: QueryConfig, regions, countries, year_range) -> QueryConfig:
+def sanatize_query_config(config: QueryConfig, regions, year_range) -> QueryConfig:
     validated_region = config.region
-    validated_country = config.country
     validated_startYear = config.startYear
     validated_endYear = config.endYear
     validated_operation = config.operation
     
     if config.region and config.region.lower() not in [r.lower() for r in regions]:
         validated_region = None
-    
-    if config.country and config.country.lower() not in [c.lower() for c in countries]:
-        validated_country = None
     
     if config.startYear is not None and config.startYear < year_range[0]:
         validated_startYear = None
@@ -53,7 +49,6 @@ def sanatize_query_config(config: QueryConfig, regions, countries, year_range) -
     return replace(
         config,
         region=validated_region,
-        country=validated_country,
         startYear=validated_startYear,
         endYear=validated_endYear,
         operation=validated_operation

@@ -1,0 +1,20 @@
+# GDP Analytics Dashboard Requirements
+
+# Core Framework
+streamlit==1.31.0
+
+# Data Processing
+pandas==2.1.4
+numpy==1.26.3
+
+# Visualization Libraries
+plotly==5.18.0
+matplotlib==3.8.2
+seaborn==0.13.1
+
+# Additional utilities
+openpyxl==3.1.2  # For Excel support
+scipy==1.11.4    # For statistical operations
+
+# Optional: For enhanced features
+streamlit-echarts5==0.5.0  # If you want to keep ECharts

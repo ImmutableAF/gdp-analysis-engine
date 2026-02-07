@@ -2,7 +2,6 @@ from dataclasses import dataclass
 from typing import Optional, Union
 import pandas as pd
 from pathlib import Path
-
 from src.core.config_manager.config_models import QueryConfig
 
 def transform(df: pd.DataFrame) -> pd.DataFrame:
@@ -51,14 +50,18 @@ def aggregate(df: pd.DataFrame, operation: str | None):
     
     return df
 
-def run_pipeline(df: pd.DataFrame, query_config: QueryConfig):
-    print("\nActive filters:")
-    print(f"  Region: {query_config.region or 'ALL'}")
-    print(f"  Country: {query_config.country or 'ALL'}")
-    print(f"  Start Year: {query_config.startYear or 'ALL'}")
-    print(f"  End Year: {query_config.endYear or 'ALL'}")
-    print(f"  Operation: {query_config.operation or 'NONE'}\n")
+def aggregate_by_region(df: pd.DataFrame, op: str) -> pd.DataFrame:
+    if op == "sum":
+        return df.groupby("Continent", as_index=False)["Value"].sum()
+    return df.groupby("Continent", as_index=False)["Value"].mean()
 
+
+def aggregate_by_country(df: pd.DataFrame, op: str) -> pd.DataFrame:
+    if op == "sum":
+        return df.groupby("Country Name", as_index=False)["Value"].sum()
+    return df.groupby("Country Name", as_index=False)["Value"].mean()
+
+def run_pipeline(df: pd.DataFrame, query_config: QueryConfig):
     result = (
         df.pipe(transform)
         .pipe(filter_by_region, query_config.region)
