@@ -1,107 +1,177 @@
 """
-Pure visualization layer
-STRICT input contracts
+Chart generation functions
+All functions are pure and return new figure objects
 """
 
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-from typing import Optional
 
 
-# -------------------------
-# VALIDATION
-# -------------------------
-def _require(df: pd.DataFrame, cols: set[str], name: str):
-    if not cols.issubset(df.columns):
-        raise ValueError(f"{name} requires columns {cols}")
+DEFAULT_LAYOUT = dict(
+    template="plotly_dark",
+    height=480,
+    title_x=0.5,
+    margin=dict(l=40, r=40, t=60, b=40),
+)
 
 
-# -------------------------
-# REGION / COUNTRY
-# -------------------------
-def region_bar(df: pd.DataFrame) -> go.Figure:
-    _require(df, {"Continent", "Value"}, "region_bar")
+def _require_columns(df: pd.DataFrame, cols: set, chart_name: str):
+    """Validate required columns exist"""
+    missing = cols - set(df.columns)
+    if missing:
+        raise ValueError(f"{chart_name}: missing columns {missing}")
 
-    return px.bar(
-        df.sort_values("Value", ascending=False),
-        x="Continent",
-        y="Value",
-        title="GDP by Region",
+
+def _aggregate_by_year(df: pd.DataFrame, interpolate: bool) -> pd.DataFrame:
+    """Helper to aggregate data by year"""
+    yearly = (
+        df.groupby("Year", as_index=False)["Value"]
+        .sum()
+        .sort_values("Year")
     )
-
-
-def country_bar(df: pd.DataFrame, title_suffix="") -> go.Figure:
-    _require(df, {"Country Name", "Value"}, "country_bar")
-
-    return px.bar(
-        df.sort_values("Value", ascending=False),
-        x="Country Name",
-        y="Value",
-        title=f"GDP by Country{title_suffix}",
-    )
-
-
-def country_treemap(df: pd.DataFrame) -> go.Figure:
-    _require(df, {"Country Name", "Value"}, "country_treemap")
-
-    return px.treemap(
-        df,
-        path=["Country Name"],
-        values="Value",
-        title="GDP Distribution",
-    )
-
-
-# -------------------------
-# TEMPORAL
-# -------------------------
-def _yearly(df: pd.DataFrame, interpolate: bool):
-    _require(df, {"Year", "Value"}, "temporal chart")
-
-    yearly = df.groupby("Year", as_index=False)["Value"].sum().sort_values("Year")
 
     if interpolate:
-        yearly = (
-            yearly.set_index("Year")
-            .reindex(range(yearly["Year"].min(), yearly["Year"].max() + 1))
-            .interpolate()
-            .reset_index()
-        )
+        yearly["Value"] = yearly["Value"].interpolate()
 
     return yearly
 
 
-def year_scatter(df, title="", interpolate=False) -> go.Figure:
-    y = _yearly(df, interpolate)
-    return px.scatter(y, x="Year", y="Value", trendline="ols",
-                      title=f"GDP Scatter{title}")
+def region_bar(df: pd.DataFrame) -> go.Figure:
+    """Bar chart comparing regions"""
+    _require_columns(df, {"Continent", "Value"}, "region_bar")
+
+    fig = px.bar(
+        df.sort_values("Value", ascending=False),
+        x="Continent",
+        y="Value",
+        color="Value",
+        color_continuous_scale="Turbo",
+        text_auto=".2s",
+        title="GDP by Region",
+    )
+
+    fig.update_layout(**DEFAULT_LAYOUT)
+    return fig
 
 
-def year_line(df, title="", interpolate=False) -> go.Figure:
-    y = _yearly(df, interpolate)
-    return px.line(y, x="Year", y="Value", markers=True,
-                   title=f"GDP Trend{title}")
+def country_bar(df: pd.DataFrame, title_suffix: str = "") -> go.Figure:
+    """Bar chart comparing countries"""
+    _require_columns(df, {"Country Name", "Value"}, "country_bar")
+
+    fig = px.bar(
+        df.sort_values("Value", ascending=False).head(20),
+        x="Country Name",
+        y="Value",
+        color="Value",
+        color_continuous_scale="Viridis",
+        text_auto=".2s",
+        title=f"Top Countries by GDP{title_suffix}",
+    )
+
+    fig.update_layout(**DEFAULT_LAYOUT)
+    fig.update_xaxes(tickangle=-45)
+    return fig
 
 
-def year_bar(df, title="", interpolate=False) -> go.Figure:
-    y = _yearly(df, interpolate)
-    return px.bar(y, x="Year", y="Value",
-                  title=f"GDP by Year{title}")
+def country_treemap(df: pd.DataFrame) -> go.Figure:
+    """Treemap showing country distribution"""
+    _require_columns(df, {"Country Name", "Value"}, "country_treemap")
+
+    fig = px.treemap(
+        df,
+        path=["Country Name"],
+        values="Value",
+        color="Value",
+        color_continuous_scale="Viridis",
+        title="GDP Distribution by Country",
+    )
+
+    fig.update_layout(**DEFAULT_LAYOUT)
+    return fig
 
 
-def growth_rate(df, title="", interpolate=False) -> Optional[go.Figure]:
-    y = _yearly(df, interpolate)
+def year_scatter(df: pd.DataFrame, title_suffix: str = "", interpolate: bool = False) -> go.Figure:
+    """Scatter plot showing GDP over time"""
+    yearly = _aggregate_by_year(df, interpolate)
 
-    if len(y) < 2:
+    fig = px.scatter(
+        yearly,
+        x="Year",
+        y="Value",
+        size="Value",
+        color="Value",
+        trendline="ols",
+        color_continuous_scale="Plasma",
+        title=f"GDP Over Time{title_suffix}",
+    )
+
+    fig.update_layout(**DEFAULT_LAYOUT)
+    return fig
+
+
+def year_line(df: pd.DataFrame, title_suffix: str = "", interpolate: bool = False) -> go.Figure:
+    """Line chart showing GDP over time"""
+    yearly = _aggregate_by_year(df, interpolate)
+
+    fig = px.line(
+        yearly,
+        x="Year",
+        y="Value",
+        markers=True,
+        title=f"GDP Over Time{title_suffix}",
+    )
+
+    fig.update_traces(
+        line=dict(color="#3498db", width=3),
+        marker=dict(size=8, color="#e74c3c"),
+    )
+
+    fig.update_layout(**DEFAULT_LAYOUT)
+    return fig
+
+
+def year_bar(df: pd.DataFrame, title_suffix: str = "", interpolate: bool = False) -> go.Figure:
+    """Bar chart showing GDP by year"""
+    yearly = _aggregate_by_year(df, interpolate)
+
+    fig = px.bar(
+        yearly,
+        x="Year",
+        y="Value",
+        color="Value",
+        color_continuous_scale="Blues",
+        text_auto=".2s",
+        title=f"GDP by Year{title_suffix}",
+    )
+
+    fig.update_layout(**DEFAULT_LAYOUT)
+    return fig
+
+
+def growth_rate(df: pd.DataFrame, title_suffix: str = "", interpolate: bool = False) -> go.Figure | None:
+    """Bar chart showing year-over-year growth rate"""
+    yearly = _aggregate_by_year(df, interpolate)
+
+    if len(yearly) < 2:
         return None
 
-    y["Growth"] = y["Value"].pct_change() * 100
-    y = y.dropna()
+    yearly["Growth"] = yearly["Value"].pct_change() * 100
+    yearly = yearly.dropna()
 
-    fig = go.Figure()
-    fig.add_bar(x=y["Year"], y=y["Growth"])
-    fig.update_layout(title=f"YoY Growth{title}",
-                      yaxis_title="%")
+    fig = px.bar(
+        yearly,
+        x="Year",
+        y="Growth",
+        color="Growth",
+        color_continuous_scale=["#e74c3c", "#f1c40f", "#2ecc71"],
+        text_auto=".1f",
+        title=f"Year-over-Year Growth Rate{title_suffix}",
+    )
+
+    fig.update_layout(
+        **DEFAULT_LAYOUT,
+        yaxis_title="Growth (%)",
+    )
 
     return fig

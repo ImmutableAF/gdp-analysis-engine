@@ -1,8 +1,7 @@
 """
 View rendering layer
-NO aggregation logic
-NO chart logic
-ONLY orchestration
+Each section creates its own filtered copy
+No shared state between sections
 """
 
 import streamlit as st
@@ -11,22 +10,32 @@ from src.core import pipeline
 from . import charts
 
 
-# -------------------------
-# REGION ANALYSIS
-# -------------------------
 def render_region_analysis(
     df: pd.DataFrame,
-    selected_region: str | None,
+    region: str | None,
+    start_year: int,
+    end_year: int,
     stat_operation: str,
 ):
+    """
+    Region analysis section
+    Filters: region (optional), year range
+    Ignores: country filter
+    """
     st.markdown("## Region Analysis")
 
-    if selected_region:
-        # Countries inside region
-        agg = pipeline.aggregate_by_country(df, stat_operation)
+    section_df = pipeline.apply_filters(
+        df,
+        region=region,
+        start_year=start_year,
+        end_year=end_year,
+    )
 
+    if region:
+        agg = pipeline.aggregate_by_country(section_df, stat_operation)
+        
         st.plotly_chart(
-            charts.country_bar(agg, f" — {selected_region.title()}"),
+            charts.country_bar(agg, f" — {region.title()}"),
             use_container_width=True,
         )
 
@@ -34,78 +43,115 @@ def render_region_analysis(
             charts.country_treemap(agg),
             use_container_width=True,
         )
-
     else:
-        # Compare regions
-        agg = pipeline.aggregate_by_region(df, stat_operation)
-
+        agg = pipeline.aggregate_by_region(section_df, stat_operation)
+        
         st.plotly_chart(
             charts.region_bar(agg),
             use_container_width=True,
         )
 
 
-# -------------------------
-# YEAR ANALYSIS
-# -------------------------
 def render_year_analysis(
     df: pd.DataFrame,
-    selected_region: str | None,
+    region: str | None,
+    start_year: int,
+    end_year: int,
 ):
-    if df["Year"].nunique() < 2:
-        st.info("Select a year range for temporal analysis.")
+    """
+    Year analysis section
+    Filters: region (optional), year range
+    Ignores: country filter
+    """
+    section_df = pipeline.apply_filters(
+        df,
+        region=region,
+        start_year=start_year,
+        end_year=end_year,
+    )
+
+    if section_df["Year"].nunique() < 2:
+        st.info("Select a year range with at least 2 years for temporal analysis.")
         return
 
     st.markdown("## Year Analysis")
 
-    title = (
-        f" — {selected_region.title()}"
-        if selected_region
-        else " — All Regions"
-    )
+    title = f" — {region.title()}" if region else " — All Regions"
 
     st.plotly_chart(
-        charts.year_scatter(df, title, interpolate=True),
+        charts.year_scatter(section_df, title, interpolate=True),
         use_container_width=True,
     )
 
-    growth = charts.growth_rate(df, title, interpolate=True)
+    growth = charts.growth_rate(section_df, title, interpolate=True)
     if growth:
         st.plotly_chart(growth, use_container_width=True)
 
 
-# -------------------------
-# COUNTRY ANALYSIS
-# -------------------------
 def render_country_analysis(
     df: pd.DataFrame,
-    selected_country: str,
+    country: str,
+    start_year: int,
+    end_year: int,
 ):
+    """
+    Country analysis section
+    Filters: country (required), year range
+    Ignores: region filter
+    """
     st.markdown("## Country Analysis")
 
-    title = f" — {selected_country.title()}"
+    section_df = pipeline.apply_filters(
+        df,
+        country=country,
+        start_year=start_year,
+        end_year=end_year,
+    )
+
+    title = f" — {country.title()}"
 
     st.plotly_chart(
-        charts.year_line(df, title, interpolate=True),
+        charts.year_line(section_df, title, interpolate=True),
         use_container_width=True,
     )
 
     st.plotly_chart(
-        charts.year_bar(df, title, interpolate=True),
+        charts.year_bar(section_df, title, interpolate=True),
         use_container_width=True,
     )
 
 
-# -------------------------
-# EXPORTS
-# -------------------------
-def render_exports(df: pd.DataFrame, start: int, end: int):
+def render_exports(
+    df: pd.DataFrame,
+    region: str | None,
+    country: str | None,
+    start_year: int,
+    end_year: int,
+):
+    """Export section with all user filters applied"""
     st.markdown("## Export")
 
-    csv = df.to_csv(index=False)
+    export_df = pipeline.apply_filters(
+        df,
+        region=region,
+        country=country,
+        start_year=start_year,
+        end_year=end_year,
+    )
+
+    csv = export_df.to_csv(index=False)
+    
+    filename_parts = ["gdp", str(start_year), str(end_year)]
+    if region:
+        filename_parts.append(region.lower().replace(" ", "_"))
+    if country:
+        filename_parts.append(country.lower().replace(" ", "_"))
+    
+    filename = "_".join(filename_parts) + ".csv"
+
     st.download_button(
         "Download CSV",
         csv,
-        file_name=f"gdp_{start}_{end}.csv",
+        file_name=filename,
         mime="text/csv",
     )
