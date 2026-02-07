@@ -32,7 +32,7 @@ def render_region_analysis(
     )
 
     if region:
-        agg = pipeline.aggregate_by_country(section_df, stat_operation)
+        agg = pipeline.aggregate_by_country_code(section_df, stat_operation)
         
         st.plotly_chart(
             charts.country_bar(agg, f" — {region.title()}"),

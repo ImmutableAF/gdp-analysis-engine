@@ -46,7 +46,7 @@ def region_bar(df: pd.DataFrame) -> go.Figure:
         x="Continent",
         y="Value",
         color="Value",
-        color_continuous_scale="Turbo",
+        color_continuous_scale="Viridis",
         text_auto=".2s",
         title="GDP by Region",
     )
@@ -54,39 +54,45 @@ def region_bar(df: pd.DataFrame) -> go.Figure:
     fig.update_layout(**DEFAULT_LAYOUT)
     return fig
 
-
 def country_bar(df: pd.DataFrame, title_suffix: str = "") -> go.Figure:
     """Bar chart comparing countries"""
-    _require_columns(df, {"Country Name", "Value"}, "country_bar")
+    _require_columns(df, {"Country Code", "Value"}, "country_bar")
 
     fig = px.bar(
         df.sort_values("Value", ascending=False).head(20),
-        x="Country Name",
+        x="Country Code",
         y="Value",
         color="Value",
         color_continuous_scale="Viridis",
         text_auto=".2s",
-        title=f"Top Countries by GDP{title_suffix}",
+        title=f"Top 20 Countries by GDP{title_suffix}"
+    )
+    fig.update_layout(**DEFAULT_LAYOUT, autosize=True)
+    fig.update_yaxes(
+        nticks=10
+    )
+    fig.update_xaxes(tickangle=-45)
+    fig.update_coloraxes(
+        colorbar_len=1.1,
+        colorbar_thickness=15,
+        colorbar_y=0.5
     )
 
-    fig.update_layout(**DEFAULT_LAYOUT)
-    fig.update_xaxes(tickangle=-45)
     return fig
 
 
 def country_treemap(df: pd.DataFrame) -> go.Figure:
     """Treemap showing country distribution"""
-    _require_columns(df, {"Country Name", "Value"}, "country_treemap")
+    _require_columns(df, {"Country Code", "Value"}, "country_treemap")
 
     fig = px.treemap(
         df,
-        path=["Country Name"],
+        path=["Country Code"],
         values="Value",
         color="Value",
-        color_continuous_scale="Viridis",
+        color_continuous_scale="cividis",
         title="GDP Distribution by Country",
     )
-
     fig.update_layout(**DEFAULT_LAYOUT)
     return fig
 
@@ -100,9 +106,10 @@ def year_scatter(df: pd.DataFrame, title_suffix: str = "", interpolate: bool = F
         x="Year",
         y="Value",
         size="Value",
+        size_max=10,
         color="Value",
         trendline="ols",
-        color_continuous_scale="Plasma",
+        color_continuous_scale="turbo",
         title=f"GDP Over Time{title_suffix}",
     )
 
@@ -164,7 +171,7 @@ def growth_rate(df: pd.DataFrame, title_suffix: str = "", interpolate: bool = Fa
         x="Year",
         y="Growth",
         color="Growth",
-        color_continuous_scale=["#e74c3c", "#f1c40f", "#2ecc71"],
+        color_continuous_scale=["#872419", "#15064D"],
         text_auto=".1f",
         title=f"Year-over-Year Growth Rate{title_suffix}",
     )
