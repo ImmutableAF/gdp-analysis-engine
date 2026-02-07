@@ -1,6 +1,8 @@
-"""
-GDP Analytics Dashboard
-"""
+import sys
+from pathlib import Path
+
+# Add root directory to sys.path
+sys.path.append(str(Path(__file__).parents[2]))
 
 import streamlit as st
 from main import initialize_system
