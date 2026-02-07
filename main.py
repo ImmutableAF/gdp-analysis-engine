@@ -39,7 +39,7 @@ def get_valid_attr(df):
 
     return regions, countries, year_range
 
-def load_data(file_path: Path) -> pd.Dataframe:
+def load_data(file_path: Path) -> pd.DataFrame:
     registry = LoaderRegistry()
     df = registry.load(file_path)
     return df
