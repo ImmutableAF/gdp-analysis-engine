@@ -83,6 +83,10 @@ def main():
 
     filters = build_sidebar(regions, countries, min_year, max_year, config)
 
+    # Toggle: Show Top 10 or All Countries
+    show_all_countries = st.sidebar.checkbox("Show All Countries", value=False)
+    top_n_countries = None if show_all_countries else 10
+
     st.title("GDP Analytics Dashboard")
     st.markdown("---")
 
@@ -92,6 +96,7 @@ def main():
         start_year=filters["start_year"],
         end_year=filters["end_year"],
         stat_operation=filters["stat_operation"],
+        top_n=top_n_countries
     )
 
     views.render_year_analysis(

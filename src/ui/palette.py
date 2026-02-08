@@ -1,39 +1,39 @@
 """
-Centralized color palette for all charts
-Safe for Plotly large data and reruns
+Centralized color palette for all charts.
 """
 
 from itertools import cycle
 
-# Base custom colors
 CUSTOM_PALETTE = ["#FF5555", "#FF937E", "#C1E59F", "#A3D78A"]
 
-# Continuous palettes (used for color_continuous_scale)
+# Continuous color scales (plain lists, compatible with px.bar/px.scatter)
 CONTINUOUS_PALETTES = {
-    "region_bar": CUSTOM_PALETTE,
+    "region": CUSTOM_PALETTE,
+    "country_bar": CUSTOM_PALETTE,
     "country_treemap": CUSTOM_PALETTE,
     "year_scatter": CUSTOM_PALETTE,
     "year_bar": CUSTOM_PALETTE,
     "growth_rate": CUSTOM_PALETTE,
 }
 
-# Discrete / categorical palettes (used for lines, markers, single-color bars)
+# Discrete / categorical colors
 DISCRETE_PALETTES = {
     "line": CUSTOM_PALETTE,
     "marker": CUSTOM_PALETTE,
     "highlight": CUSTOM_PALETTE,
+    "background": ["#111111", "#222222", "#333333"],
 }
 
-# Pick a discrete color (cycles safely)
+# Pick a discrete color
 def pick_color(palette_name: str, index: int = 0) -> str:
     colors = DISCRETE_PALETTES.get(palette_name, ["#888888"])
     return list(cycle(colors))[index]
 
-# Pick a continuous scale (returns a copy to prevent mutation issues)
+# Pick a continuous colorscale (just return the list)
 def pick_scale(scale_name: str) -> list[str]:
-    return CONTINUOUS_PALETTES.get(scale_name, ["#888888"]).copy()
+    return CONTINUOUS_PALETTES.get(scale_name, ["#888888"])
 
-# Default layout for all charts
+# Default layout
 LAYOUT = dict(
     template="plotly_dark",
     height=480,

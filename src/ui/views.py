@@ -18,15 +18,90 @@ def _register_figure(name: str, fig):
 
 
 def _render_aggregate_metrics(df: pd.DataFrame, scope: str):
+    from .palette import CUSTOM_PALETTE
+    
     total_gdp = df["Value"].sum()
     avg_gdp = df["Value"].mean()
     rows = len(df)
+    
+    # Get gradient colors from palette
+    color1 = CUSTOM_PALETTE[0]  # #FF5555
+    color2 = CUSTOM_PALETTE[-1]  # #A3D78A
+    
+    # Cleaned CSS with subtle gradient (40 = 25% opacity)
+    st.markdown(f"""
+        <style>
+        .gdp-card {{
+            background: linear-gradient(135deg, {color1}80 0%, {color2}80 100%);
+            border-radius: 16px;
+            padding: 30px;
+            color: white;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+        }}
+        .subtitle {{
+            font-size: 12px;
+            opacity: 0.8;
+            margin-bottom: 5px;
+            padding-left: 17px;
+        }}
+        .gdp-breakdown {{
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }}
+        .breakdown-item {{
+            flex: 1;
+            min-width: 140px;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 15px;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }}
+        .breakdown-value {{
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }}
+        .breakdown-label {{
+            font-size: 12px;
+            opacity: 0.85;
+            margin-top: 4px;
+        }}
+        </style>
+    """, unsafe_allow_html=True)
+    
+    # Value Formatting Logic
+    def format_val(val):
+        if val >= 1e12: return f"${val/1e12:.2f}T"
+        if val >= 1e9:  return f"${val/1e9:.2f}B"
+        if val >= 1e6:  return f"${val/1e6:.2f}M"
+        return f"${val:,.0f}"
 
-    c1, c2, c3 = st.columns(3)
-    c1.metric(f"Total GDP ({scope})", f"{total_gdp:,.0f}")
-    c2.metric("Average GDP", f"{avg_gdp:,.0f}")
-    c3.metric("Data Entries", rows)
-
+    total_display = format_val(total_gdp)
+    avg_display = format_val(avg_gdp)
+    
+    # Rendered HTML
+    st.markdown(f"""
+        <div class="gdp-card">
+            <div class="subtitle"><h1>{scope}</h1></div>
+            <div class="gdp-breakdown">
+                <div class="breakdown-item">
+                    <div class="breakdown-value">{total_display}</div>
+                    <div class="breakdown-label">Total GDP</div>
+                </div>
+                <div class="breakdown-item">
+                    <div class="breakdown-value">{avg_display}</div>
+                    <div class="breakdown-label">Average GDP</div>
+                </div>
+                <div class="breakdown-item">
+                    <div class="breakdown-value">{rows:,}</div>
+                    <div class="breakdown-label">Data Entries</div>
+                </div>
+            </div>
+        </div>
+    """, unsafe_allow_html=True)
 
 def _render_filtered_data_preview(df: pd.DataFrame):
     with st.expander("View Filtered Data (Raw CSV-style)"):
@@ -39,7 +114,7 @@ def _render_filtered_data_preview(df: pd.DataFrame):
 
 # ---------- views ----------
 
-def render_region_analysis(df, region, start_year, end_year, stat_operation):
+def render_region_analysis(df, region, start_year, end_year, stat_operation, top_n):
     st.markdown("## Region Analysis")
 
     section_df = pipeline.apply_filters(
@@ -56,11 +131,11 @@ def render_region_analysis(df, region, start_year, end_year, stat_operation):
     if region:
         agg = pipeline.aggregate_by_country_code(section_df, stat_operation)
 
-        fig = charts.country_bar(agg, f" — {scope}")
+        fig = charts.country_bar(agg, f" — {scope}", top_n)
         st.plotly_chart(fig, use_container_width=True)
         _register_figure("country_bar", fig)
 
-        fig = charts.country_treemap(agg)
+        fig = charts.country_treemap(agg, top_n)
         st.plotly_chart(fig, use_container_width=True)
         _register_figure("country_treemap", fig)
     else:
