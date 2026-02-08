@@ -28,28 +28,23 @@ def boot():
 
 
 def build_sidebar(regions, countries, min_year, max_year, initial_config):
-    """Render sidebar and return user selections"""
     st.sidebar.title("Filters")
 
-    # Determine initial values from QueryConfig
     initial_region = initial_config.region if initial_config.region else "All"
     initial_start = initial_config.startYear if initial_config.startYear else min_year
     initial_end = initial_config.endYear if initial_config.endYear else max_year
     initial_op = initial_config.operation if initial_config.operation else "avg"
-    
-    # Map operation to label
+
     op_options = ["Average", "Sum"]
     initial_op_label = "Average" if initial_op.lower() in ["avg", "average"] else "Sum"
     initial_op_index = op_options.index(initial_op_label)
 
-    # Region selector
     region_options = ["All"] + regions
     initial_region_index = region_options.index(initial_region) if initial_region in region_options else 0
-    
+
     region = st.sidebar.selectbox("Region", region_options, index=initial_region_index)
     selected_region = None if region == "All" else region
 
-    # Year range slider
     start_year, end_year = st.sidebar.slider(
         "Year range",
         min_year,
@@ -57,11 +52,9 @@ def build_sidebar(regions, countries, min_year, max_year, initial_config):
         (initial_start, initial_end),
     )
 
-    # Aggregation selector
     op_label = st.sidebar.selectbox("Aggregation", op_options, index=initial_op_index)
     stat_operation = "avg" if op_label == "Average" else "sum"
 
-    # Country analysis toggle
     show_country = st.sidebar.checkbox("Enable Country Analysis")
     selected_country = None
 
@@ -81,7 +74,13 @@ def build_sidebar(regions, countries, min_year, max_year, initial_config):
 
 def main():
     df, config, regions, countries, min_year, max_year = boot()
-    
+
+    # global figure registry
+    if "figures" not in st.session_state:
+        st.session_state.figures = []
+
+    st.session_state.figures.clear()
+
     filters = build_sidebar(regions, countries, min_year, max_year, config)
 
     st.title("GDP Analytics Dashboard")
