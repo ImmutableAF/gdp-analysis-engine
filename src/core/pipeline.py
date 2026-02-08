@@ -57,6 +57,12 @@ def aggregate_by_country(df: pd.DataFrame, operation: str) -> pd.DataFrame:
         return df.groupby("Country Name", as_index=False)["Value"].sum()
     return df.groupby("Country Name", as_index=False)["Value"].mean()
 
+def aggregate_by_country_code(df: pd.DataFrame, operation: str) -> pd.DataFrame:
+    """Aggregate values by country code"""
+    if operation == "sum":
+        return df.groupby("Country Code", as_index=False)["Value"].sum()
+    return df.groupby("Country Code", as_index=False)["Value"].mean()
+
 
 def aggregate_all(df: pd.DataFrame, operation: str) -> pd.DataFrame:
     """Aggregate all values with grouping by core dimensions"""
