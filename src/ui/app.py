@@ -7,6 +7,7 @@ sys.path.append(str(Path(__file__).parents[2]))
 import streamlit as st
 from main import initialize_system
 from src.core import pipeline, handle
+from src.core.data_cleaning import clean_gdp_data
 from src.ui import views
 
 st.set_page_config(
@@ -20,6 +21,7 @@ st.set_page_config(
 def boot():
     """Initialize system and prepare metadata"""
     raw_df, config = initialize_system()
+    df = clean_gdp_data(raw_df, fill_method="ffill")
     df = pipeline.transform(raw_df)
 
     regions = sorted(handle.get_all_regions(df))
