@@ -2,7 +2,7 @@
 import pytest
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from src.core.config_manager.config_handler import validate_base_config, sanatize_query_config
+from core.config_manager.config_handle import validate_base_config, sanatize_query_config
 from src.core.config_manager.config_models import BaseConfig, QueryConfig
 
 

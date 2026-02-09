@@ -1,7 +1,45 @@
 """
-View rendering layer
-Pure UI composition
-No export or IO logic
+View Rendering Layer
+====================
+
+Pure UI composition functions for Streamlit dashboard. Handles view rendering,
+metric displays, and figure registration. No export or I/O logic.
+
+View Types:
+- Region Analysis: Continental or global GDP analysis with country breakdowns
+- Year Analysis: Temporal trends and growth rates
+- Country Analysis: Individual country GDP over time
+- Export View: Data and chart export controls
+
+Functions
+---------
+render_region_analysis(df, region, start_year, end_year, stat_operation, top_n)
+    Render regional GDP analysis view
+render_year_analysis(df, region, start_year, end_year)
+    Render temporal analysis view
+render_country_analysis(df, country, start_year, end_year)
+    Render country-specific view
+render_exports(df, region, country, start_year, end_year)
+    Render export controls view
+
+See Also
+--------
+charts : Chart generation functions
+exports : Export utility functions
+pipeline : Data filtering and aggregation
+
+Notes
+-----
+All render functions are pure UI - they compose charts and metrics but don't
+handle file I/O. Figures registered via st.session_state.figures for export.
+
+Metrics display uses custom gradient cards with CUSTOM_PALETTE colors.
+
+Examples
+--------
+In Streamlit app:
+>>> render_region_analysis(df, "Asia", 2000, 2020, "sum", top_n=10)
+>>> render_year_analysis(df, "Europe", 1990, 2020)
 """
 
 import streamlit as st
@@ -13,11 +51,47 @@ from . import exports
 
 # ---------- internal helpers ----------
 
+
 def _register_figure(name: str, fig):
+    """
+    Register figure for export.
+    
+    Appends (name, figure) tuple to st.session_state.figures list.
+    
+    Parameters
+    ----------
+    name : str
+        Figure identifier for export filename
+    fig : go.Figure
+        Plotly figure object
+    """
     st.session_state.figures.append((name, fig))
 
 
 def _render_aggregate_metrics(df: pd.DataFrame, scope: str):
+    """
+    Render aggregate metrics card with gradient styling.
+    
+    Displays total GDP, average GDP, and data entry count in styled card
+    using CUSTOM_PALETTE gradient.
+    
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Filtered DataFrame with Value column
+    scope : str
+        Scope label (region/country name or "All Regions")
+    
+    Notes
+    -----
+    Value formatting:
+    - >= 1T: Displays as $X.XXT
+    - >= 1B: Displays as $X.XXB
+    - >= 1M: Displays as $X.XXM
+    - < 1M: Displays with comma separators
+    
+    Uses custom CSS with gradient background and glassmorphism effects.
+    """
     from .palette import CUSTOM_PALETTE
     
     total_gdp = df["Value"].sum()
@@ -28,7 +102,7 @@ def _render_aggregate_metrics(df: pd.DataFrame, scope: str):
     color1 = CUSTOM_PALETTE[0]  # #FF5555
     color2 = CUSTOM_PALETTE[-1]  # #A3D78A
     
-    # Cleaned CSS with subtle gradient (40 = 25% opacity)
+    # CSS with subtle gradient
     st.markdown(f"""
         <style>
         .gdp-card {{
@@ -72,17 +146,18 @@ def _render_aggregate_metrics(df: pd.DataFrame, scope: str):
         </style>
     """, unsafe_allow_html=True)
     
-    # Value Formatting Logic
     def format_val(val):
-        if val >= 1e12: return f"${val/1e12:.2f}T"
-        if val >= 1e9:  return f"${val/1e9:.2f}B"
-        if val >= 1e6:  return f"${val/1e6:.2f}M"
+        if val >= 1e12:
+            return f"${val/1e12:.2f}T"
+        if val >= 1e9:
+            return f"${val/1e9:.2f}B"
+        if val >= 1e6:
+            return f"${val/1e6:.2f}M"
         return f"${val:,.0f}"
 
     total_display = format_val(total_gdp)
     avg_display = format_val(avg_gdp)
     
-    # Rendered HTML
     st.markdown(f"""
         <div class="gdp-card">
             <div class="subtitle"><h1>{scope}</h1></div>
@@ -103,7 +178,20 @@ def _render_aggregate_metrics(df: pd.DataFrame, scope: str):
         </div>
     """, unsafe_allow_html=True)
 
+
 def _render_filtered_data_preview(df: pd.DataFrame):
+    """
+    Render expandable DataFrame preview.
+    
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Filtered data to display
+    
+    Notes
+    -----
+    Data sorted by Year and Country Code before display.
+    """
     with st.expander("View Filtered Data (Raw CSV-style)"):
         st.dataframe(
             df.sort_values(["Year", "Country Code"]),
@@ -114,7 +202,34 @@ def _render_filtered_data_preview(df: pd.DataFrame):
 
 # ---------- views ----------
 
+
 def render_region_analysis(df, region, start_year, end_year, stat_operation, top_n):
+    """
+    Render regional GDP analysis view.
+    
+    Shows aggregate metrics and either country breakdown (if region selected)
+    or continental comparison (if all regions).
+    
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Transformed long-format DataFrame
+    region : str or None
+        Selected region, None for all regions
+    start_year : int or None
+        Start year filter
+    end_year : int or None
+        End year filter
+    stat_operation : str
+        Aggregation operation ("sum" or "avg")
+    top_n : int
+        Number of top countries to show
+    
+    Notes
+    -----
+    Renders: Metrics card → Country bar chart → Country treemap (if region)
+             OR Metrics card → Region bar chart (if all regions)
+    """
     st.markdown("## Region Analysis")
 
     section_df = pipeline.apply_filters(
@@ -147,6 +262,27 @@ def render_region_analysis(df, region, start_year, end_year, stat_operation, top
 
 
 def render_year_analysis(df, region, start_year, end_year):
+    """
+    Render temporal GDP analysis view.
+    
+    Shows GDP trends and growth rates over time.
+    
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Transformed long-format DataFrame
+    region : str or None
+        Region filter
+    start_year : int or None
+        Start year filter
+    end_year : int or None
+        End year filter
+    
+    Notes
+    -----
+    Requires at least 2 years of data. Renders: Scatter with trendline →
+    Growth rate bar chart (if sufficient data).
+    """
     section_df = pipeline.apply_filters(
         df,
         region=region,
@@ -172,6 +308,26 @@ def render_year_analysis(df, region, start_year, end_year):
 
 
 def render_country_analysis(df, country, start_year, end_year):
+    """
+    Render country-specific GDP analysis view.
+    
+    Shows metrics and temporal trends for a single country.
+    
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Transformed long-format DataFrame
+    country : str
+        Country name filter
+    start_year : int or None
+        Start year filter
+    end_year : int or None
+        End year filter
+    
+    Notes
+    -----
+    Renders: Metrics card → Line chart → Bar chart (both with interpolation).
+    """
     st.markdown("## Country Analysis")
 
     section_df = pipeline.apply_filters(
@@ -194,6 +350,28 @@ def render_country_analysis(df, country, start_year, end_year):
 
 
 def render_exports(df, region, country, start_year, end_year):
+    """
+    Render export controls view.
+    
+    Shows filtered data preview and export buttons for CSV and PNG charts.
+    
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Transformed long-format DataFrame
+    region : str or None
+        Region filter
+    country : str or None
+        Country filter
+    start_year : int or None
+        Start year filter
+    end_year : int or None
+        End year filter
+    
+    Notes
+    -----
+    Layout: Data preview expander → CSV download | PNG export buttons (in columns).
+    """
     st.markdown("## Export")
 
     export_df = pipeline.apply_filters(

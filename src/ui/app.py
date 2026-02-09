@@ -1,37 +1,157 @@
+"""
+Streamlit Dashboard Entry Point
+================================
+
+Main Streamlit application for interactive GDP data visualization and analysis.
+Provides sidebar filters, multiple analysis views, and export capabilities.
+
+Application Structure:
+1. Boot: Initialize system, load data, extract metadata (cached)
+2. Sidebar: Build interactive filters (region, year range, aggregation, country)
+3. Views: Render analysis sections (region, year, country, export)
+4. State: Manage figure registry for chart exports
+
+Functions
+---------
+boot()
+    Initialize system and prepare metadata (cached resource)
+build_sidebar(regions, countries, min_year, max_year, initial_config)
+    Build interactive sidebar with filters
+main()
+    Main application orchestration
+
+See Also
+--------
+views : View rendering functions
+charts : Chart generation
+exports : Export utilities
+
+Notes
+-----
+Uses st.cache_resource for boot() to prevent reloading on every interaction.
+Session state manages figure registry for multi-chart PNG export.
+Sidebar width set to 250px via custom CSS.
+
+Page Config:
+- Title: "GDP Analytics Dashboard"
+- Icon: custom file
+- Sidebar: 250px width
+
+Examples
+--------
+Run application:
+$ streamlit run src/ui/app.py
+
+Access at http://localhost:8501
+"""
+
 import sys
 from pathlib import Path
-
 # Add root directory to sys.path
 sys.path.append(str(Path(__file__).parents[2]))
 
 import streamlit as st
 from main import initialize_system
-from src.core import pipeline, handle
+from src.core import pipeline, metadata
 from src.core.data_cleaning import clean_gdp_data
 from src.ui import views
 
+from src.ui.style import load_css
+load_css("src/ui/layout.css")
+
 st.set_page_config(
     page_title="GDP Analytics Dashboard",
-    page_icon="📊",
-    layout="wide",
+    page_icon=str(Path(__file__).parent.parent.parent / "assets" / "app.ico"),
 )
-
 
 @st.cache_resource
 def boot():
-    """Initialize system and prepare metadata"""
+    """
+    Initialize system and prepare metadata.
+    
+    Executes complete initialization workflow: system init → data cleaning →
+    transformation → metadata extraction. Cached as resource to prevent
+    reloading on UI interactions.
+    
+    Returns
+    -------
+    tuple
+        (df, config, regions, countries, min_year, max_year)
+        - df: Transformed long-format DataFrame
+        - config: QueryConfig from initialization
+        - regions: Sorted list of region names
+        - countries: Sorted list of country names
+        - min_year: Minimum year in dataset
+        - max_year: Maximum year in dataset
+    
+    Notes
+    -----
+    Cached via st.cache_resource - runs once per session. Data loading and
+    transformation expensive, so caching critical for performance.
+    
+    Uses main.initialize_system() for config loading and data ingestion.
+    
+    Examples
+    --------
+    >>> df, config, regions, countries, min_yr, max_yr = boot()
+    >>> print(len(regions))
+    6
+    """
     raw_df, config = initialize_system()
     df = clean_gdp_data(raw_df, fill_method="ffill")
     df = pipeline.transform(raw_df)
 
-    regions = sorted(handle.get_all_regions(df))
-    countries = sorted(handle.get_all_countries(df))
-    min_year, max_year = handle.get_year_range(df)
+    regions = sorted(metadata.get_all_regions(df))
+    countries = sorted(metadata.get_all_countries(df))
+    min_year, max_year = metadata.get_year_range(df)
 
     return df, config, regions, countries, min_year, max_year
 
 
 def build_sidebar(regions, countries, min_year, max_year, initial_config):
+    """
+    Build interactive sidebar with filter controls.
+    
+    Creates sidebar widgets for region selection, year range, aggregation
+    operation, and optional country analysis toggle.
+    
+    Parameters
+    ----------
+    regions : list[str]
+        Available region names
+    countries : list[str]
+        Available country names
+    min_year : int
+        Dataset minimum year
+    max_year : int
+        Dataset maximum year
+    initial_config : QueryConfig
+        Initial configuration for default values
+    
+    Returns
+    -------
+    dict
+        Filter state dictionary with keys:
+        - region: Selected region (None for "All")
+        - start_year: Start year from slider
+        - end_year: End year from slider
+        - stat_operation: "avg" or "sum"
+        - show_country: Boolean for country analysis
+        - country: Selected country (None if not enabled)
+    
+    Notes
+    -----
+    Uses initial_config to set default widget values. "All" option maps to None
+    for filter functions.
+    
+    Examples
+    --------
+    >>> filters = build_sidebar(regions, countries, 1960, 2020, config)
+    >>> print(filters["region"])
+    'Asia'
+    >>> print(filters["stat_operation"])
+    'sum'
+    """
     st.sidebar.title("Filters")
 
     initial_region = initial_config.region if initial_config.region else "All"
@@ -77,6 +197,27 @@ def build_sidebar(regions, countries, min_year, max_year, initial_config):
 
 
 def main():
+    """
+    Main application orchestration.
+    
+    Workflow:
+    1. Boot system (cached)
+    2. Initialize figure registry in session state
+    3. Build sidebar filters
+    4. Render analysis views (region, year, country, export)
+    
+    Notes
+    -----
+    Figure registry cleared on each run to prevent accumulation across reruns.
+    Top N countries toggle (10 vs all) in sidebar affects region analysis.
+    Country analysis view only shown if enabled and country selected.
+    
+    View rendering order:
+    - Region Analysis (always)
+    - Year Analysis (always)
+    - Country Analysis (conditional)
+    - Export (always)
+    """
     df, config, regions, countries, min_year, max_year = boot()
 
     # global figure registry
