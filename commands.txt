@@ -1,0 +1,6 @@
+sphinx-autobuild .\source .\build\html
+
+streamlit run src/ui/app.py --theme.base="dark" --theme.primaryColor="#FF4E50" --theme.backgroundColor="#13131B" --theme.secondaryBackgroundColor="#23232E" --theme.textColor="#EFEFEF"
+streamlit run src/ui/app.py --theme.backgroundColor="#09090B" --theme.secondaryBackgroundColor="#18181B" --theme.textColor="#FAFAFA"
+streamlit run src/ui/app.py --theme.base="dark" --theme.primaryColor="#FFC300" --theme.backgroundColor="#0D0D0D" --theme.secondaryBackgroundColor="#1A1A1A" --theme.textColor="#FFFFFF"
+streamlit run src/ui/app.py --theme.base="dark" --theme.primaryColor="#FF5DA2" --theme.backgroundColor="#11111B" --theme.secondaryBackgroundColor="#24243B" --theme.textColor="#F2F2F2"
