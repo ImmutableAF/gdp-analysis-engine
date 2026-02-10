@@ -62,7 +62,7 @@ CUSTOM_PALETTE = ["#FF5555", "#FF937E", "#C1E59F", "#A3D78A"]
 LAYOUT = dict(
     template="plotly_dark",
     height=480,
-    title_x=0.5,
+    title_x=0.35,
     margin=dict(l=40, r=40, t=60, b=40),
 )
 

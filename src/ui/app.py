@@ -220,17 +220,30 @@ def main():
     """
     df, config, regions, countries, min_year, max_year = boot()
 
+    if "query_config" not in st.session_state:
+        st.session_state.query_config = config
+
     # global figure registry
     if "figures" not in st.session_state:
         st.session_state.figures = []
 
     st.session_state.figures.clear()
 
-    filters = build_sidebar(regions, countries, min_year, max_year, config)
+    filters = build_sidebar(
+        regions,
+        countries,
+        min_year,
+        max_year,
+        st.session_state.query_config
+    )
 
-    # Toggle: Show Top 10 or All Countries
     show_all_countries = st.sidebar.checkbox("Show All Countries", value=False)
     top_n_countries = None if show_all_countries else 10
+
+    if st.sidebar.button("Re-run Main Query"):
+        _, new_query = initialize_system()
+        st.session_state.query_config = new_query
+        st.rerun()
 
     st.title("GDP Analytics Dashboard")
     st.markdown("---")
