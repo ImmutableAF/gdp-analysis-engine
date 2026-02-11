@@ -56,9 +56,6 @@ from src.core import pipeline, metadata
 from src.core.data_cleaning import clean_gdp_data
 from src.ui import views
 
-from src.ui.style import load_css
-load_css("src/ui/layout.css")
-
 st.set_page_config(
     page_title="GDP Analytics Dashboard",
     page_icon=str(Path(__file__).parent.parent.parent / "assets" / "app.ico"),
@@ -282,4 +279,6 @@ def main():
 
 
 if __name__ == "__main__":
+    from src.ui.style import load_css
+    load_css("src/ui/layout.css")
     main()
