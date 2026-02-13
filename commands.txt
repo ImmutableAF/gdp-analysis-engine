@@ -1,0 +1,7 @@
+python -m venv .venv
+./.venv/Scripts/Activate
+
+sphinx-apidoc -o source ../src/core
+sphinx-apidoc -o source ../src/plugins
+.\make.bat html
+sphinx-autobuild .\source .\build\html
