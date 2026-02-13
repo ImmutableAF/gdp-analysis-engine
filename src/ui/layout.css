@@ -1,9 +1,0 @@
-/* Sidebar width control */
-
-[data-testid="stSidebar"] {
-    width: 250px;
-}
-
-[data-testid="stSidebar"][aria-expanded="true"] {
-    min-width: 250px;
-}

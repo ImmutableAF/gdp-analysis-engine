@@ -1,6 +1,0 @@
-{
-  "data_directory": "data",
-  "default_file": "gdp_with_continent_filled.csv",
-  "log_directory": "logs",
-  "max_log_size": 1000000
-}
