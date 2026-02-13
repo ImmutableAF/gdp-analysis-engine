@@ -31,7 +31,6 @@ Examples
 from typing import List, Tuple
 import pandas as pd
 
-
 def get_all_regions(df: pd.DataFrame) -> List[str]:
     """
     Extract unique region names from DataFrame.
@@ -56,7 +55,6 @@ def get_all_regions(df: pd.DataFrame) -> List[str]:
         return []
     return df["Continent"].dropna().str.title().unique().tolist()
 
-
 def get_all_countries(df: pd.DataFrame) -> List[str]:
     """
     Extract unique country names from DataFrame.
@@ -80,7 +78,6 @@ def get_all_countries(df: pd.DataFrame) -> List[str]:
     if "Country Name" not in df.columns:
         return []
     return df["Country Name"].dropna().str.title().unique().tolist()
-
 
 def get_year_range(df: pd.DataFrame) -> Tuple[int, int]:
     """
@@ -120,3 +117,33 @@ def get_year_range(df: pd.DataFrame) -> Tuple[int, int]:
 
     stats = years.agg(['min', 'max'])
     return int(stats['min']), int(stats['max'])
+
+def get_valid_attr(df):
+    """
+    Extract valid regions and year range from wide-format DataFrame.
+    
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Wide-format DataFrame with Continent column and year columns
+    
+    Returns
+    -------
+    tuple
+        (regions_list, (min_year, max_year))
+    
+    Notes
+    -----
+    Assumes year columns are digit-only strings. Filters columns via
+    str.isdigit() before conversion to int.
+    
+    Examples
+    --------
+    >>> df = pd.DataFrame({"Continent": ["Asia"], "1960": [100], "2020": [200]})
+    >>> regions, years = get_valid_attr(df)
+    >>> print(regions)
+    ['Asia']
+    >>> print(years)
+    (1960, 2020)
+    """
+    return get_all_regions(df), get_year_range(df)

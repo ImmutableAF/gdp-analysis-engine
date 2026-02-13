@@ -29,10 +29,14 @@ Examples
 >>> clean_query = sanatize_query_config(query, ["Asia", "Europe"], (1960, 2020))
 """
 
-import logging
+import pandas as pd
 from dataclasses import replace
 from .config_models import BaseConfig, QueryConfig
 from pathlib import Path
+from src.paths import get_query_config_path
+from src.core.metadata import get_valid_attr
+from src.core.config_manager.config_loader import load_query_config
+from .config_loader import load_base_config, load_default_config
 
 
 def validate_base_config(config: BaseConfig) -> None:
@@ -153,3 +157,71 @@ def sanatize_query_config(config: QueryConfig, regions, year_range) -> QueryConf
         endYear=validated_endYear,
         operation=validated_operation
     )
+
+def get_base_config(base_config_path: Path) -> BaseConfig:
+    """
+    Load and validate base configuration with fallback to defaults.
+    
+    Attempts to load from file and validate. On any failure (missing file,
+    invalid JSON, validation error), falls back to hardcoded defaults.
+    
+    Parameters
+    ----------
+    base_config_path : Path
+        Path to base_config.json
+    
+    Returns
+    -------
+    BaseConfig
+        Validated configuration or defaults
+    
+    Notes
+    -----
+    Exceptions silently caught - always returns valid config. Use for
+    graceful degradation when config files unavailable.
+    
+    Examples
+    --------
+    >>> config = get_base_config(Path("data/configs/base_config.json"))
+    >>> print(config.data_directory)
+    data
+    """
+    try:
+        base_config = load_base_config(base_config_path)
+        validate_base_config(base_config)
+    except:
+        base_config = load_default_config()
+
+    return base_config
+
+def get_query_config(df: pd.DataFrame) -> QueryConfig:
+    """
+    Load and sanitize query configuration against DataFrame.
+    
+    Loads query config from file and validates regions/years against actual
+    data. Invalid values set to None.
+    
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Wide-format data for validation
+    
+    Returns
+    -------
+    QueryConfig
+        Sanitized query configuration
+    
+    Notes
+    -----
+    Extracts valid regions and year range from df, then sanitizes loaded
+    config against these constraints.
+    
+    Examples
+    --------
+    >>> df = load_data(Path("data/gdp_data.csv"))
+    >>> query = get_query_config(df)
+    >>> print(query.region)
+    Asia
+    """
+    query_config = sanatize_query_config(load_query_config(get_query_config_path()), *get_valid_attr(df))
+    return query_config

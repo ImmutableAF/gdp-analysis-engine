@@ -98,7 +98,6 @@ def transform(df: pd.DataFrame) -> pd.DataFrame:
         value_name="Value"
     ).assign(Year=lambda x: x["Year"].astype(int))
 
-
 def filter_by_region(df: pd.DataFrame, region: str | None) -> pd.DataFrame:
     """
     Filter DataFrame by region (case-insensitive).
@@ -124,7 +123,6 @@ def filter_by_region(df: pd.DataFrame, region: str | None) -> pd.DataFrame:
         return df.copy()
     return df[df["Continent"].str.lower() == region.lower()].copy()
 
-
 def filter_by_country(df: pd.DataFrame, country: str | None) -> pd.DataFrame:
     """
     Filter DataFrame by country name (case-insensitive).
@@ -149,7 +147,6 @@ def filter_by_country(df: pd.DataFrame, country: str | None) -> pd.DataFrame:
     if country is None:
         return df.copy()
     return df[df["Country Name"].str.lower() == country.lower()].copy()
-
 
 def filter_by_year(df: pd.DataFrame, start: int | None = None, end: int | None = None) -> pd.DataFrame:
     """
@@ -193,7 +190,6 @@ def filter_by_year(df: pd.DataFrame, start: int | None = None, end: int | None =
 
     return df[df["Year"].between(start, end)].copy()
 
-
 def aggregate_by_region(df: pd.DataFrame, operation: str) -> pd.DataFrame:
     """
     Aggregate GDP values by region.
@@ -218,7 +214,6 @@ def aggregate_by_region(df: pd.DataFrame, operation: str) -> pd.DataFrame:
     if operation == "sum":
         return df.groupby("Continent", as_index=False)["Value"].sum()
     return df.groupby("Continent", as_index=False)["Value"].mean()
-
 
 def aggregate_by_country(df: pd.DataFrame, operation: str) -> pd.DataFrame:
     """
@@ -245,7 +240,6 @@ def aggregate_by_country(df: pd.DataFrame, operation: str) -> pd.DataFrame:
         return df.groupby("Country Name", as_index=False)["Value"].sum()
     return df.groupby("Country Name", as_index=False)["Value"].mean()
 
-
 def aggregate_by_country_code(df: pd.DataFrame, operation: str) -> pd.DataFrame:
     """
     Aggregate GDP values by country code.
@@ -270,7 +264,6 @@ def aggregate_by_country_code(df: pd.DataFrame, operation: str) -> pd.DataFrame:
     if operation == "sum":
         return df.groupby("Country Code", as_index=False)["Value"].sum()
     return df.groupby("Country Code", as_index=False)["Value"].mean()
-
 
 def aggregate_all(df: pd.DataFrame, operation: str) -> pd.DataFrame:
     """
@@ -325,7 +318,6 @@ def aggregate_all(df: pd.DataFrame, operation: str) -> pd.DataFrame:
     
     return df.copy()
 
-
 def apply_filters(
     df: pd.DataFrame,
     region: str | None = None,
@@ -378,7 +370,6 @@ def apply_filters(
         result = filter_by_year(result, start_year, end_year)
     
     return result.dropna(subset=["Value"])
-
 
 def run_pipeline(df: pd.DataFrame, query_config: QueryConfig):
     """
