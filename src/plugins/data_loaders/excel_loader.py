@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from src.core.data_loading import DataLoader, register_plugin
+from ..data_loading import DataLoader, register_plugin
 
 @register_plugin
 class ExcelLoader(DataLoader):

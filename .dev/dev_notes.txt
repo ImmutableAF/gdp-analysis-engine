@@ -1,1 +1,3 @@
-pydep
+pydep for dep diagrams
+
+-> have to handle paths and metadata deps

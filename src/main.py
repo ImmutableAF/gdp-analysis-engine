@@ -1,12 +1,12 @@
 import logging
 from pathlib import Path
 
-from src.core.data_loading import load_data
-from .core.config_loading import get_config
+from .plugins.data_loading import load_data
+from .plugins.config_handler import get_base_config, get_query_config
+from .core.engine import run_pipeline
 
-
-config = get_config()
-test_path = Path(config["data_dir"]) / config["data_filename"]
+base_config = get_base_config()
+test_path = Path(base_config.data_dir) / base_config.data_filename
 filepath = test_path if test_path.exists() and test_path.is_file() else Path("data/gdp_with_continent_filled.xlsx")
 
 try:
@@ -17,4 +17,5 @@ except Exception as e:
     raise
 else:
     logging.info(f"data loaded succesfully without any exception occurrence")
-    print(df)
+    print(run_pipeline(filters=get_query_config(df), df=df, inLongFormat=True))
+    print(run_pipeline(filters=get_query_config(df), df=df))

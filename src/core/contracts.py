@@ -9,3 +9,10 @@ class DataFrameLoadable(Protocol):
 class DataFrameOutput(Protocol):
     def write(self, df: pd.DataFrame) -> None:
         ...
+
+class Filters(Protocol):
+    region: str | None
+    country: str | None
+    startYear: int | None
+    endYear: int | None
+    operation: str | None
