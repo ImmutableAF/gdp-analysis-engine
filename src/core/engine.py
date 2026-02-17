@@ -49,7 +49,8 @@ Examples
 """
 
 import pandas as pd
-
+import logging
+logger = logging.getLogger(__name__)
 from .contracts import Filters
 
 def transform(df: pd.DataFrame) -> pd.DataFrame:
@@ -119,9 +120,13 @@ def _filter_by_region(df: pd.DataFrame, region: str | None) -> pd.DataFrame:
     >>> df = pd.DataFrame({"Continent": ["Asia", "Europe"], "Value": [100, 200]})
     >>> _filter_by_region(df, "asia")
     """
+    logger.debug(f"Filtering by region: {region}, input shape: {df.shape}")
     if region is None:
+        logger.debug("No region provided, skipping region filter")
         return df.copy()
-    return df[df["Continent"].str.lower() == region.lower()].copy()
+    result = df[df["Continent"].str.lower() == region.lower()].copy()
+    logger.debug(f"Region filter applied. Resulting shape: {result.shape}")
+    return result
 
 def _filter_by_country(df: pd.DataFrame, country: str | None) -> pd.DataFrame:
     """
@@ -144,9 +149,13 @@ def _filter_by_country(df: pd.DataFrame, country: str | None) -> pd.DataFrame:
     >>> df = pd.DataFrame({"Country Name": ["USA", "Canada"], "Value": [100, 200]})
     >>> _filter_by_country(df, "usa")
     """
+    logger.debug(f"Filtering by country: {country}, input shape: {df.shape}")
     if country is None:
+        logger.debug("No country provided, skipping country filter")
         return df.copy()
-    return df[df["Country Name"].str.lower() == country.lower()].copy()
+    result = df[df["Country Name"].str.lower() == country.lower()].copy()
+    logger.debug(f"Country filter applied. Resulting shape: {result.shape}")
+    return result
 
 def _filter_by_year(df: pd.DataFrame, start: int | None = None, end: int | None = None) -> pd.DataFrame:
     """
@@ -179,16 +188,24 @@ def _filter_by_year(df: pd.DataFrame, start: int | None = None, end: int | None 
     >>> df = pd.DataFrame({"Year": [2000, 2010, 2020], "Value": [1, 2, 3]})
     >>> _filter_by_year(df, 2000, 2010)
     """
+    logger.debug(f"Filtering by year: start={start}, end={end}, input shape={df.shape}")
     if start is None and end is None:
+        logger.debug("No year range provided, skipping year filter")
         return df.copy()
 
     if end is None:
-        return df[df["Year"] == start].copy()
+        result = df[df["Year"] == start].copy()
+        logger.debug(f"Filtered by start year={start}, resulting shape={result.shape}")
+        return result
 
     if start is None:
-        return df[df["Year"] == end].copy()
+        result = df[df["Year"] == end].copy()
+        logger.debug(f"Filtered by end year={end}, resulting shape={result.shape}")
+        return result
 
-    return df[df["Year"].between(start, end)].copy()
+    result = df[df["Year"].between(start, end)].copy()
+    logger.debug(f"Filtered by year range {start}-{end}, resulting shape={result.shape}")
+    return result
 
 def aggregate_by_region(df: pd.DataFrame, operation: str) -> pd.DataFrame:
     """
