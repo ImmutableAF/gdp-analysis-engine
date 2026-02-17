@@ -5,7 +5,7 @@ from importlib import import_module
 
 from pandas import DataFrame
 
-from src.plugins import data_loaders
+from .. import data_loaders
 from .loader_registry import get_loader
 
 _loaded = False
