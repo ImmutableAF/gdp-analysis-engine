@@ -321,20 +321,19 @@ def aggregate_all(df: pd.DataFrame, operation: str) -> pd.DataFrame:
     operation = operation.lower()
     group_cols = ["Country Name", "Country Code", "Indicator Name", "Indicator Code", "Continent"]
 
+    logger.debug(f"Aggregating all: operation={operation}, input shape={df.shape}")
+
     if operation == "sum":
-        return (
-            df.groupby(group_cols, as_index=False)["Value"]
-            .sum()
-            .assign(Operation="Sum")
-        )
+        result = df.groupby(group_cols, as_index=False)["Value"].sum().assign(Operation="Sum")
 
-    if operation in ["avg", "average"]:
-        return (
-            df.groupby(group_cols, as_index=False)["Value"]
-            .mean()
-            .assign(Operation="Average")
-        )
+    elif operation in ["avg", "average"]:
+        result = df.groupby(group_cols, as_index=False)["Value"].mean().assign(Operation="Average")
+        
+    else:
+        result = df.copy()
+        logger.debug("Unknown operation, returning original DataFrame")
 
+    logger.debug(f"Aggregation complete, resulting shape={result.shape}")
     return df.copy()
 
 def apply_filters(
@@ -377,6 +376,7 @@ def apply_filters(
     >>> df = transform(wide_df)
     >>> filtered = apply_filters(df, region="Asia", start_year=2000, end_year=2020)
     """
+    logger.info(f"Applying filters: region={region}, country={country}, years={start_year}-{end_year}")
     result = df.copy()
 
     if region is not None:
@@ -388,7 +388,9 @@ def apply_filters(
     if start_year is not None or end_year is not None:
         result = _filter_by_year(result, start_year, end_year)
 
-    return result.dropna(subset=["Value"])
+    result = result.dropna(subset=["Value"])
+    logger.debug(f"Filters applied, resulting shape={result.shape}")
+    return result
 
 def get_query_result(df: pd.DataFrame, filters: Filters) -> pd.DataFrame:
     result = (
