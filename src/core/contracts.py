@@ -1,5 +1,5 @@
 from typing import Protocol
-
+from pathlib import Path
 import pandas as pd
 
 class DataFrameLoadable(Protocol):

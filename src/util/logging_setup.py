@@ -33,10 +33,9 @@ Examples
 import logging
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
-from ..plugins.config_handler.config_models import BaseConfig
+from .logging_contract import LogPolicy
 
-
-def initialize_logging(base_config: BaseConfig, debug: bool = False) -> None:
+def initialize_logging(base_config: LogPolicy, debug: bool = False) -> None:
     """
     Initialize rotating file handler for application logging.
     
