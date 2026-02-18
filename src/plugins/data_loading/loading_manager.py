@@ -19,11 +19,11 @@ def _import_plugins():
         return
     for _, name, _ in iter_modules(data_loaders.__path__):
         try:
-            logging.debug(f"Trying to import plugin {data_loaders.__name__}.{name}")
+            logger.debug(f"Trying to import plugin {data_loaders.__name__}.{name}")
             import_module(f"{data_loaders.__name__}.{name}")
-            logging.debug(f"Imported pluggin {name} successfully")
+            logger.debug(f"Imported pluggin {name} successfully")
         except Exception as e:
-            logging.error(f"Failed to import plugin {name}: {e}", exc_info=True)
+            logger.error(f"Failed to import plugin {name}: {e}", exc_info=True)
             pass
     _loaded = True
 

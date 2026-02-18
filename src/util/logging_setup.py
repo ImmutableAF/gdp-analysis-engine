@@ -70,9 +70,9 @@ def initialize_logging(base_config: LogPolicy, debug: bool = False) -> None:
     >>> initialize_logging(config, debug=True)
     # Creates logs/debug.log at DEBUG level
     """
-    base_config.log_directory.mkdir(parents=True, exist_ok=True)
+    base_config.log_dir.mkdir(parents=True, exist_ok=True)
 
-    log_file = base_config.log_directory / ("debug.log" if debug else "prod.log")
+    log_file = base_config.log_dir / ("debug.log" if debug else "prod.log")
     log_level = logging.DEBUG if debug else logging.ERROR
 
     handler = RotatingFileHandler(
