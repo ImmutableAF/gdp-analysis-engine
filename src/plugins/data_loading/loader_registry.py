@@ -1,8 +1,9 @@
 import logging
 from typing import List
 from pathlib import Path
-
 from .loader_interface import DataLoader
+import logging
+logger = logging.getLogger(__name__)
 
 _loaders: List[DataLoader] = []
 
