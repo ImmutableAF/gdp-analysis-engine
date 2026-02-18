@@ -30,6 +30,8 @@ Examples
 
 from typing import List, Tuple
 import pandas as pd
+import logging
+logger = logging.getLogger(__name__)
 
 def get_all_regions(df: pd.DataFrame) -> List[str]:
     """
@@ -109,10 +111,12 @@ def get_year_range(df: pd.DataFrame) -> Tuple[int, int]:
     (1960, 2024)
     """
     if "Year" not in df.columns or df["Year"].empty:
+        logger.debug("Year column missing or empty — using default range")
         return (1960, 2024)
 
     years = pd.to_numeric(df["Year"], errors='coerce').dropna()
     if years.empty:
+        logger.debug("No valid numeric years found — using default range")
         return (1960, 2024)
 
     stats = years.agg(['min', 'max'])

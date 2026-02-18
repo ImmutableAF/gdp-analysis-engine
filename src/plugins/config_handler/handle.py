@@ -32,6 +32,8 @@ from pathlib import Path
 from dataclasses import replace
 
 import pandas as pd
+import logging
+logger = logging.getLogger(__name__)
 
 from .config_models import BaseConfig, QueryConfig
 from .config_load import load_base_config, load_query_config, load_default_config
@@ -134,28 +136,33 @@ def _sanatize_query_config(config: QueryConfig, regions, year_range) -> QueryCon
     validated_operation = config.operation
 
     if config.region and config.region.lower() not in [r.lower() for r in regions]:
+        logger.debug(f"Invalid region '{config.region}' → resetting to None")
         validated_region = None
 
     if config.startYear is not None and config.startYear < year_range[0]:
+        logger.debug(f"startYear {config.startYear} out of range → resetting")
         validated_startYear = None
 
     if config.endYear is not None and config.endYear > year_range[1]:
         validated_endYear = None
 
     if config.endYear < config.startYear:
-        config.startYear = None
-        config.endYear = None
+        logger.debug("endYear < startYear → resetting both to None")
+        validated_startYear = None
+        validated_endYear = None
 
     if config.operation and config.operation.lower() not in ["sum", "avg", "average"]:
         validated_operation = None
 
-    return replace(
+    config =  replace(
         config,
         region=validated_region,
         startYear=validated_startYear,
         endYear=validated_endYear,
         operation=validated_operation
     )
+    logger.debug(f"Normalized query config: {config}")
+    return config
 
 def get_base_config() -> BaseConfig:
     """

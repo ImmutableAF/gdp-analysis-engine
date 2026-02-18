@@ -34,6 +34,8 @@ Examples
 import json
 from pathlib import Path
 from .config_models import BaseConfig, QueryConfig
+import logging
+logger = logging.getLogger(__name__)
 
 def load_base_config(config_path: Path) -> BaseConfig:
     """
@@ -64,14 +66,17 @@ def load_base_config(config_path: Path) -> BaseConfig:
     >>> print(config.data_dir)
     data
     """
+    logger.info(f"Loading base configuration from {config_path}")
     with open(config_path) as f:
         data = json.load(f)
-    return BaseConfig(
+    config = BaseConfig(
         data_dir=Path(data["data_dir"]),
         data_filename=data["data_filename"],
         log_dir=Path(data["log_dir"]),
         max_log_size=data["max_log_size"],
     )
+    logger.debug(f"Base configuration loaded: {config}")
+    return config
 
 def load_query_config(config_path: Path) -> QueryConfig:
     """
@@ -104,15 +109,18 @@ def load_query_config(config_path: Path) -> QueryConfig:
     >>> print(query.region)
     Asia
     """
+    logger.info(f"Loading query configuration from {config_path}")
     with open(config_path) as f:
         data = json.load(f)
-    return QueryConfig(
+    config =  QueryConfig(
         region=data.get("region"),
         country=data.get("country"),
         startYear=data.get("startYear"),
         endYear=data.get("endYear"),
         operation=data.get("operation")
     )
+    logger.debug(f"Base configuration loaded: {config}")
+    return config
 
 def load_default_config() -> BaseConfig:
     """
@@ -137,9 +145,12 @@ def load_default_config() -> BaseConfig:
     >>> print(config.data_filename)
     gdp_with_continent_filled.csv
     """
-    return BaseConfig(
+    logger.info(f"Loading default configuration")
+    config =  BaseConfig(
         data_dir=Path("data"),
         data_filename="gdp_with_continent_filled.xlsx",
         log_dir=Path("logs"),
         max_log_size=1000000
     )
+    logger.debug(f"Default configuration loaded: {config}")
+    return config
