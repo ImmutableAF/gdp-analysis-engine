@@ -75,7 +75,8 @@ def load_base_config(config_path: Path) -> BaseConfig:
         log_dir=Path(data["log_dir"]),
         max_log_size=data["max_log_size"],
     )
-    logger.debug(f"Base configuration loaded: {config}")
+    logger.info(f"Base configuration loaded")
+    logger.debug(f"config : {config}")
     return config
 
 def load_query_config(config_path: Path) -> QueryConfig:
@@ -119,7 +120,7 @@ def load_query_config(config_path: Path) -> QueryConfig:
         endYear=data.get("endYear"),
         operation=data.get("operation")
     )
-    logger.debug(f"Base configuration loaded: {config}")
+    logger.debug(f"Query configuration loaded: {config}")
     return config
 
 def load_default_config() -> BaseConfig:

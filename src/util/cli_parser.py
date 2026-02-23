@@ -28,25 +28,25 @@ def parse_cli_args(
 ):
     """
     Parse command-line arguments.
-    
+
     Returns
     -------
     argparse.Namespace
         Parsed arguments with attributes:
         - debug (bool): Debug mode flag
         - fpath (str or None): Input file path
-    
+
     Notes
     -----
     Arguments:
     - --debug: Enable debug logging (flag, no value needed)
     - -fpath PATH: Override default input file path
-    
+
     Examples
     --------
     Command line usage:
     $ python main.py --debug -fpath data/custom.csv
-    
+
     In code:
     >>> args = parse_cli_args()
     >>> print(args.debug)
@@ -63,7 +63,7 @@ def parse_cli_args(
     )
 
     parser.add_argument(
-        "--file",
+        "--fp",
         type=Path,
         metavar="PATH",
         default=file_path,
