@@ -65,6 +65,7 @@ def parse_cli_args(
     parser.add_argument(
         "--fp",
         type=Path,
+        dest="file_path",
         metavar="PATH",
         default=file_path,
         help="Input file path"

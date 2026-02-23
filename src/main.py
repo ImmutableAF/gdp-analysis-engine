@@ -7,17 +7,21 @@ from .core.engine import run_pipeline
 from .util.logging_setup import initialize_logging
 from .util.cli_parser import parse_cli_args
 
-if __name__ == "__main__":
+
+def main():
     base_config = get_base_config()
     initialize_logging(base_config, debug=True)
     logger = logging.getLogger(__name__)
 
     args = parse_cli_args()
     print(args)
-    test_path = args.filePath
-    filepath = test_path if test_path.exists() and test_path.is_file() else Path(base_config.data_dir) / base_config.data_filename
 
+    if args.file_path and args.file_path.is_file():
+        filepath = args.file_path
+    else:
+        filepath = Path(base_config.data_dir) / base_config.data_filename
     logger.info(f"Selected data file: {filepath}")
+
     try:
         logger.info(f"trying to load data from {filepath}")
         df = load_data(filepath)
@@ -29,7 +33,13 @@ if __name__ == "__main__":
         logger.info(f"trying to load query config")
         query_config = get_query_config(df)
         logger.info(f"query config loaded")
-        logger.info(f"running first pipeline")
-        print(run_pipeline(filters=query_config, df=df, inLongFormat=True))
-        logger.info(f"running second pipeline")
-        print(run_pipeline(filters=query_config, df=df))
+        for _ in range(1):
+            logger.info(f"running first pipeline")
+            print(run_pipeline(filters=query_config, df=df, inLongFormat=True))
+            print("=" * 96)
+            logger.info(f"running second pipeline")
+            print(run_pipeline(filters=query_config, df=df))
+
+
+if __name__ == "__main__":
+    main()
