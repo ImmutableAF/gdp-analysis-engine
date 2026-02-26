@@ -1,34 +1,25 @@
 """
-Configuration File Loaders
-===========================
+Purpose:
+Loads and constructs configuration objects from JSON files.
 
-JSON loading functions for BaseConfig and QueryConfig. Converts raw JSON
-dictionaries to validated immutable dataclass instances.
+Description:
+Each loader reads a file, extracts the relevant keys, and hands back
+a fully constructed, immutable config object.
 
 Functions
 ---------
 load_base_config(config_path)
-    Load BaseConfig from JSON file
+    Parse a JSON file into a BaseConfig object.
 load_query_config(config_path)
-    Load QueryConfig from JSON file
+    Parse a JSON file into a QueryConfig object.
 load_default_config()
-    Create BaseConfig with hardcoded defaults
-
-See Also
---------
-config_models : Configuration dataclasses
-config_handler : Validation functions
+    Return a hardcoded BaseConfig with sensible default values.
 
 Notes
 -----
-Path fields automatically converted from strings to Path objects.
-QueryConfig uses .get() for optional fields (returns None if missing).
-
-Examples
---------
->>> config = load_base_config(Path("data/configs/base_config.json"))
->>> query = load_query_config(Path("data/configs/query_config.json"))
->>> default = load_default_config()
+- All functions return validated config model instances, not raw dicts.
+- load_default_config() requires no file on disk and is safe to call at any time.
+- Missing optional query fields (region, country, etc.) resolve to None via dict.get().
 """
 
 import json
@@ -41,32 +32,26 @@ logger = logging.getLogger(__name__)
 
 def load_base_config(config_path: Path) -> BaseConfig:
     """
-    Load system configuration from JSON file.
+    Parse a JSON config file into a BaseConfig object.
+
+    Reads the file at config_path, extracts the expected keys, and
+    constructs a BaseConfig instance. All fields are required — a missing
+    key will raise a KeyError.
 
     Parameters
     ----------
     config_path : Path
-        Path to JSON config file
+        Path to the JSON file containing base configuration fields:
+        data_dir, data_filename, log_dir, max_log_size, and output_mode.
 
     Returns
     -------
     BaseConfig
-        Immutable configuration instance
-
-    Raises
-    ------
-    FileNotFoundError
-        If config file doesn't exist
-    json.JSONDecodeError
-        If JSON is malformed
-    KeyError
-        If required fields missing
+        Populated base configuration object.
 
     Examples
     --------
-    >>> config = load_base_config(Path("data/configs/base_config.json"))
-    >>> print(config.data_dir)
-    data
+    >>> config = load_base_config(Path("config/base.json"))
     """
     logger.info(f"Loading base configuration from {config_path}")
     with open(config_path) as f:
@@ -85,34 +70,25 @@ def load_base_config(config_path: Path) -> BaseConfig:
 
 def load_query_config(config_path: Path) -> QueryConfig:
     """
-    Load query parameters from JSON file.
+    Parse a JSON config file into a QueryConfig object.
+
+    All query fields are optional — any key absent from the file resolves
+    to None.
 
     Parameters
     ----------
     config_path : Path
-        Path to JSON config file
+        Path to the JSON file containing query fields: region, country,
+        startYear, endYear, and operation.
 
     Returns
     -------
     QueryConfig
-        Immutable query configuration
-
-    Raises
-    ------
-    FileNotFoundError
-        If config file doesn't exist
-    json.JSONDecodeError
-        If JSON is malformed
-
-    Notes
-    -----
-    Uses .get() for all fields - missing fields become None.
+        Populated query configuration object. Missing fields default to None.
 
     Examples
     --------
-    >>> query = load_query_config(Path("data/configs/query_config.json"))
-    >>> print(query.region)
-    Asia
+    >>> config = load_query_config(Path("config/query.json"))
     """
     logger.info(f"Loading query configuration from {config_path}")
     with open(config_path) as f:
@@ -130,26 +106,21 @@ def load_query_config(config_path: Path) -> QueryConfig:
 
 def load_default_config() -> BaseConfig:
     """
-    Create BaseConfig with hardcoded default values.
+    Return a BaseConfig populated with hardcoded default values.
+
+    Used as a fallback when no config file is provided. Safe to call at
+    any time — requires no file on disk.
 
     Returns
     -------
     BaseConfig
-        Configuration with standard defaults
-
-    Notes
-    -----
-    Default values:
-    - data_dir: "data"
-    - data_filename: "gdp_with_continent_filled.csv"
-    - log_dir: "logs"
-    - max_log_size: 1000000 bytes (1 MB)
+        Default configuration with:
+        data_dir="data", data_filename="gdp_with_continent_filled.xlsx",
+        log_dir="logs", max_log_size=1000000, output_mode="ui".
 
     Examples
     --------
     >>> config = load_default_config()
-    >>> print(config.data_filename)
-    gdp_with_continent_filled.csv
     """
     logger.info(f"Loading default configuration")
     config = BaseConfig(

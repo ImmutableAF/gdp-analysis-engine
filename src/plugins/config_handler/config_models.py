@@ -1,31 +1,17 @@
 """
-Immutable Configuration Data Models
-====================================
+Purpose:
+Immutable dataclasses that hold configuration values to be used across the package.
 
-Defines frozen dataclasses for system and query configurations. Immutability
-enforced via frozen=True ensures configurations cannot be modified after creation.
+Description:
+Frozen dataclasses that represent the two distinct configuration concerns —
+application setup (BaseConfig) and query parameters (QueryConfig). 
 
-Classes
--------
-BaseConfig
-    System configuration (paths, logging)
-QueryConfig
-    User query parameters (region, years, operations)
 
 Notes
 -----
-Both classes use frozen dataclasses for immutability. Modifications require
-creating new instances via dataclasses.replace().
-
-Examples
---------
->>> config = BaseConfig(
-...     data_directory=Path("data"),
-...     default_file="gdp.csv",
-...     log_directory=Path("logs"),
-...     max_log_size=1000000
-... )
->>> config.max_log_size = 500000  # Raises FrozenInstanceError
+- Both models are frozen — fields cannot be modified after construction.
+- Both models are constructed once.
+- QueryConfig fields are all optional; None means no filter or default behavior applies.
 """
 
 from dataclasses import dataclass
@@ -36,41 +22,21 @@ from typing import Optional
 @dataclass(frozen=True)
 class BaseConfig:
     """
-    System configuration for data paths and logging.
-
-    Immutable configuration containing file system paths and logging parameters.
-    Validated by config_handler.validate_base_config() after loading.
+    Application-level configuration for paths, logging, and output mode.
 
     Attributes
     ----------
-    data_directory : Path
-        Directory containing GDP data files
-    default_file : str
-        Default CSV filename to load
-    log_directory : Path
-        Directory for log file storage
+    data_dir : Path
+        Directory where the input data file is located.
+    data_filename : str
+        Name of the data file to load (e.g. "gdp_data.xlsx").
+    log_dir : Path
+        Directory where log files are written.
     max_log_size : int
-        Maximum log file size in bytes (for rotation)
-
-    See Also
-    --------
-    config_loader.load_base_config : Load from JSON
-    config_handler.validate_base_config : Validate constraints
-
-    Notes
-    -----
-    Frozen dataclass prevents modification. Use dataclasses.replace() for updates.
-
-    Examples
-    --------
-    >>> config = BaseConfig(
-    ...     data_directory=Path("data"),
-    ...     default_file="gdp_data.csv",
-    ...     log_directory=Path("logs"),
-    ...     max_log_size=1000000
-    ... )
+        Maximum size of a single log file in bytes before rotation.
+    output_mode : str
+        Determines how results are presented (e.g. "ui", "cli").
     """
-
     data_dir: Path
     data_filename: str
     log_dir: Path
@@ -81,42 +47,24 @@ class BaseConfig:
 @dataclass(frozen=True)
 class QueryConfig:
     """
-    User query parameters for data filtering and aggregation.
+    Query-level configuration carrying filter and aggregation parameters.
 
-    Immutable configuration for pipeline operations. Optional fields allow
-    partial specification. Sanitized by config_handler.sanatize_query_config().
+    All fields are optional. None on any field means no constraint is applied
+    for that parameter.
 
     Attributes
     ----------
-    region : Optional[str]
-        Geographic region filter (e.g., "Asia", "Europe")
-    startYear : Optional[int]
-        Start year for time range filter
-    endYear : Optional[int]
-        End year for time range filter
-    operation : Optional[str]
-        Aggregation operation ("sum", "avg", "average")
-
-    See Also
-    --------
-    config_loader.load_query_config : Load from JSON
-    config_handler.sanatize_query_config : Validate and sanitize
-
-    Notes
-    -----
-    All fields optional to support flexible querying. Invalid values set to None
-    during sanitization rather than raising errors.
-
-    Examples
-    --------
-    >>> query = QueryConfig(
-    ...     region="Asia",
-    ...     startYear=2000,
-    ...     endYear=2020,
-    ...     operation="avg"
-    ... )
+    region : str or None
+        Continent to filter on (case-insensitive).
+    country : str or None
+        Country name to filter on (case-insensitive).
+    startYear : int or None
+        Lower bound of the year range (inclusive).
+    endYear : int or None
+        Upper bound of the year range (inclusive).
+    operation : str or None
+        Aggregation to apply — "sum", "avg", or "average". Defaults to "avg" in engine.py.
     """
-
     region: Optional[str]
     country: Optional[str]
     startYear: Optional[int]
