@@ -2,5 +2,6 @@
     "data_dir": "data",
     "data_filename": "gdp_asdth_continent_filled.xlsx",
     "log_dir": "logs",
-    "max_log_size": 10000
+    "max_log_size": 10000,
+    "output_mode": "ui"
 }

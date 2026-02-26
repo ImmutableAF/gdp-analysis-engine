@@ -1,7 +1,3 @@
 {
-  "region": "Asia",
-  "country": "Pakistan",
-  "startYear": 1980,
-  "endYear": 2012,
-  "operation": "sum"
+  "region": "Asia"
 }

@@ -9,3 +9,7 @@ perl flamegraph.pl --width 1535 --height 30 --fontsize 12 flamegraph.folded > fl
 perl flamegraph.pl --width 1235 --height 30 --fontsize 12 --minwidth 36 flamegraph.folded > consise-flamegraph.svg
 python -m run_main
 snakeviz profile.prof
+
+redudency in metadata.py
+get_valid_attr in config handler
+get metadata in main to ui

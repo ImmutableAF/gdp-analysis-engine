@@ -32,3 +32,11 @@ def get_year_range(df: pd.DataFrame) -> Tuple[int, int]:
 
 def get_valid_attr(df: pd.DataFrame) -> Tuple[List[str], Tuple[int, int]]:
     return (get_all_regions(df), get_year_range(df))
+
+
+def get_metadata(df: pd.DataFrame) -> dict:
+    return {
+        "regions": sorted(get_all_regions(df)),
+        "countries": sorted(get_all_countries(df)),
+        "year_range": get_year_range(df),
+    }

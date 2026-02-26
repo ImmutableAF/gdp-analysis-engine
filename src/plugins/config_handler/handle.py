@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 from .config_models import BaseConfig, QueryConfig
 from .config_load import load_base_config, load_query_config, load_default_config
 from .paths import get_base_config_path, get_query_config_path
-from ...core.metadata import get_valid_attr
+from src.core.metadata import get_valid_attr
 
 
 def _validate_base_config(config: BaseConfig) -> None:

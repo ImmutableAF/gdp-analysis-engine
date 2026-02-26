@@ -32,6 +32,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
 
+
 @dataclass(frozen=True)
 class BaseConfig:
     """
@@ -69,10 +70,13 @@ class BaseConfig:
     ...     max_log_size=1000000
     ... )
     """
+
     data_dir: Path
     data_filename: str
     log_dir: Path
     max_log_size: int
+    output_mode: str
+
 
 @dataclass(frozen=True)
 class QueryConfig:
@@ -112,6 +116,7 @@ class QueryConfig:
     ...     operation="avg"
     ... )
     """
+
     region: Optional[str]
     country: Optional[str]
     startYear: Optional[int]
