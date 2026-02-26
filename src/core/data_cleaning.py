@@ -1,101 +1,88 @@
 """
-GDP Data Cleaning - Functional Pipeline
-=======================================
+Purpose:
+Cleans and standardizes raw GDP DataFrame before it enters the analysis pipeline.
 
-Pure functional helpers for cleaning GDP datasets. All functions are
-side-effect free and return new DataFrames, preserving original inputs.
+Description:
+This module fixes string-typed year columns, missing or negative values, and duplicate country-indicator 
+rows and exposes a single entry-point function, clean_gdp_data(), that runs the full cleaning pipeline in one call.
+
+Pipeline Flow:
+Raw DataFrame → convert_years_to_numeric() → fill_missing_years() → remove_invalid_values() → drop_duplicates() → Clean DataFrame
 
 Functions
 ---------
-convert_years_to_numeric(df, start_year=1960, end_year=2024)
-    Convert year columns to numeric, invalid entries become NaN.
-fill_missing_years(df, method='ffill', start_year=1960, end_year=2024)
-    Fill missing values in year columns using specified method.
-remove_invalid_values(df, start_year=1960, end_year=2024)
-    Replace negative GDP values with NaN.
+_year_columns(df, start_year, end_year)
+    Internal helper — returns the list of year column names present in the DataFrame.
+convert_years_to_numeric(df, start_year, end_year)
+    Cast year columns from strings to numbers, turning unparseable entries into NaN.
+fill_missing_years(df, method, start_year, end_year)
+    Fill NaN cells in year columns using forward-fill, backward-fill, or zero.
+remove_invalid_values(df, start_year, end_year)
+    Null out any negative numbers in year columns (negative GDP is not meaningful).
 drop_duplicates(df)
-    Drop duplicate rows based on Country Name + Indicator Code.
-clean_gdp_data(df, fill_method='ffill')
-    Full functional pipeline: numeric conversion, filling, sanitization, deduplication.
+    Keep only the first row for each unique Country Name + Indicator Code pair.
+clean_gdp_data(df, fill_method)
+    Run the complete cleaning pipeline and return a clean copy of the DataFrame.
 
 Notes
 -----
-- All functions handle missing year columns gracefully.
-- String or invalid numeric values are coerced to NaN.
-- Functional composition ensures no in-place mutation.
+- All functions return copies — the original DataFrame is never modified.
+- Year columns are detected by name (e.g. "1960", "2024"); non-year columns are untouched.
+- _year_columns() is an internal helper and is not intended to be called directly.
 
 Examples
 --------
->>> import pandas as pd
->>> df = pd.DataFrame({
-...     "Country Name": ["A", "A", "B"],
-...     "Indicator Code": ["GDP", "GDP", "GDP"],
-...     "1960": ["100", "100", "-50"],
-...     "1961": ["200", None, "30"]
-... })
->>> df_clean = clean_gdp_data(df)
->>> df_clean
-  Country Name Indicator Code 1960 1961
-0            A            GDP 100.0 200.0
-2            B            GDP  NaN  30.0
+>>> # Full pipeline in one call
+>>> clean_df = clean_gdp_data(raw_df, fill_method="ffill")
+
+>>> # Step by step
+>>> df = convert_years_to_numeric(raw_df)
+>>> df = fill_missing_years(df, method="zero")
+>>> df = remove_invalid_values(df)
+>>> df = drop_duplicates(df)
 """
 
 import pandas as pd
 from typing import List
 
 
-# --- Helpers ---
 def _year_columns(
     df: pd.DataFrame, start_year: int = 1960, end_year: int = 2024
 ) -> List[str]:
     """
-    Return list of year columns that exist in the DataFrame.
-
-    Parameters
-    ----------
-    df : pd.DataFrame
-        Input GDP DataFrame.
-    start_year : int
-        Starting year for selection.
-    end_year : int
-        Ending year for selection.
-
-    Returns
-    -------
-    List[str]
-        List of string year column names.
+    Return year column names present in the DataFrame within the given range.
     """
     return [str(y) for y in range(start_year, end_year + 1) if str(y) in df.columns]
 
 
-# --- Functional transformations ---
 def convert_years_to_numeric(
     df: pd.DataFrame, start_year: int = 1960, end_year: int = 2024
 ) -> pd.DataFrame:
     """
-    Convert year columns to numeric values; invalid entries become NaN.
+    Cast year columns from strings to numeric values.
+
+    Any cell that cannot be parsed as a number (e.g. "..", "N/A", empty
+    strings) is replaced with NaN so downstream functions can handle it
+    explicitly rather than silently operating on bad data.
 
     Parameters
     ----------
     df : pd.DataFrame
-        GDP dataset with year columns.
+        Raw DataFrame with year columns stored as strings.
     start_year : int
-        Starting year for conversion.
+        First year column to convert. Default is 1960.
     end_year : int
-        Ending year for conversion.
+        Last year column to convert. Default is 2024.
 
     Returns
     -------
     pd.DataFrame
-        New DataFrame with numeric year columns.
+        Copy of df with year columns converted to float64; unparseable
+        values become NaN.
 
     Examples
     --------
-    >>> df = pd.DataFrame({"1960": ["100", "abc"]})
-    >>> convert_years_to_numeric(df)
-       1960
-    0  100.0
-    1    NaN
+    >>> df = convert_years_to_numeric(raw_df)
     """
     year_cols = _year_columns(df, start_year, end_year)
     return df.assign(
@@ -110,31 +97,38 @@ def fill_missing_years(
     end_year: int = 2024,
 ) -> pd.DataFrame:
     """
-    Fill missing year values using 'ffill', 'bfill', or zero replacement.
+    Fill NaN cells in year columns using the specified strategy.
+
+    Three strategies are supported:
+
+    - "ffill"  — propagate the last valid value forward across years (left → right).
+    - "bfill"  — propagate the next valid value backward across years (right → left).
+    - "zero"   — replace every NaN with 0.
+
+    Any other string leaves year columns unchanged. Filling is applied row-wise,
+    meaning each country's own values are used to fill its own gaps.
 
     Parameters
     ----------
     df : pd.DataFrame
-        GDP dataset with numeric year columns.
+        DataFrame with numeric year columns (run convert_years_to_numeric first).
     method : str
-        'ffill', 'bfill', or 'zero'.
+        Fill strategy: "ffill", "bfill", or "zero". Default is "ffill".
     start_year : int
-        Start year for filling.
+        First year column to fill. Default is 1960.
     end_year : int
-        End year for filling.
+        Last year column to fill. Default is 2024.
 
     Returns
     -------
     pd.DataFrame
-        New DataFrame with missing year values filled.
+        Copy of df with NaN values in year columns filled according to method.
+        Columns outside the year range are not affected.
 
     Examples
     --------
-    >>> df = pd.DataFrame({"1960": [100, None]})
-    >>> fill_missing_years(df, method="zero")
-       1960
-    0  100.0
-    1    0.0
+    >>> df = fill_missing_years(df, method="ffill")
+    >>> df = fill_missing_years(df, method="zero")
     """
     year_cols = _year_columns(df, start_year, end_year)
 
@@ -154,29 +148,29 @@ def remove_invalid_values(
     df: pd.DataFrame, start_year: int = 1960, end_year: int = 2024
 ) -> pd.DataFrame:
     """
-    Replace negative GDP values with NaN.
+    Replace negative values in year columns with NaN.
+
+    GDP cannot be negative, so any negative number is treated as a data
+    error. NaN values are left as-is; only values that are both non-null
+    and less than zero are nulled out.
 
     Parameters
     ----------
     df : pd.DataFrame
-        GDP dataset with numeric year columns.
+        DataFrame with numeric year columns.
     start_year : int
-        Start year for sanitization.
+        First year column to sanitize. Default is 1960.
     end_year : int
-        End year for sanitization.
+        Last year column to sanitize. Default is 2024.
 
     Returns
     -------
     pd.DataFrame
-        New DataFrame with invalid values set to NaN.
+        Copy of df with negative year values replaced by NaN.
 
     Examples
     --------
-    >>> df = pd.DataFrame({"1960": [100, -50]})
-    >>> remove_invalid_values(df)
-       1960
-    0  100.0
-    1    NaN
+    >>> df = remove_invalid_values(df)
     """
     year_cols = _year_columns(df, start_year, end_year)
     sanitized = {
@@ -188,63 +182,55 @@ def remove_invalid_values(
 
 def drop_duplicates(df: pd.DataFrame) -> pd.DataFrame:
     """
-    Drop duplicate rows based on Country Name + Indicator Code.
+    Remove duplicate rows based on Country Name and Indicator Code.
+
+    When the same country-indicator pair appears more than once, only the
+    first occurrence is kept.
 
     Parameters
     ----------
     df : pd.DataFrame
-        GDP dataset.
+        DataFrame with "Country Name" and "Indicator Code" columns.
 
     Returns
     -------
     pd.DataFrame
-        DataFrame without duplicates.
+        Copy with duplicate country-indicator rows removed.
 
     Examples
     --------
-    >>> df = pd.DataFrame({"Country Name": ["A","A"], "Indicator Code": ["GDP","GDP"]})
-    >>> drop_duplicates(df)
-      Country Name Indicator Code
-    0            A            GDP
+    >>> df = drop_duplicates(df)
     """
     return df.drop_duplicates(subset=["Country Name", "Indicator Code"])
 
 
 def clean_gdp_data(df: pd.DataFrame, fill_method: str = "ffill") -> pd.DataFrame:
     """
-    Full functional cleaning pipeline for GDP dataset.
+    Run the full cleaning pipeline and return a clean DataFrame.
 
-    Steps
-    -----
-    1. Convert year columns to numeric
-    2. Fill missing year values
-    3. Remove negative GDP values
-    4. Drop duplicate rows
+    Executes all four cleaning steps in the correct order:
+    convert_years_to_numeric → fill_missing_years → remove_invalid_values → drop_duplicates.
+
+    This is the recommended entry point for cleaning raw GDP data. Use the
+    individual step functions only if you need finer control over the process.
 
     Parameters
     ----------
     df : pd.DataFrame
-        Raw GDP dataset.
+        Raw GDP DataFrame straight from the data loader.
     fill_method : str
-        Method to fill missing values ('ffill', 'bfill', 'zero')
+        Strategy for filling missing year values. Passed directly to
+        fill_missing_years(). "ffill", "bfill", or "zero". Default is "ffill".
 
     Returns
     -------
     pd.DataFrame
-        Cleaned GDP dataset.
+        Fully cleaned DataFrame ready for transformation and analysis.
 
     Examples
     --------
-    >>> df = pd.DataFrame({
-    ...     "Country Name": ["A", "A", "B"],
-    ...     "Indicator Code": ["GDP", "GDP", "GDP"],
-    ...     "1960": ["100", "100", "-50"],
-    ...     "1961": ["200", None, "30"]
-    ... })
-    >>> clean_gdp_data(df)
-      Country Name Indicator Code 1960 1961
-    0            A            GDP 100.0 200.0
-    2            B            GDP  NaN  30.0
+    >>> clean_df = clean_gdp_data(raw_df)
+    >>> clean_df = clean_gdp_data(raw_df, fill_method="zero")
     """
     return (
         df.pipe(convert_years_to_numeric)
