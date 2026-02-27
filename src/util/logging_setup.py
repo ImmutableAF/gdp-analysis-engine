@@ -1,33 +1,27 @@
 """
-Logging System Factory
-======================
+Purpose:
+Configures the root logger with a rotating file handler for the application.
 
-Configures rotating file handler for application logging with dual-mode
-support (production/debug).
+Description:
+Sets up logging to a file that rotates when it reaches a size limit, keeping
+the last 3 backups. Switches between debug.log and prod.log based on the
+debug flag, and sets the log level to DEBUG or ERROR accordingly.
 
 Functions
 ---------
 initialize_logging(base_config, debug)
-    Setup rotating file handler with mode-specific configuration
-
-See Also
---------
-config_manager.BaseConfig : System configuration with log settings
+    Configure the root logger with a rotating file handler.
 
 Notes
 -----
-Logging modes:
-- Production: ERROR level, prod.log file
-- Debug: DEBUG level, debug.log file
-
-Both modes use RotatingFileHandler with 3 backup files and UTF-8 encoding.
-Log directory created automatically if missing.
+- Clears any existing handlers on the root logger before adding the new one.
+- Log directory is created automatically if it does not exist.
+- max_log_size falls back to 100000 bytes if not present on base_config.
 
 Examples
 --------
->>> from config_manager import BaseConfig
->>> config = BaseConfig(Path("data"), "gdp.csv", Path("logs"), 1000000)
->>> initialize_logging(config, debug=True)
+>>> initialize_logging(base_config, debug=True)
+>>> initialize_logging(base_config, debug=False)
 """
 
 import logging
@@ -35,41 +29,36 @@ from logging.handlers import RotatingFileHandler
 from pathlib import Path
 from .logging_contract import LogPolicy
 
+
 def initialize_logging(base_config: LogPolicy, debug: bool = False) -> None:
     """
-    Initialize rotating file handler for application logging.
-    
-    Creates log directory, configures handler with rotation, and sets root
-    logger level based on debug flag.
-    
+    Configure the root logger with a rotating file handler.
+
+    Creates the log directory if it does not exist. Selects debug.log at
+    DEBUG level or prod.log at ERROR level based on the debug flag. Builds
+    a RotatingFileHandler that rotates when the file reaches max_log_size,
+    keeping the last 3 backups. Attaches a formatter that includes timestamp,
+    level, logger name, and message. Clears all existing handlers on the root
+    logger before attaching the new one.
+
     Parameters
     ----------
-    base_config : BaseConfig
-        Configuration with log_directory and max_log_size
-    debug : bool, default=False
-        If True, use DEBUG level and debug.log; if False, use ERROR level and prod.log
-    
-    Notes
-    -----
-    Configuration:
-    - File rotation: maxBytes from config, 3 backups
-    - Format: "HH:MM:SS [LEVEL] logger_name: message"
-    - Encoding: UTF-8
-    - Clears existing handlers before adding new one
-    
-    Log directory created with parents=True if it doesn't exist.
-    
+    base_config : LogPolicy
+        Config object with log_dir (Path) and max_log_size (int) attributes.
+    debug : bool
+        If True, writes to debug.log at DEBUG level.
+        If False, writes to prod.log at ERROR level. Default is False.
+
+    Returns
+    -------
+    None
+
     Examples
     --------
-    Production mode:
-    >>> config = BaseConfig(Path("data"), "gdp.csv", Path("logs"), 1000000)
-    >>> initialize_logging(config, debug=False)
-    # Creates logs/prod.log at ERROR level
-    
-    Debug mode:
-    >>> initialize_logging(config, debug=True)
-    # Creates logs/debug.log at DEBUG level
+    >>> initialize_logging(base_config, debug=True) 
+    >>> initialize_logging(base_config, debug=False)
     """
+    
     base_config.log_dir.mkdir(parents=True, exist_ok=True)
 
     log_file = base_config.log_dir / ("debug.log" if debug else "prod.log")

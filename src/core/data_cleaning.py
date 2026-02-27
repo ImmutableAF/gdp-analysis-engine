@@ -51,6 +51,20 @@ def _year_columns(
 ) -> List[str]:
     """
     Return year column names present in the DataFrame within the given range.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        DataFrame whose columns are checked.
+    start_year : int
+        First year to include. Default is 1960.
+    end_year : int
+        Last year to include. Default is 2024.
+
+    Returns
+    -------
+    List[str]
+        Column names like ["1960", "1961", ...] that exist in df.
     """
     return [str(y) for y in range(start_year, end_year + 1) if str(y) in df.columns]
 

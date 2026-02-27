@@ -41,6 +41,12 @@ Notes
 - All query sanitization is silent — invalid values are reset to None, never raised.
 - get_base_config() swallows all exceptions and falls back to load_default_config().
 - get_query_config() requires a loaded DataFrame to validate regions and year range.
+
+Examples
+--------
+>>> config = get_base_config()
+>>> query  = get_query_config(df)
+
 """
 
 from dataclasses import replace
@@ -102,7 +108,7 @@ def _sanitize_region(
     region: Optional[str], valid_regions: Iterable[str]
 ) -> Optional[str]:
     """
-    Return None if region is not among the DataFrame's known regions.
+    Return None if region is not among the known valid regions.
 
     Parameters
     ----------
