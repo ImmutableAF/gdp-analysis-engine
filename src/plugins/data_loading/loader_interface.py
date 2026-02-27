@@ -17,6 +17,15 @@ Notes
 - Concrete loaders must implement both supports() and load().
 - supports() should check file extension only — no file I/O.
 - load() is only called if supports() returns True.
+
+Examples
+--------
+>>> class CSVLoader(DataLoader):
+...     def supports(self, filepath: Path) -> bool:
+...         return filepath.suffix.lower() == ".csv"
+...
+...     def load(self, filepath: Path) -> DataFrame:
+...         return pd.read_csv(filepath)
 """
 
 from pathlib import Path

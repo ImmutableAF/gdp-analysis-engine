@@ -18,6 +18,8 @@ class CsvLoader(DataLoader):
 
     def supports(self, source: Path) -> bool:
         """
+        Return True if source ends with .csv.
+
         Parameters
         ----------
         source : Path
@@ -32,6 +34,8 @@ class CsvLoader(DataLoader):
 
     def load(self, source: Path) -> pd.DataFrame:
         """
+        Read the CSV file at source into a DataFrame.
+
         Parameters
         ----------
         source : Path
@@ -41,5 +45,5 @@ class CsvLoader(DataLoader):
         -------
         pd.DataFrame
             Contents of the CSV file as a DataFrame.
-        """
+        """ 
         return pd.read_csv(source)
