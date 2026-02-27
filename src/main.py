@@ -37,7 +37,7 @@ def main():
         return run_pipeline(df=df, filters=query_config, inLongFormat=True)
 
     mode = OutputMode(base_config.output_mode)  # "ui" or "cli" from config
-    sink = make_sink(mode, metadata, provider)
+    sink = make_sink(mode, metadata, df, query_config, provider)
     sink.start()  # UI → spawns streamlit / CLI → runs directly
 
 

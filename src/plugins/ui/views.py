@@ -103,7 +103,7 @@ def _render_filtered_data_preview(df: pd.DataFrame):
     with st.expander("View Filtered Data (Raw CSV-style)"):
         st.dataframe(
             df.sort_values(["Year", "Country Code"]),
-            use_container_width=True,
+            width="stretch",
             hide_index=True,
         )
 
@@ -124,11 +124,11 @@ def render_region_analysis(section_df: pd.DataFrame, region, stat_operation, top
             else section_df.groupby("Country Code", as_index=False)["Value"].mean()
         )
         fig = charts.country_bar(agg, f" — {scope}", top_n)
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch", key="country_bar")
         _register_figure("country_bar", fig)
 
         fig = charts.country_treemap(agg, top_n)
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch", key="country_treemap")
         _register_figure("country_treemap", fig)
     else:
         agg = (
@@ -137,7 +137,7 @@ def render_region_analysis(section_df: pd.DataFrame, region, stat_operation, top
             else section_df.groupby("Continent", as_index=False)["Value"].mean()
         )
         fig = charts.region_bar(agg)
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch", key="region_bar")
         _register_figure("region_bar", fig)
 
 
@@ -150,12 +150,12 @@ def render_year_analysis(section_df: pd.DataFrame, region):
     title = f" — {region.title()}" if region else " — All Regions"
 
     fig = charts.year_scatter(section_df, title, interpolate=True)
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch", key="year_scatter")
     _register_figure("year_scatter", fig)
 
     growth = charts.growth_rate(section_df, title, interpolate=True)
     if growth:
-        st.plotly_chart(growth, use_container_width=True)
+        st.plotly_chart(growth, width="stretch", key="growth_rate")
         _register_figure("growth_rate", growth)
 
 
@@ -165,11 +165,11 @@ def render_country_analysis(section_df: pd.DataFrame, country):
     st.markdown("---")
 
     fig = charts.year_line(section_df, f" — {country.title()}", interpolate=True)
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch", key="country_year_line")
     _register_figure("country_year_line", fig)
 
     fig = charts.year_bar(section_df, f" — {country.title()}", interpolate=True)
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch", key="country_year_bar")
     _register_figure("country_year_bar", fig)
 
 
@@ -184,13 +184,27 @@ def render_exports(export_df: pd.DataFrame):
         exports.export_charts_as_png()
 
 
-def build_sidebar(regions, countries, min_year, max_year, initial_config) -> dict:
+def build_sidebar(regions, countries, min_year, max_year, initial_config=None) -> dict:
     st.sidebar.title("Filters")
 
-    initial_region = initial_config.region if initial_config.region else "All"
-    initial_start = initial_config.startYear if initial_config.startYear else min_year
-    initial_end = initial_config.endYear if initial_config.endYear else max_year
-    initial_op = initial_config.operation if initial_config.operation else "avg"
+    initial_region = (
+        initial_config.region if initial_config and initial_config.region else "All"
+    )
+    initial_start = (
+        initial_config.startYear
+        if initial_config and initial_config.startYear
+        else min_year
+    )
+    initial_end = (
+        initial_config.endYear
+        if initial_config and initial_config.endYear
+        else max_year
+    )
+    initial_op = (
+        initial_config.operation
+        if initial_config and initial_config.operation
+        else "avg"
+    )
 
     op_options = ["Average", "Sum"]
     initial_op_label = "Average" if initial_op.lower() in ["avg", "average"] else "Sum"
@@ -271,3 +285,42 @@ def render_all(runner, filters: dict) -> None:
         render_country_analysis(country_df, filters["country"])
 
     render_exports(export_df)
+
+
+def render_all_from_df(df: pd.DataFrame, filters: dict) -> None:
+    region = filters["region"]
+    start_year = filters["start_year"]
+    end_year = filters["end_year"]
+
+    region_df = df[
+        (df["Year"] >= start_year)
+        & (df["Year"] <= end_year)
+        & (
+            df["Continent"] == region
+            if region
+            else pd.Series([True] * len(df), index=df.index)
+        )
+    ]
+
+    country_df = (
+        df[
+            (df["Country Name"] == filters["country"])
+            & (df["Year"] >= start_year)
+            & (df["Year"] <= end_year)
+        ]
+        if filters["show_country"] and filters["country"]
+        else None
+    )
+
+    render_region_analysis(
+        region_df,
+        region,
+        filters["stat_operation"],
+        None if filters["show_all"] else 10,
+    )
+    render_year_analysis(region_df, region)
+
+    if country_df is not None:
+        render_country_analysis(country_df, filters["country"])
+
+    render_exports(df)
