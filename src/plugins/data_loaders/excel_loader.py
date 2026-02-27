@@ -18,6 +18,8 @@ class ExcelLoader(DataLoader):
 
     def supports(self, source: Path) -> bool:
         """
+        Return True if source ends with .xlsx or .xls.
+
         Parameters
         ----------
         source : Path
@@ -32,6 +34,8 @@ class ExcelLoader(DataLoader):
 
     def load(self, source: Path) -> pd.DataFrame:
         """
+        Read the Excel file at source into a DataFrame.
+
         Parameters
         ----------
         source : Path

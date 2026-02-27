@@ -2,6 +2,11 @@
 Purpose:
 Extracts available filter options from a cleaned DataFrame for use in the API or UI.
 
+Description:
+Inspects a long-format DataFrame and returns the distinct values a user can
+filter on — regions, countries, and year range. All functions are read-only
+and never modify the input.
+
 Functions
 ---------
 extract_column(df, column)
@@ -23,6 +28,11 @@ Notes
 -----
 - If a column is missing, extract_column() returns an empty Series rather than raising.
 - If no valid years exist, get_year_range() falls back to DEFAULT_YEAR_RANGE (1960–2024).
+
+Examples
+--------
+>>> metadata = get_metadata(df)
+>>> regions, year_range = get_valid_attr(df)
 """
 
 from typing import List, Tuple
@@ -129,7 +139,7 @@ def get_year_range(df: pd.DataFrame) -> Tuple[int, int]:
 
 def get_valid_attr(df: pd.DataFrame) -> Tuple[List[str], Tuple[int, int]]:
     """
-    Return regions and year range together.
+    Return regions and year range together as a single tuple.
 
     Parameters
     ----------

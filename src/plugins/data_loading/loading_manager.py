@@ -3,9 +3,10 @@ Purpose:
 Auto-discovers and imports all loader plugins, then loads the correct one.
 
 Description:
-The data_loaders package is scanned and every module in it is dynamically 
-imported. Each import triggers a decorator that silently populates the 
-loader registry as a side effect. After that the supported loader is loaded.
+The data_loaders package is scanned and every module in it is dynamically
+imported. Each import triggers a decorator that silently populates the
+loader registry as a side effect. Once discovery is complete, load_data()
+asks the registry for the matching loader and delegates the file reading to it.
 
 Functions
 ---------
@@ -19,6 +20,10 @@ Notes
 - A module-level _loaded flag ensures the discovery runs exactly once per interpreter session.
 - Plugins that fail to import are logged and silently skipped.
 - load_data() raises ValueError if no registered loader supports the file.
+
+Examples
+--------
+>>> df = load_data(Path("data/gdp_data.xlsx"))
 """
 
 import logging
@@ -31,7 +36,6 @@ from pandas import DataFrame
 from .. import data_loaders
 from .loader_registry import get_loader
 
-import logging
 logger = logging.getLogger(__name__)
 
 _loaded = False

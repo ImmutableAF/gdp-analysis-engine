@@ -11,12 +11,12 @@ from ..data_loading import DataLoader, register_plugin
 
 
 @register_plugin
-class CsvLoader(DataLoader):
+class JsonLoader(DataLoader):
     """
     Loader plugin for JSON files.
 
-    Attributes
-    ----------
+    Methods
+    -------
     supports(source)
         Returns True for any path ending in .json.
     load(source)
@@ -25,6 +25,8 @@ class CsvLoader(DataLoader):
 
     def supports(self, source: Path) -> bool:
         """
+        Return True if source ends with .json.
+
         Parameters
         ----------
         source : Path
@@ -39,6 +41,8 @@ class CsvLoader(DataLoader):
 
     def load(self, source: Path) -> pd.DataFrame:
         """
+        Read the JSON file at source into a DataFrame.
+
         Parameters
         ----------
         source : Path

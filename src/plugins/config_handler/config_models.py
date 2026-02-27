@@ -1,17 +1,34 @@
 """
 Purpose:
-Immutable dataclasses that hold configuration values to be used across the package.
+Immutable dataclasses that hold configuration values used across the package.
 
 Description:
 Frozen dataclasses that represent the two distinct configuration concerns —
-application setup (BaseConfig) and query parameters (QueryConfig). 
+application setup (BaseConfig) and query parameters (QueryConfig).
 
+Models
+------
+BaseConfig
+    Application-level settings: data paths, logging, and output mode.
+QueryConfig
+    Query-level filter and aggregation parameters passed to the pipeline.
 
 Notes
 -----
 - Both models are frozen — fields cannot be modified after construction.
 - Both models are constructed once.
 - QueryConfig fields are all optional; None means no filter or default behavior applies.
+
+Examples
+--------
+>>> base = BaseConfig(
+...     data_dir=Path("data"),
+...     data_filename="gdp_data.xlsx",
+...     log_dir=Path("logs"),
+...     max_log_size=1000000,
+...     output_mode="ui"
+... )
+>>> query = QueryConfig(region="Asia", country=None, startYear=2000, endYear=2020, operation="sum")
 """
 
 from dataclasses import dataclass
@@ -36,6 +53,16 @@ class BaseConfig:
         Maximum size of a single log file in bytes before rotation.
     output_mode : str
         Determines how results are presented (e.g. "ui", "cli").
+
+    Examples
+    --------
+    >>> config = BaseConfig(
+    ...     data_dir=Path("data"),
+    ...     data_filename="gdp_data.xlsx",
+    ...     log_dir=Path("logs"),
+    ...     max_log_size=1000000,
+    ...     output_mode="ui"
+    ... )
     """
     data_dir: Path
     data_filename: str
@@ -64,6 +91,10 @@ class QueryConfig:
         Upper bound of the year range (inclusive).
     operation : str or None
         Aggregation to apply — "sum", "avg", or "average". Defaults to "avg" in engine.py.
+
+    Examples
+    --------
+    >>> config = QueryConfig(region="Asia", country=None, startYear=2000, endYear=2020, operation="sum")
     """
     region: Optional[str]
     country: Optional[str]

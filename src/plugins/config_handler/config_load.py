@@ -1,10 +1,11 @@
 """
 Purpose:
-Loads and constructs configuration objects from JSON files.
+Loads and constructs configuration objects from JSON files or built-in defaults.
 
 Description:
-Each loader reads a file, extracts the relevant keys, and hands back
-a fully constructed, immutable config object.
+Bridges raw JSON files on disk to the typed config models the rest of the
+package depends on. Each loader reads a file, extracts the relevant keys,
+and hands back a fully constructed, immutable config object.
 
 Functions
 ---------
@@ -20,6 +21,12 @@ Notes
 - All functions return validated config model instances, not raw dicts.
 - load_default_config() requires no file on disk and is safe to call at any time.
 - Missing optional query fields (region, country, etc.) resolve to None via dict.get().
+
+Examples
+--------
+>>> config = load_base_config(Path("config/base.json"))
+>>> config = load_query_config(Path("config/query.json"))
+>>> config = load_default_config()
 """
 
 import json

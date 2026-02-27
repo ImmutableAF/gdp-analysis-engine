@@ -20,6 +20,13 @@ Notes
 -----
 - Project root is resolved as three levels up from this file's location.
 - All functions derive their result from get_config_paths() — no paths are hardcoded twice.
+
+Examples
+--------
+>>> base_path, query_path = get_config_paths()
+>>> base_path  = get_base_config_path()
+>>> query_path = get_query_config_path()
+
 """
 
 from pathlib import Path
@@ -34,7 +41,12 @@ def get_config_paths() -> Tuple[Path, Path]:
     -------
     Tuple[Path, Path]
         (base_config_path, query_config_path) resolved from the project root.
+
+    Examples
+    --------
+    >>> base_path, query_path = get_config_paths()
     """
+
     base_dir = Path(__file__).parent.parent.parent
 
     base_config_path = base_dir / "base_config.json"
@@ -51,6 +63,10 @@ def get_base_config_path() -> Path:
     -------
     Path
         Absolute path to the base configuration file.
+
+    Examples
+    --------
+    >>> path = get_base_config_path()
     """
     return get_config_paths()[0]
 
@@ -63,5 +79,9 @@ def get_query_config_path() -> Path:
     -------
     Path
         Absolute path to the query configuration file.
+
+    Examples
+    --------
+    >>> path = get_query_config_path()
     """
     return get_config_paths()[1]

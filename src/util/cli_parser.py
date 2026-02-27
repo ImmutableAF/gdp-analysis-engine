@@ -1,58 +1,61 @@
 """
-CLI Argument Parser
-===================
+Purpose:
+Defines and parses CLI arguments for the application.
 
-Command-line argument parsing for non-UI mode execution.
+Description:
+Builds an ArgumentParser with two arguments — a debug flag and a file path —
+and returns the parsed result ready to use in the rest of the application.
 
 Functions
 ---------
-parse_cli_args()
-    Parse command-line arguments for debug mode and file path
+parse_cli_args(description, file_path)
+    Build and parse the argument parser, returning the parsed namespace.
+
+Notes
+-----
+- --debug sets a boolean flag for enabling debug mode.
+- --fp accepts a file path, falling back to the file_path parameter if not provided.
 
 Examples
 --------
->>> args = parse_cli_args()
->>> if args.debug:
-...     print("Debug mode enabled")
->>> if args.fpath:
-...     print(f"Loading file: {args.fpath}")
+>>> args = parse_cli_args(description="GDP Query CLI", file_path=Path("data/gdp_data.xlsx"))
+>>> args.debug
+False
+>>> args.file_path
+PosixPath('data/gdp_data.xlsx')
 """
 
 import argparse
 from pathlib import Path
 from typing import Optional
 
+
 def parse_cli_args(
         description: str = "CLI",
         file_path: Optional[Path] = None
 ):
     """
-    Parse command-line arguments.
+    Build and parse CLI arguments, returning the parsed namespace.
+
+    Parameters
+    ----------
+    description : str
+        Description string shown in the help message. Default is "CLI".
+    file_path : Path or None
+        Default file path used if --fp is not provided on the command line.
 
     Returns
     -------
     argparse.Namespace
-        Parsed arguments with attributes:
-        - debug (bool): Debug mode flag
-        - fpath (str or None): Input file path
-
-    Notes
-    -----
-    Arguments:
-    - --debug: Enable debug logging (flag, no value needed)
-    - -fpath PATH: Override default input file path
+        Parsed arguments with attributes: debug (bool), file_path (Path or None).
 
     Examples
     --------
-    Command line usage:
-    $ python main.py --debug -fpath data/custom.csv
-
-    In code:
-    >>> args = parse_cli_args()
-    >>> print(args.debug)
-    True
-    >>> print(args.fpath)
-    data/custom.csv
+    >>> args = parse_cli_args(description="GDP Query CLI", file_path=Path("data/gdp_data.xlsx"))
+    >>> args.debug
+    False
+    >>> args.file_path
+    PosixPath('data/gdp_data.xlsx')    
     """
     parser = argparse.ArgumentParser(description=description)
 

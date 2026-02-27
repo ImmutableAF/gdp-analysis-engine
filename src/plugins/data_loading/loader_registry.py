@@ -21,13 +21,24 @@ Notes
 - _loaders is populated at import time via @register_plugin decorators.
 - Loaders are matched in registration order — first match wins.
 - get_loader() raises ValueError if no registered loader supports the file.
+
+Examples
+--------
+>>> @register_plugin
+... class CSVLoader(DataLoader):
+...     def supports(self, source: Path) -> bool:
+...         return str(source).lower().endswith(".csv")
+...     def load(self, source: Path) -> DataFrame:
+...         return pd.read_csv(source)
+
+>>> loader = get_loader(Path("data/gdp_data.xlsx"))
 """
 
 import logging
 from typing import List
 from pathlib import Path
+
 from .loader_interface import DataLoader
-import logging
 logger = logging.getLogger(__name__)
 
 _loaders: List[DataLoader] = []
