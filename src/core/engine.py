@@ -325,7 +325,7 @@ def aggregate_all(df: pd.DataFrame, operation: str) -> pd.DataFrame:
         logger.debug("Unknown operation, returning original DataFrame")
 
     logger.debug(f"Aggregation complete, resulting shape={result.shape}")
-    return df
+    return result
 
 
 def apply_filters(

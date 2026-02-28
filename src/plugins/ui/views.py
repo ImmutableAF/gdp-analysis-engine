@@ -302,6 +302,14 @@ def render_all_from_df(df: pd.DataFrame, filters: dict) -> None:
         )
     ]
 
+    render_region_analysis(
+        region_df,
+        region,
+        filters["stat_operation"],
+        None if filters["show_all"] else 10,
+    )
+    render_year_analysis(region_df, region)
+
     country_df = (
         df[
             (df["Country Name"] == filters["country"])
@@ -311,14 +319,6 @@ def render_all_from_df(df: pd.DataFrame, filters: dict) -> None:
         if filters["show_country"] and filters["country"]
         else None
     )
-
-    render_region_analysis(
-        region_df,
-        region,
-        filters["stat_operation"],
-        None if filters["show_all"] else 10,
-    )
-    render_year_analysis(region_df, region)
 
     if country_df is not None:
         render_country_analysis(country_df, filters["country"])

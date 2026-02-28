@@ -1,14 +1,9 @@
 from __future__ import annotations
 from enum import StrEnum
-from typing import Callable, Any
-import json
-import tempfile
-from pathlib import Path
+from typing import Optional, Any
+import httpx
 import pandas as pd
-
-Provider = Callable[[], pd.DataFrame]
-
-_META_PATH = Path(tempfile.gettempdir()) / "gdp_engine_meta.json"
+from typing import Callable
 
 
 class OutputMode(StrEnum):
@@ -16,87 +11,76 @@ class OutputMode(StrEnum):
     CLI = "cli"
 
 
-_endpoints: dict[str, Callable[[pd.DataFrame], Any]] = {}
+class CoreAPIClient:
+    """
+    Thin HTTP client wrapping the core API server.
+    All OutputSink subclasses use this to get live data.
+    """
 
+    def __init__(self, base_url: str = "http://localhost:8010"):
+        self._base = base_url.rstrip("/")
 
-def endpoint(name: str):
-    def decorator(fn):
-        _endpoints[name] = fn
-        return fn
+    def _post(self, path: str, filters: Optional[dict] = None) -> pd.DataFrame:
+        body = filters or {}
+        # Strip None values so server falls back to its defaults
+        body = {k: v for k, v in body.items() if v is not None}
+        r = httpx.post(f"{self._base}{path}", json=body, timeout=30)
+        r.raise_for_status()
+        return pd.DataFrame(r.json())
 
-    return decorator
+    def _get(self, path: str) -> Any:
+        r = httpx.get(f"{self._base}{path}", timeout=30)
+        r.raise_for_status()
+        return r.json()
 
+    # ── convenience methods used by sinks ──────────────────────────────────
 
-@endpoint("filtered_df")
-def _(df: pd.DataFrame) -> pd.DataFrame:
-    return df
+    def get_metadata(self) -> dict:
+        return self._get("/metadata")
 
+    def get_config(self) -> dict:
+        return self._get("/config")
 
-@endpoint("region_agg")
-def _(df: pd.DataFrame) -> pd.DataFrame:
-    from src.core.engine import aggregate_by_region
+    def get_original(self) -> pd.DataFrame:
+        return pd.DataFrame(self._get("/original"))
 
-    return aggregate_by_region(df, "sum")
+    def run(self, filters: Optional[dict] = None) -> pd.DataFrame:
+        return self._post("/run", filters)
 
+    def aggregate_by_region(self, filters: Optional[dict] = None) -> pd.DataFrame:
+        return self._post("/aggregate/region", filters)
 
-@endpoint("country_agg")
-def _(df: pd.DataFrame) -> pd.DataFrame:
-    from src.core.engine import aggregate_by_country_code
+    def aggregate_by_country(self, filters: Optional[dict] = None) -> pd.DataFrame:
+        return self._post("/aggregate/country", filters)
 
-    return aggregate_by_country_code(df, "sum")
+    def aggregate_by_country_code(self, filters: Optional[dict] = None) -> pd.DataFrame:
+        return self._post("/aggregate/country-code", filters)
 
+    def aggregate_all(self, filters: Optional[dict] = None) -> pd.DataFrame:
+        return self._post("/aggregate/all", filters)
 
-@endpoint("region_agg_avg")
-def _(df: pd.DataFrame) -> pd.DataFrame:
-    from src.core.engine import aggregate_by_region
-
-    return aggregate_by_region(df, "avg")
-
-
-class OutputRunner:
-    def __init__(self, provider: Provider) -> None:
-        self._provider = provider
-        self._df: pd.DataFrame | None = None
-
-    def refresh(self) -> None:
-        self._df = self._provider()
-
-    def get(self, name: str) -> Any:
-        if self._df is None:
-            self.refresh()
-        if name not in _endpoints:
-            raise KeyError(f"No endpoint: '{name}'")
-        return _endpoints[name](self._df)
+    def reload_config(self) -> dict:
+        r = httpx.post(f"{self._base}/config/reload", timeout=10)
+        r.raise_for_status()
+        return r.json()
 
 
 class OutputSink:
-    def __init__(self, runner, metadata, original_df=None, query_config=None):
-        self.runner = runner
-        self.metadata = metadata
-        self.original_df = original_df
-        self.query_config = query_config
+    """Base class for all output sinks. Receives a live CoreAPIClient."""
+
+    def __init__(self, client: CoreAPIClient):
+        self.client = client
 
     def start(self) -> None:
         raise NotImplementedError
 
 
-def write_metadata(metadata: dict) -> None:
-    _META_PATH.write_text(json.dumps(metadata))
-
-
-def read_metadata() -> dict:
-    return json.loads(_META_PATH.read_text())
-
-
-def make_sink(mode, metadata, original_df, query_config, provider):
-    write_metadata(metadata)
-    runner = OutputRunner(provider)
+def make_sink(mode: OutputMode, api_url: str = "http://localhost:8010") -> OutputSink:
+    client = CoreAPIClient(base_url=api_url)
     match mode:
         case OutputMode.UI:
             from src.plugins.ui.app import UISink
-
-            return UISink(runner, metadata, original_df, query_config)
+            return UISink(client)
         case OutputMode.CLI:
             from src.plugins.cli.app import CliSink
-
-            return CliSink(runner, metadata)
+            return CliSink(client)

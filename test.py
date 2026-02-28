@@ -1,60 +1,21 @@
-import json
-import requests
+import httpx
 
-BASE = "http://localhost:8000"
-
-
-def test_metadata():
-    r = requests.get(f"{BASE}/metadata")
-    print(f"[metadata] status={r.status_code}")
-    if r.ok:
-        print(f"[metadata] body={json.loads(r.text)}\n")
-    else:
-        print(f"[metadata] error={r.text[:500]}\n")
+API_BASE = "http://localhost:8010"
 
 
-def test_config():
-    r = requests.get(f"{BASE}/config")
-    print(f"[config] status={r.status_code}")
-    if r.ok:
-        print(f"[config] body={json.loads(r.text)}\n")
-    else:
-        print(f"[config] error={r.text[:500]}\n")
+def main():
+    print("=== Static config (GET /config) ===")
+    r = httpx.get(f"{API_BASE}/config")
+    r.raise_for_status()
+    for k, v in r.json().items():
+        print(f"  {k}: {v}")
 
-
-def test_original():
-    r = requests.get(f"{BASE}/original")
-    print(f"[original] status={r.status_code}")
-    if r.ok:
-        data = json.loads(r.text)
-        print(f"[original] rows={len(data)}")
-        print(f"[original] first row={data[0]}\n")
-    else:
-        print(f"[original] error={r.text[:500]}\n")
-
-
-def test_run():
-    payload = {
-        "filters": {
-            "region": "Europe",
-            "country": None,
-            "startYear": 2000,
-            "endYear": 2020,
-            "operation": None,
-        }
-    }
-    r = requests.post(f"{BASE}/run", json=payload)
-    print(f"[run] status={r.status_code}")
-    if r.ok:
-        data = json.loads(r.text)
-        print(f"[run] rows={len(data)}")
-        print(f"[run] first row={data[0]}\n")
-    else:
-        print(f"[run] error={r.text}\n")
+    print("\n=== Reloaded config (POST /config/reload) ===")
+    r = httpx.post(f"{API_BASE}/config/reload")
+    r.raise_for_status()
+    for k, v in r.json().items():
+        print(f"  {k}: {v}")
 
 
 if __name__ == "__main__":
-    test_metadata()
-    test_config()
-    test_original()
-    test_run()
+    main()
