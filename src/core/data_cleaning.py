@@ -148,10 +148,10 @@ def fill_missing_years(
 
     if method == "zero":
         filled = {col: df[col].fillna(0) for col in year_cols}
-    elif method in ["ffill", "bfill"]:
-        filled = {
-            col: df[year_cols].fillna(method=method, axis=1)[col] for col in year_cols
-        }
+    elif method == "ffill":
+        filled = {col: df[year_cols].ffill(axis=1)[col] for col in year_cols}
+    elif method == "bfill":
+        filled = {col: df[year_cols].bfill(axis=1)[col] for col in year_cols}
     else:
         filled = {col: df[col] for col in year_cols}
 
