@@ -21,6 +21,7 @@ ANALYTICS_PORT = 8011
 CORE_URL = f"http://localhost:{CORE_PORT}"
 ANALYTICS_URL = f"http://localhost:{ANALYTICS_PORT}"
 
+
 def start_core_api(base_df, default_filters, config_loader):
     app = create_server(base_df, default_filters, config_loader=config_loader)
     uvicorn.run(app, host="0.0.0.0", port=CORE_PORT, log_level="warning")

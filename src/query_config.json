@@ -1,6 +1,7 @@
 {
   "region": "Asia",
-  "startYear": 1981,
+  "country": "Afghanistan",
+  "startYear": 1980,
   "endYear": 2012,
-  "operation": "sum"
+  "operation": "avg"
 }

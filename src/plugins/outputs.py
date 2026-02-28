@@ -82,7 +82,9 @@ def make_sink(
     match mode:
         case OutputMode.UI:
             from src.plugins.ui.app import UISink
+
             return UISink(client, analytics_url=analytics_url)
         case OutputMode.CLI:
             from src.plugins.cli.app import CliSink
+
             return CliSink(client)

@@ -70,6 +70,16 @@ import logging
 logger = logging.getLogger(__name__)
 from .contracts import Filters
 
+class EngineError(Exception):
+    """Raised when the query engine pipeline cannot continue."""
+
+_TRANSFORM_ID_VARS = [
+    "Country Name",
+    "Continent",
+    "Indicator Name",
+    "Indicator Code",
+    "Country Code",
+]
 
 def transform(df: pd.DataFrame) -> pd.DataFrame:
     """
@@ -93,6 +103,13 @@ def transform(df: pd.DataFrame) -> pd.DataFrame:
     --------
     >>> long_df = transform(wide_df)
     """
+    missing = [c for c in _TRANSFORM_ID_VARS if c not in df.columns]
+    if missing:
+        raise EngineError(
+            f"[transform] Required column(s) not found: {missing}. "
+            f"Available columns: {df.columns.tolist()}"
+        )
+    
     return df.melt(
         id_vars=[
             "Country Name",
