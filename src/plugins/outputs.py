@@ -70,11 +70,12 @@ class OutputRunner:
 
 
 class OutputSink:
-    def __init__(self, runner, metadata, original_df=None, query_config=None):
+    def __init__(self, runner, metadata, original_df=None, query_config=None, config_loader=None):
         self.runner = runner
         self.metadata = metadata
         self.original_df = original_df
         self.query_config = query_config
+        self._config_loader = config_loader
 
     def start(self) -> None:
         raise NotImplementedError
@@ -88,15 +89,11 @@ def read_metadata() -> dict:
     return json.loads(_META_PATH.read_text())
 
 
-def make_sink(mode, metadata, original_df, query_config, provider):
-    write_metadata(metadata)
-    runner = OutputRunner(provider)
+def make_sink(mode: OutputMode, metadata, original_df, query_config, runner, config_loader=None) -> OutputSink:
     match mode:
         case OutputMode.UI:
             from src.plugins.ui.app import UISink
-
-            return UISink(runner, metadata, original_df, query_config)
+            return UISink(runner, metadata, original_df, query_config, config_loader)
         case OutputMode.CLI:
             from src.plugins.cli.app import CliSink
-
-            return CliSink(runner, metadata)
+            return CliSink(runner, metadata, original_df, query_config, config_loader)

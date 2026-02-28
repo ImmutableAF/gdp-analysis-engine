@@ -15,7 +15,6 @@ from util.logging_setup import initialize_logging
 from util.cli_parser import parse_cli_args
 from src.core.metadata import get_metadata
 
-
 def main():
     base_config = get_base_config()
     initialize_logging(base_config, debug=True)
@@ -42,15 +41,20 @@ def main():
 
     df = clean_gdp_data(raw_df)  # once, here, never again
 
-    query_config = get_query_config(df)  # metadata reads clean df
+    query_config = get_query_config(df)
     metadata = get_metadata(df)
 
-    # provider: callable that re-runs pipeline on demand
-    def provider():
-        return run_pipeline(df=df, filters=query_config, inLongFormat=True)
+    state = {"query_config": query_config}
 
-    mode = OutputMode(base_config.output_mode)  # "ui" or "cli" from config
-    sink = make_sink(mode, metadata, df, query_config, provider)
+    def provider():
+        return run_pipeline(df=df, filters=state["query_config"], inLongFormat=True)
+
+    def config_loader():
+        state["query_config"] = get_query_config(df)
+        return state["query_config"]
+
+    mode = OutputMode(base_config.output_mode)
+    sink = make_sink(mode, metadata, df, query_config, provider, config_loader=config_loader)
     sink.start()  # UI → spawns streamlit / CLI → runs directly
 
 
