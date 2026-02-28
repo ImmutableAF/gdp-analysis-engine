@@ -263,7 +263,8 @@ def get_base_config() -> BaseConfig:
     try:
         base_config = load_base_config(get_base_config_path())
         _validate_base_config(base_config)
-    except Exception:
+    except Exception as e:
+        logger.debug(f"Base config failed: {e}, falling back to defaults")
         base_config = load_default_config()
 
     return base_config

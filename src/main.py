@@ -4,6 +4,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 
 import logging
+logger = logging.getLogger(__name__)
 
 from plugins.data_loading.loading_manager import load_data
 from plugins.config_handler import get_base_config, get_query_config
@@ -26,7 +27,19 @@ def main():
         else Path(base_config.data_dir) / base_config.data_filename
     )
 
-    raw_df = load_data(filepath)
+    try:
+        raw_df = load_data(filepath)
+    except FileNotFoundError:
+        logger.error(f"File not found: {filepath}")
+        sys.exit(1)
+    except ValueError as e:
+        logger.error(f"Unsupported file type: {filepath.suffix}")
+        sys.exit(1)
+    except Exception as e:
+        logger.error(f"Unexpected error loading data: {e}")
+        sys.exit(1)
+    
+
     df = clean_gdp_data(raw_df)  # once, here, never again
 
     query_config = get_query_config(df)  # metadata reads clean df
