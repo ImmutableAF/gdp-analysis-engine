@@ -1,0 +1,15 @@
+services:
+  gdp-app:
+    build: .
+    ports:
+      - "8010:8010"   # Core API
+      - "8011:8011"   # Analytics API
+      - "8501:8501"   # Streamlit UI
+    volumes:
+      - ./data:/app/data        # live data updates without rebuild
+      - ./src:/app/src          # live code changes without rebuild
+      - ./logs:/app/logs
+    environment:
+      - CORE_API_URL=http://localhost:8010
+      - ANALYTICS_API_URL=http://localhost:8011
+    restart: unless-stopped

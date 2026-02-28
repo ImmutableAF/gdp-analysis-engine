@@ -33,8 +33,6 @@ class CoreAPIClient:
         r.raise_for_status()
         return r.json()
 
-    # ── convenience methods used by sinks ──────────────────────────────────
-
     def get_metadata(self) -> dict:
         return self._get("/metadata")
 
@@ -75,12 +73,16 @@ class OutputSink:
         raise NotImplementedError
 
 
-def make_sink(mode: OutputMode, api_url: str = "http://localhost:8010") -> OutputSink:
+def make_sink(
+    mode: OutputMode,
+    api_url: str = "http://localhost:8010",
+    analytics_url: str = "http://localhost:8011",
+) -> OutputSink:
     client = CoreAPIClient(base_url=api_url)
     match mode:
         case OutputMode.UI:
             from src.plugins.ui.app import UISink
-            return UISink(client)
+            return UISink(client, analytics_url=analytics_url)
         case OutputMode.CLI:
             from src.plugins.cli.app import CliSink
             return CliSink(client)

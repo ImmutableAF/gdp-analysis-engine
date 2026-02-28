@@ -1,0 +1,12 @@
+.dev/
+docs/
+logs/
+.venv/
+__pycache__/
+*.pyc
+*.prof
+*.svg
+*.png
+.git/
+test.py
+profile_main.py

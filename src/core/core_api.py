@@ -47,14 +47,12 @@ def _to_response(df: pd.DataFrame) -> Response:
 def _resolve(body: Optional[FilterBody], defaults: Filters) -> ResolvedFilters:
     if body is None:
         return ResolvedFilters(
-            region=defaults.region,
-            country=defaults.country,
-            startYear=defaults.startYear,
-            endYear=defaults.endYear,
+            region=defaults.region, country=defaults.country,
+            startYear=defaults.startYear, endYear=defaults.endYear,
             operation=defaults.operation,
         )
     return ResolvedFilters(
-        region=body.region if body.region is not None else defaults.region,
+        region=None if body.region == "__ALL__" else (body.region if body.region is not None else defaults.region),
         country=body.country if body.country is not None else defaults.country,
         startYear=body.startYear if body.startYear is not None else defaults.startYear,
         endYear=body.endYear if body.endYear is not None else defaults.endYear,
