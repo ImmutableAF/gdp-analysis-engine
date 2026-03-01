@@ -17,11 +17,7 @@ get metadata in main to ui
 superb work everything working perfect just one small thing ...
 rn this sidebar is applying coutry filter (from query config) to main graphs not countr analysis graphs
 
-ui
-cli
-filewriter
 test
-docker
 
 docs
 

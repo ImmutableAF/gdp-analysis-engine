@@ -3,12 +3,12 @@ from enum import StrEnum
 from typing import Optional, Any
 import httpx
 import pandas as pd
-from typing import Callable
 
 
 class OutputMode(StrEnum):
     UI = "ui"
     CLI = "cli"
+    FILE = "file"
 
 
 class CoreAPIClient:
@@ -22,7 +22,6 @@ class CoreAPIClient:
 
     def _post(self, path: str, filters: Optional[dict] = None) -> pd.DataFrame:
         body = filters or {}
-        # Strip None values so server falls back to its defaults
         body = {k: v for k, v in body.items() if v is not None}
         r = httpx.post(f"{self._base}{path}", json=body, timeout=30)
         r.raise_for_status()
@@ -74,11 +73,18 @@ class OutputSink:
 
 
 def make_sink(
-    mode: OutputMode,
+    base_config,
     api_url: str = "http://localhost:8010",
     analytics_url: str = "http://localhost:8011",
+    mode_override: Optional[OutputMode] = None,
 ) -> OutputSink:
+    """
+    Resolve output mode from config, with an optional CLI override.
+    Priority: mode_override > base_config.output_mode
+    """
+    mode = mode_override or OutputMode(base_config.output_mode)
     client = CoreAPIClient(base_url=api_url)
+
     match mode:
         case OutputMode.UI:
             from src.plugins.ui.app import UISink
@@ -87,4 +93,10 @@ def make_sink(
         case OutputMode.CLI:
             from src.plugins.cli.app import CliSink
 
-            return CliSink(client)
+            return CliSink(client, analytics_url=analytics_url)
+        case OutputMode.FILE:
+            from src.plugins.fileWriter.app import FileOutputSink
+
+            return FileOutputSink(client, analytics_url=analytics_url)
+        case _:
+            raise ValueError(f"Unknown output mode: {mode!r}")

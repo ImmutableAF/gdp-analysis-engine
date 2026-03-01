@@ -2,6 +2,7 @@ import sys
 import threading
 import time
 from pathlib import Path
+import httpx
 import uvicorn
 
 sys.path.insert(0, str(Path(__file__).parent))
@@ -12,7 +13,7 @@ from core.data_cleaning import clean_gdp_data
 from src.core.core_api import create_server
 from src.plugins.ui.output_api import app as analytics_app
 import src.plugins.ui.output_api as analytics_server
-from plugins.outputs import OutputMode, make_sink
+from plugins.outputs import make_sink
 from util.logging_setup import initialize_logging
 from util.cli_parser import parse_cli_args
 
@@ -29,6 +30,39 @@ def start_core_api(base_df, default_filters, config_loader):
 
 def start_analytics_api():
     uvicorn.run(analytics_app, host="0.0.0.0", port=ANALYTICS_PORT, log_level="warning")
+
+
+def _probe(url: str) -> bool:
+    """Return True if the URL responds with any non-connection-error status."""
+    try:
+        httpx.get(url, timeout=2)
+        return True  # any HTTP response means the server is up
+    except httpx.ConnectError:
+        return False  # server not listening yet — keep waiting
+    except Exception:
+        return True  # got a response (even 4xx/5xx) means server is up
+
+
+def wait_for_servers(
+    probes: dict[str, str], timeout: float = 60.0, interval: float = 0.3
+) -> None:
+    """
+    Block until every probe URL responds.
+    probes: { label: url }
+    """
+    deadline = time.time() + timeout
+    pending = dict(probes)
+
+    while pending:
+        if time.time() > deadline:
+            raise RuntimeError(
+                f"Servers did not start within {timeout}s: {list(pending)}"
+            )
+        for label, url in list(pending.items()):
+            if _probe(url):
+                pending.pop(label)
+        if pending:
+            time.sleep(interval)
 
 
 def main():
@@ -54,15 +88,20 @@ def main():
         daemon=True,
     ).start()
 
-    # Start analytics API on :8011 (points at core, test separately)
+    # Start analytics API on :8011
     analytics_server.CORE_API_URL = CORE_URL
     threading.Thread(target=start_analytics_api, daemon=True).start()
 
-    time.sleep(1)
+    # Wait until both servers actually accept connections.
+    # Probe /docs — always present on any FastAPI app, no query params needed.
+    wait_for_servers(
+        {
+            "core": f"{CORE_URL}/docs",
+            "analytics": f"{ANALYTICS_URL}/docs",
+        }
+    )
 
-    # Streamlit sink still uses core API directly as before
-    mode = OutputMode.CLI if getattr(args, "cli", False) else OutputMode.UI
-    sink = make_sink(mode, api_url=CORE_URL, analytics_url=ANALYTICS_URL)
+    sink = make_sink(base_config, api_url=CORE_URL, analytics_url=ANALYTICS_URL)
     sink.start()
 
 
