@@ -59,7 +59,8 @@ Then run any of the following:
 **Tests & coverage**
 
 ```bash
-pytest --cov=src --cov-report=html:reports/coverage
+pytest
+start .dev\reports\tests_coverage\index.html
 ```
 
 **Dead code detection (vulture)**
@@ -77,7 +78,7 @@ radon cc src/ -a > .dev/reports/radon.txt
 **Dependency diagram (pydeps)**
 
 ```bash
-pydeps src/
+pydeps src/ --max-bacon 3 --cluster --exclude "^(sys|os|re|json|pathlib|itertools|functools|collections|threading|multiprocessing|subprocess|logging|time|pandas|orjson|tempfile|shutil|glob|math|random|copy|inspect|types|importlib|pickle|csv|argparse|enum|dataclasses|typing|contextlib)$" --show-cycles --rankdir LR --noshow -o .dev/dep_graphs/project_deps.svg
 ```
 
 **Dynamic profiling (snakeviz)**

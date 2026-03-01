@@ -6,15 +6,15 @@ from pydantic import BaseModel
 from dataclasses import dataclass
 from typing import Optional, Callable
 
-from src.core.engine import (
+from .engine import (
     run_pipeline,
     aggregate_by_region,
     aggregate_by_country,
     aggregate_by_country_code,
     aggregate_all,
 )
-from src.core.metadata import get_metadata
-from src.core.contracts import Filters
+from .metadata import get_metadata
+from .contracts import Filters
 
 
 class FilterBody(BaseModel):
@@ -47,12 +47,18 @@ def _to_response(df: pd.DataFrame) -> Response:
 def _resolve(body: Optional[FilterBody], defaults: Filters) -> ResolvedFilters:
     if body is None:
         return ResolvedFilters(
-            region=defaults.region, country=defaults.country,
-            startYear=defaults.startYear, endYear=defaults.endYear,
+            region=defaults.region,
+            country=defaults.country,
+            startYear=defaults.startYear,
+            endYear=defaults.endYear,
             operation=defaults.operation,
         )
     return ResolvedFilters(
-        region=None if body.region == "__ALL__" else (body.region if body.region is not None else defaults.region),
+        region=(
+            None
+            if body.region == "__ALL__"
+            else (body.region if body.region is not None else defaults.region)
+        ),
         country=body.country if body.country is not None else defaults.country,
         startYear=body.startYear if body.startYear is not None else defaults.startYear,
         endYear=body.endYear if body.endYear is not None else defaults.endYear,

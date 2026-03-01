@@ -5,17 +5,16 @@ from pathlib import Path
 import httpx
 import uvicorn
 
-sys.path.insert(0, str(Path(__file__).parent))
-
-from plugins.data_loading.loading_manager import load_data
-from plugins.config_handler import get_base_config, get_query_config
-from core.data_cleaning import clean_gdp_data
-from src.core.core_api import create_server
-from src.plugins.ui.output_api import app as analytics_app
-import src.plugins.ui.output_api as analytics_server
-from plugins.outputs import make_sink
-from util.logging_setup import initialize_logging
-from util.cli_parser import parse_cli_args
+from src.core import clean_gdp_data, create_server
+from src.util import parse_cli_args, initialize_logging
+from src.plugins import (
+    load_data,
+    get_base_config,
+    get_query_config,
+    make_sink,
+    analytics_app,
+    analytics_server,
+)
 
 CORE_PORT = 8010
 ANALYTICS_PORT = 8011

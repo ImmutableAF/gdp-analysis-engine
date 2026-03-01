@@ -5,15 +5,11 @@ concrete implementations throughout the core.
 
 Description:
 Any object that satisfies the required attributes or methods is accepted —
-no inheritance needed. This allows loaders, writers, and filter objects to
+no inheritance needed. This allows filter objects to
 be swapped freely as long as they match the expected shape.
 
 Contracts
 ---------
-DataFrameLoadable
-    Any object with a load(source) method that returns a DataFrame.
-DataFrameOutput
-    Any object with a write(df) method that accepts a DataFrame.
 Filters
     Any object carrying the five query parameters: region, country,
     startYear, endYear, and operation.
@@ -26,7 +22,6 @@ Notes
 """
 
 from typing import Protocol
-import pandas as pd
 
 
 class Filters(Protocol):

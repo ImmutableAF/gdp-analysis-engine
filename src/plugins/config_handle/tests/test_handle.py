@@ -18,6 +18,7 @@ from ..config_models import BaseConfig, QueryConfig
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
+
 def make_base_config(tmp_path, filename="gdp.xlsx"):
     data_dir = tmp_path / "data"
     data_dir.mkdir()
@@ -34,12 +35,19 @@ def make_base_config(tmp_path, filename="gdp.xlsx"):
 
 
 def make_query_config(**kwargs):
-    defaults = dict(region="Europe", country="Germany", startYear=1990, endYear=2020, operation="sum")
+    defaults = dict(
+        region="Europe",
+        country="Germany",
+        startYear=1990,
+        endYear=2020,
+        operation="sum",
+    )
     defaults.update(kwargs)
     return QueryConfig(**defaults)
 
 
 # ── ValidateBaseConfig ────────────────────────────────────────────────────────
+
 
 class TestValidateBaseConfig:
 
@@ -107,6 +115,7 @@ class TestValidateBaseConfig:
 
 # ── SanitizeRegion ────────────────────────────────────────────────────────────
 
+
 class TestSanitizeRegion:
 
     def test_valid_region_is_returned(self):
@@ -135,6 +144,7 @@ class TestSanitizeRegion:
 
 
 # ── SanitizeYears ─────────────────────────────────────────────────────────────
+
 
 class TestSanitizeYears:
 
@@ -182,6 +192,7 @@ class TestSanitizeYears:
 
 # ── SanitizeOperation ─────────────────────────────────────────────────────────
 
+
 class TestSanitizeOperation:
 
     def test_sum_is_valid(self):
@@ -207,6 +218,7 @@ class TestSanitizeOperation:
 
 
 # ── SanatizeQueryConfig ───────────────────────────────────────────────────────
+
 
 class TestSanatizeQueryConfig:
 
@@ -252,58 +264,77 @@ class TestSanatizeQueryConfig:
 
 # ── GetBaseConfig ─────────────────────────────────────────────────────────────
 
+
 class TestGetBaseConfig:
 
     def test_returns_base_config_instance(self, tmp_path):
         config = make_base_config(tmp_path)
-        with patch("src.plugins.config_handler.handle.load_base_config", return_value=config), \
-             patch("src.plugins.config_handler.handle._validate_base_config"):
+        with patch(
+            "src.plugins.config_handle.handle.load_base_config", return_value=config
+        ), patch("src.plugins.config_handle.handle._validate_base_config"):
             result = get_base_config()
         assert isinstance(result, BaseConfig)
 
     def test_falls_back_to_default_on_file_not_found(self):
-        with patch("src.plugins.config_handler.handle.load_base_config", side_effect=FileNotFoundError):
+        with patch(
+            "src.plugins.config_handle.handle.load_base_config",
+            side_effect=FileNotFoundError,
+        ):
             result = get_base_config()
         assert isinstance(result, BaseConfig)
 
     def test_falls_back_to_default_on_validation_failure(self, tmp_path):
         config = make_base_config(tmp_path)
-        with patch("src.plugins.config_handler.handle.load_base_config", return_value=config), \
-             patch("src.plugins.config_handler.handle._validate_base_config", side_effect=ValueError("bad")):
+        with patch(
+            "src.plugins.config_handle.handle.load_base_config", return_value=config
+        ), patch(
+            "src.plugins.config_handle.handle._validate_base_config",
+            side_effect=ValueError("bad"),
+        ):
             result = get_base_config()
         assert isinstance(result, BaseConfig)
+
 
 class TestGetQueryConfig:
 
     def test_returns_query_config_instance(self):
         raw = make_query_config()
-        df = pd.DataFrame({
-            "Continent": ["Europe"],
-            "Year": [1990],
-        })
-        with patch("src.plugins.config_handler.handle.load_query_config", return_value=raw), \
-             patch("src.plugins.config_handler.handle.get_query_config_path"):
+        df = pd.DataFrame(
+            {
+                "Continent": ["Europe"],
+                "Year": [1990],
+            }
+        )
+        with patch(
+            "src.plugins.config_handle.handle.load_query_config", return_value=raw
+        ), patch("src.plugins.config_handle.handle.get_query_config_path"):
             result = get_query_config(df)
         assert isinstance(result, QueryConfig)
 
     def test_invalid_region_is_sanitized(self):
         raw = make_query_config(region="Mars")
-        df = pd.DataFrame({
-            "Continent": ["Europe"],
-            "Year": [1990],
-        })
-        with patch("src.plugins.config_handler.handle.load_query_config", return_value=raw), \
-             patch("src.plugins.config_handler.handle.get_query_config_path"):
+        df = pd.DataFrame(
+            {
+                "Continent": ["Europe"],
+                "Year": [1990],
+            }
+        )
+        with patch(
+            "src.plugins.config_handle.handle.load_query_config", return_value=raw
+        ), patch("src.plugins.config_handle.handle.get_query_config_path"):
             result = get_query_config(df)
         assert result.region is None
 
     def test_valid_region_is_preserved(self):
         raw = make_query_config(region="Europe")
-        df = pd.DataFrame({
-            "Continent": ["Europe"],
-            "Year": [1990],
-        })
-        with patch("src.plugins.config_handler.handle.load_query_config", return_value=raw), \
-             patch("src.plugins.config_handler.handle.get_query_config_path"):
+        df = pd.DataFrame(
+            {
+                "Continent": ["Europe"],
+                "Year": [1990],
+            }
+        )
+        with patch(
+            "src.plugins.config_handle.handle.load_query_config", return_value=raw
+        ), patch("src.plugins.config_handle.handle.get_query_config_path"):
             result = get_query_config(df)
         assert result.region == "Europe"
