@@ -1,0 +1,13 @@
+services:
+  gdp-app:
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    ports:
+      - "8010:8010"
+      - "8011:8011"
+      - "8501:8501"
+    environment:
+      - CORE_API_URL=http://gdp-app:8010
+      - ANALYTICS_API_URL=http://gdp-app:8011
+    restart: unless-stopped

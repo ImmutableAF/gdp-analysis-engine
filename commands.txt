@@ -5,3 +5,6 @@ sphinx-apidoc -o source ../src/core
 sphinx-apidoc -o source ../src/plugins
 .\make.bat html
 sphinx-autobuild .\source .\build\html
+
+docker-compose -f docker-compose.dev.yml up --build
+docker-compose -f docker-compose.prod.yml up --build

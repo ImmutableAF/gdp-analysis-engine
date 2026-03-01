@@ -1,0 +1,30 @@
+FROM python:3.12-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1
+
+WORKDIR /app
+
+# Layer 1 – prod deps
+COPY requirements.prod.txt .
+RUN pip install -r requirements.prod.txt
+
+# Layer 2 – dev-only deps (separate layer so prod cache isn't busted)
+COPY requirements.dev.txt .
+RUN pip install -r requirements.dev.txt \
+    && pip install "watchdog[watchmedo]"
+
+# Install flamegraph.pl (Perl is already on slim via dependencies)
+RUN apt-get update -qq \
+    && apt-get install -y --no-install-recommends perl git graphviz \
+    && rm -rf /var/lib/apt/lists/* \
+    && curl -fsSL https://raw.githubusercontent.com/brendangregg/FlameGraph/master/flamegraph.pl \
+    -o /usr/local/bin/flamegraph.pl \
+    && chmod +x /usr/local/bin/flamegraph.pl
+
+# Source is mounted as a volume in dev – no COPY needed
+EXPOSE 8010 8011 8501
+
+CMD ["python", "-m", "src.main"]
