@@ -3,5 +3,5 @@
     "data_filename": "gdp_with_continent_filled.xlsx",
     "log_dir": "logs",
     "max_log_size": 10000,
-    "output_mode": "file"
+    "output_mode": "ui"
 }

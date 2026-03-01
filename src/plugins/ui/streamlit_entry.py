@@ -5,6 +5,7 @@ import pandas as pd
 from types import SimpleNamespace
 from dataclasses import dataclass
 
+from src.plugins.ui.style import load_css
 from src.plugins.ui import views
 from src.plugins.ui import analytics_views
 from src.plugins.outputs import CoreAPIClient
@@ -13,6 +14,7 @@ _API_URL = os.environ.get("CORE_API_URL", "http://localhost:8010")
 
 
 # ── contracts ─────────────────────────────────────────────────────────────────
+
 
 @dataclass
 class SidebarFilters:
@@ -26,8 +28,14 @@ class SidebarFilters:
 
     def api_key(self) -> tuple:
         effective_country = self.country if self.show_country else None
-        return (self.region, effective_country, self.start_year,
-                self.end_year, self.stat_operation, self.show_country)
+        return (
+            self.region,
+            effective_country,
+            self.start_year,
+            self.end_year,
+            self.stat_operation,
+            self.show_country,
+        )
 
     def to_dict(self) -> dict:
         return self.__dict__.copy()
@@ -41,6 +49,7 @@ class FetchedData:
 
 
 # ── boot ──────────────────────────────────────────────────────────────────────
+
 
 def _wait_for_api(client: CoreAPIClient, retries: int = 20, delay: float = 1.0) -> bool:
     for i in range(retries):
@@ -65,24 +74,29 @@ def boot() -> tuple[CoreAPIClient, dict]:
 
 # ── fetch ─────────────────────────────────────────────────────────────────────
 
-def _fetch(client: CoreAPIClient, filters: SidebarFilters) -> FetchedData:
-    region_df = client.run({
-        "region": filters.region,
-        "country": None,
-        "startYear": filters.start_year,
-        "endYear": filters.end_year,
-        "operation": filters.stat_operation,
-    })
 
-    country_df = None
-    if filters.show_country and filters.country:
-        country_df = client.run({
-            "region": None,
-            "country": filters.country,
+def _fetch(client: CoreAPIClient, filters: SidebarFilters) -> FetchedData:
+    region_df = client.run(
+        {
+            "region": filters.region,
+            "country": None,
             "startYear": filters.start_year,
             "endYear": filters.end_year,
             "operation": filters.stat_operation,
-        })
+        }
+    )
+
+    country_df = None
+    if filters.show_country and filters.country:
+        country_df = client.run(
+            {
+                "region": None,
+                "country": filters.country,
+                "startYear": filters.start_year,
+                "endYear": filters.end_year,
+                "operation": filters.stat_operation,
+            }
+        )
 
     return FetchedData(
         region_df=region_df,
@@ -105,17 +119,18 @@ def _config_to_filters(config: SimpleNamespace) -> SidebarFilters:
 
 # ── main ──────────────────────────────────────────────────────────────────────
 
+
 def main():
-    st.set_page_config(page_title="GDP Analytics Dashboard", layout="wide")
+    st.set_page_config(page_title="GDP Analytics Dashboard")  # layout="wide" but cringe
 
     client, metadata = boot()
 
-    regions   = metadata["regions"]
+    regions = metadata["regions"]
     countries = metadata["countries"]
     min_y, max_y = metadata["year_range"]
 
     # ── tabs ──────────────────────────────────────────────────────────────────
-    tab1, tab2 = st.tabs(["📊 Dashboard", "🔬 Analytics"])
+    tab1, tab2 = st.tabs(["Dashboard", "Analytics"])
 
     # ── Tab 1: existing dashboard ─────────────────────────────────────────────
     with tab1:
@@ -129,16 +144,21 @@ def main():
         if st.session_state.pop("pending_widget_reset", False):
             cfg = st.session_state.active_config
             region_val = cfg.region if cfg.region else "All"
-            op_label   = "Average" if (cfg.operation or "avg").lower() in ["avg", "average"] else "Sum"
-            st.session_state["sb_region"]       = region_val
-            st.session_state["sb_year_range"]   = (cfg.startYear, cfg.endYear)
-            st.session_state["sb_operation"]    = op_label
+            op_label = (
+                "Average"
+                if (cfg.operation or "avg").lower() in ["avg", "average"]
+                else "Sum"
+            )
+            st.session_state["sb_region"] = region_val
+            st.session_state["sb_year_range"] = (cfg.startYear, cfg.endYear)
+            st.session_state["sb_operation"] = op_label
             st.session_state["sb_show_country"] = cfg.country is not None
             if cfg.country:
-                st.session_state["sb_country"]  = cfg.country
+                st.session_state["sb_country"] = cfg.country
 
-        raw = views.build_sidebar(regions, countries, min_y, max_y,
-                                  st.session_state.active_config)
+        raw = views.build_sidebar(
+            regions, countries, min_y, max_y, st.session_state.active_config
+        )
         filters = SidebarFilters(**raw)
 
         refreshed = st.sidebar.button("Refresh Data")
@@ -166,4 +186,5 @@ def main():
 
 
 if __name__ == "__main__":
+    load_css("layout.css")
     main()

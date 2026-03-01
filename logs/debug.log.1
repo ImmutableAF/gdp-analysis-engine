@@ -1,106 +1,109 @@
-10:49:51 [DEBUG] src.core.engine: Filtering by region: Europe, input shape: (17290, 7)
-10:49:51 [DEBUG] src.core.engine: Region filter applied. Resulting shape: (3640, 7)
-10:49:51 [DEBUG] src.core.engine: Filtering by country: None, input shape: (3640, 7)
-10:49:51 [DEBUG] src.core.engine: No country provided, skipping country filter
-10:49:51 [DEBUG] src.core.engine: Filtering by year: start=2015, end=2020, input shape=(3640, 7)
-10:49:51 [DEBUG] src.core.engine: Filtered by year range 2015-2020, resulting shape=(336, 7)
-10:49:51 [DEBUG] httpcore.http11: receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'date', b'Sun, 01 Mar 2026 05:49:50 GMT'), (b'server', b'uvicorn'), (b'content-length', b'59600'), (b'content-type', b'application/json')])
-10:49:51 [INFO] httpx: HTTP Request: POST http://localhost:8010/run "HTTP/1.1 200 OK"
-10:49:51 [DEBUG] httpcore.http11: receive_response_body.started request=<Request [b'POST']>
-10:49:51 [DEBUG] httpcore.http11: receive_response_body.complete
-10:49:51 [DEBUG] httpcore.http11: response_closed.started
-10:49:51 [DEBUG] httpcore.http11: response_closed.complete
-10:49:51 [DEBUG] httpcore.connection: close.started
-10:49:51 [DEBUG] httpcore.connection: close.complete
-10:49:51 [DEBUG] httpcore.http11: receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'date', b'Sun, 01 Mar 2026 05:49:48 GMT'), (b'server', b'uvicorn'), (b'content-length', b'20498'), (b'content-type', b'application/json')])
-10:49:51 [INFO] httpx: HTTP Request: GET http://localhost:8011/gdp-growth-rate?continent=Europe&startYear=2015&endYear=2020 "HTTP/1.1 200 OK"
-10:49:51 [DEBUG] httpcore.http11: receive_response_body.started request=<Request [b'GET']>
-10:49:51 [DEBUG] httpcore.http11: receive_response_body.complete
-10:49:51 [DEBUG] httpcore.http11: response_closed.started
-10:49:51 [DEBUG] httpcore.http11: response_closed.complete
-10:49:51 [DEBUG] httpcore.connection: close.started
-10:49:51 [DEBUG] httpcore.connection: close.complete
-10:49:52 [DEBUG] httpcore.connection: connect_tcp.started host='localhost' port=8011 local_address=None timeout=30 socket_options=None
-10:49:54 [DEBUG] httpcore.connection: connect_tcp.complete return_value=<httpcore._backends.sync.SyncStream object at 0x000002609ACD1350>
-10:49:54 [DEBUG] httpcore.http11: send_request_headers.started request=<Request [b'GET']>
-10:49:54 [DEBUG] httpcore.http11: send_request_headers.complete
-10:49:54 [DEBUG] httpcore.http11: send_request_body.started request=<Request [b'GET']>
-10:49:54 [DEBUG] httpcore.http11: send_request_body.complete
-10:49:54 [DEBUG] httpcore.http11: receive_response_headers.started request=<Request [b'GET']>
-10:49:54 [DEBUG] httpcore.connection: connect_tcp.started host='localhost' port=8010 local_address=None timeout=30 socket_options=None
-10:49:56 [DEBUG] httpcore.connection: connect_tcp.complete return_value=<httpcore._backends.sync.SyncStream object at 0x000002609ACD2E50>
-10:49:56 [DEBUG] httpcore.http11: send_request_headers.started request=<Request [b'POST']>
-10:49:56 [DEBUG] httpcore.http11: send_request_headers.complete
-10:49:56 [DEBUG] httpcore.http11: send_request_body.started request=<Request [b'POST']>
-10:49:56 [DEBUG] httpcore.http11: send_request_body.complete
-10:49:56 [DEBUG] httpcore.http11: receive_response_headers.started request=<Request [b'POST']>
-10:49:56 [DEBUG] src.core.engine: Filtering by region: None, input shape: (17290, 7)
-10:49:56 [DEBUG] src.core.engine: No region provided, skipping region filter
-10:49:56 [DEBUG] src.core.engine: Filtering by country: None, input shape: (17290, 7)
-10:49:56 [DEBUG] src.core.engine: No country provided, skipping country filter
-10:49:56 [DEBUG] src.core.engine: Filtering by year: start=2015, end=2020, input shape=(17290, 7)
-10:49:56 [DEBUG] src.core.engine: Filtered by year range 2015-2020, resulting shape=(1596, 7)
-10:49:56 [DEBUG] httpcore.http11: receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'date', b'Sun, 01 Mar 2026 05:49:56 GMT'), (b'server', b'uvicorn'), (b'content-length', b'284699'), (b'content-type', b'application/json')])
-10:49:56 [INFO] httpx: HTTP Request: POST http://localhost:8010/run "HTTP/1.1 200 OK"
-10:49:56 [DEBUG] httpcore.http11: receive_response_body.started request=<Request [b'POST']>
-10:49:56 [DEBUG] httpcore.http11: receive_response_body.complete
-10:49:56 [DEBUG] httpcore.http11: response_closed.started
-10:49:56 [DEBUG] httpcore.http11: response_closed.complete
-10:49:56 [DEBUG] httpcore.connection: close.started
-10:49:56 [DEBUG] httpcore.connection: close.complete
-10:49:56 [DEBUG] httpcore.http11: receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'date', b'Sun, 01 Mar 2026 05:49:53 GMT'), (b'server', b'uvicorn'), (b'content-length', b'373'), (b'content-type', b'application/json')])
-10:49:56 [INFO] httpx: HTTP Request: GET http://localhost:8011/avg-gdp-by-continent?startYear=2015&endYear=2020 "HTTP/1.1 200 OK"
-10:49:56 [DEBUG] httpcore.http11: receive_response_body.started request=<Request [b'GET']>
-10:49:56 [DEBUG] httpcore.http11: receive_response_body.complete
-10:49:56 [DEBUG] httpcore.http11: response_closed.started
-10:49:56 [DEBUG] httpcore.http11: response_closed.complete
-10:49:56 [DEBUG] httpcore.connection: close.started
-10:49:56 [DEBUG] httpcore.connection: close.complete
-10:49:57 [DEBUG] httpcore.connection: connect_tcp.started host='localhost' port=8011 local_address=None timeout=30 socket_options=None
-10:49:59 [DEBUG] httpcore.connection: connect_tcp.complete return_value=<httpcore._backends.sync.SyncStream object at 0x000002609ACDFC50>
-10:49:59 [DEBUG] httpcore.http11: send_request_headers.started request=<Request [b'GET']>
-10:49:59 [DEBUG] httpcore.http11: send_request_headers.complete
-10:49:59 [DEBUG] httpcore.http11: send_request_body.started request=<Request [b'GET']>
-10:49:59 [DEBUG] httpcore.http11: send_request_body.complete
-10:49:59 [DEBUG] httpcore.http11: receive_response_headers.started request=<Request [b'GET']>
-10:49:59 [DEBUG] httpcore.connection: connect_tcp.started host='localhost' port=8010 local_address=None timeout=30 socket_options=None
-10:50:02 [DEBUG] httpcore.connection: connect_tcp.complete return_value=<httpcore._backends.sync.SyncStream object at 0x000002609B1157C0>
-10:50:02 [DEBUG] httpcore.http11: send_request_headers.started request=<Request [b'POST']>
-10:50:02 [DEBUG] httpcore.http11: send_request_headers.complete
-10:50:02 [DEBUG] httpcore.http11: send_request_body.started request=<Request [b'POST']>
-10:50:02 [DEBUG] httpcore.http11: send_request_body.complete
-10:50:02 [DEBUG] httpcore.http11: receive_response_headers.started request=<Request [b'POST']>
-10:50:02 [DEBUG] src.core.engine: Filtering by region: None, input shape: (17290, 7)
-10:50:02 [DEBUG] src.core.engine: No region provided, skipping region filter
-10:50:02 [DEBUG] src.core.engine: Filtering by country: None, input shape: (17290, 7)
-10:50:02 [DEBUG] src.core.engine: No country provided, skipping country filter
-10:50:02 [DEBUG] src.core.engine: Filtering by year: start=2015, end=2020, input shape=(17290, 7)
-10:50:02 [DEBUG] src.core.engine: Filtered by year range 2015-2020, resulting shape=(1596, 7)
-10:50:02 [DEBUG] httpcore.http11: receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'date', b'Sun, 01 Mar 2026 05:50:01 GMT'), (b'server', b'uvicorn'), (b'content-length', b'284699'), (b'content-type', b'application/json')])
-10:50:02 [INFO] httpx: HTTP Request: POST http://localhost:8010/run "HTTP/1.1 200 OK"
-10:50:02 [DEBUG] httpcore.http11: receive_response_body.started request=<Request [b'POST']>
-10:50:02 [DEBUG] httpcore.http11: receive_response_body.complete
-10:50:02 [DEBUG] httpcore.http11: response_closed.started
-10:50:02 [DEBUG] httpcore.http11: response_closed.complete
-10:50:02 [DEBUG] httpcore.connection: close.started
-10:50:02 [DEBUG] httpcore.connection: close.complete
-10:50:02 [DEBUG] httpcore.http11: receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'date', b'Sun, 01 Mar 2026 05:49:59 GMT'), (b'server', b'uvicorn'), (b'content-length', b'265'), (b'content-type', b'application/json')])
-10:50:02 [INFO] httpx: HTTP Request: GET http://localhost:8011/global-gdp-trend?startYear=2015&endYear=2020 "HTTP/1.1 200 OK"
-10:50:02 [DEBUG] httpcore.http11: receive_response_body.started request=<Request [b'GET']>
-10:50:02 [DEBUG] httpcore.http11: receive_response_body.complete
-10:50:02 [DEBUG] httpcore.http11: response_closed.started
-10:50:02 [DEBUG] httpcore.http11: response_closed.complete
-10:50:02 [DEBUG] httpcore.connection: close.started
-10:50:02 [DEBUG] httpcore.connection: close.complete
-10:50:02 [DEBUG] httpcore.connection: connect_tcp.started host='localhost' port=8011 local_address=None timeout=30 socket_options=None
-10:50:04 [DEBUG] httpcore.connection: connect_tcp.complete return_value=<httpcore._backends.sync.SyncStream object at 0x000002609B104210>
-10:50:04 [DEBUG] httpcore.http11: send_request_headers.started request=<Request [b'GET']>
-10:50:04 [DEBUG] httpcore.http11: send_request_headers.complete
-10:50:04 [DEBUG] httpcore.http11: send_request_body.started request=<Request [b'GET']>
-10:50:04 [DEBUG] httpcore.http11: send_request_body.complete
-10:50:04 [DEBUG] httpcore.http11: receive_response_headers.started request=<Request [b'GET']>
-10:50:05 [DEBUG] httpcore.connection: connect_tcp.started host='localhost' port=8010 local_address=None timeout=30 socket_options=None
-10:50:07 [DEBUG] httpcore.connection: connect_tcp.complete return_value=<httpcore._backends.sync.SyncStream object at 0x000002609AC92EB0>
-10:50:07 [DEBUG] httpcore.http11: send_request_headers.started request=<Request [b'POST']>
-10:50:07 [DEBUG] httpcore.http11: send_request_headers.complete
-10:50:07 [DEBUG] httpcore.http11: send_request_body.started request=<Request [b'POST']>
+11:36:03 [INFO] httpx: HTTP Request: POST http://localhost:8010/run "HTTP/1.1 200 OK"
+11:36:03 [DEBUG] httpcore.http11: receive_response_body.started request=<Request [b'POST']>
+11:36:03 [DEBUG] httpcore.http11: receive_response_body.complete
+11:36:03 [DEBUG] httpcore.http11: response_closed.started
+11:36:03 [DEBUG] httpcore.http11: response_closed.complete
+11:36:03 [DEBUG] httpcore.connection: close.started
+11:36:03 [DEBUG] httpcore.connection: close.complete
+11:36:12 [DEBUG] httpcore.connection: connect_tcp.started host='localhost' port=8010 local_address=None timeout=30 socket_options=None
+11:36:14 [DEBUG] httpcore.connection: connect_tcp.complete return_value=<httpcore._backends.sync.SyncStream object at 0x000002A5FA383A70>
+11:36:14 [DEBUG] httpcore.http11: send_request_headers.started request=<Request [b'POST']>
+11:36:14 [DEBUG] httpcore.http11: send_request_headers.complete
+11:36:14 [DEBUG] httpcore.http11: send_request_body.started request=<Request [b'POST']>
+11:36:14 [DEBUG] httpcore.http11: send_request_body.complete
+11:36:14 [DEBUG] httpcore.http11: receive_response_headers.started request=<Request [b'POST']>
+11:36:14 [DEBUG] src.core.engine: Filtering by region: Africa, input shape: (17290, 7)
+11:36:14 [DEBUG] src.core.engine: Region filter applied. Resulting shape: (3835, 7)
+11:36:14 [DEBUG] src.core.engine: Filtering by country: None, input shape: (3835, 7)
+11:36:14 [DEBUG] src.core.engine: No country provided, skipping country filter
+11:36:14 [DEBUG] src.core.engine: Filtering by year: start=2020, end=2020, input shape=(3835, 7)
+11:36:14 [DEBUG] src.core.engine: Filtered by year range 2020-2020, resulting shape=(59, 7)
+11:36:14 [DEBUG] httpcore.http11: receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'date', b'Sun, 01 Mar 2026 06:36:13 GMT'), (b'server', b'uvicorn'), (b'content-length', b'10290'), (b'content-type', b'application/json')])
+11:36:14 [INFO] httpx: HTTP Request: POST http://localhost:8010/run "HTTP/1.1 200 OK"
+11:36:14 [DEBUG] httpcore.http11: receive_response_body.started request=<Request [b'POST']>
+11:36:14 [DEBUG] httpcore.http11: receive_response_body.complete
+11:36:14 [DEBUG] httpcore.http11: response_closed.started
+11:36:14 [DEBUG] httpcore.http11: response_closed.complete
+11:36:14 [DEBUG] httpcore.connection: close.started
+11:36:14 [DEBUG] httpcore.connection: close.complete
+11:36:16 [DEBUG] httpcore.connection: connect_tcp.started host='localhost' port=8010 local_address=None timeout=30 socket_options=None
+11:36:18 [DEBUG] httpcore.connection: connect_tcp.complete return_value=<httpcore._backends.sync.SyncStream object at 0x000002A5FA838910>
+11:36:18 [DEBUG] httpcore.http11: send_request_headers.started request=<Request [b'POST']>
+11:36:18 [DEBUG] httpcore.http11: send_request_headers.complete
+11:36:19 [DEBUG] httpcore.http11: send_request_body.started request=<Request [b'POST']>
+11:36:19 [DEBUG] httpcore.http11: send_request_body.complete
+11:36:19 [DEBUG] httpcore.http11: receive_response_headers.started request=<Request [b'POST']>
+11:36:19 [DEBUG] src.core.engine: Filtering by region: Africa, input shape: (17290, 7)
+11:36:19 [DEBUG] src.core.engine: Region filter applied. Resulting shape: (3835, 7)
+11:36:19 [DEBUG] src.core.engine: Filtering by country: None, input shape: (3835, 7)
+11:36:19 [DEBUG] src.core.engine: No country provided, skipping country filter
+11:36:19 [DEBUG] src.core.engine: Filtering by year: start=2020, end=2020, input shape=(3835, 7)
+11:36:19 [DEBUG] src.core.engine: Filtered by year range 2020-2020, resulting shape=(59, 7)
+11:36:19 [DEBUG] httpcore.http11: receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'date', b'Sun, 01 Mar 2026 06:36:18 GMT'), (b'server', b'uvicorn'), (b'content-length', b'10290'), (b'content-type', b'application/json')])
+11:36:19 [INFO] httpx: HTTP Request: POST http://localhost:8010/run "HTTP/1.1 200 OK"
+11:36:19 [DEBUG] httpcore.http11: receive_response_body.started request=<Request [b'POST']>
+11:36:19 [DEBUG] httpcore.http11: receive_response_body.complete
+11:36:19 [DEBUG] httpcore.http11: response_closed.started
+11:36:19 [DEBUG] httpcore.http11: response_closed.complete
+11:36:19 [DEBUG] httpcore.connection: close.started
+11:36:19 [DEBUG] httpcore.connection: close.complete
+11:36:22 [DEBUG] httpcore.connection: connect_tcp.started host='localhost' port=8010 local_address=None timeout=30 socket_options=None
+11:36:24 [DEBUG] httpcore.connection: connect_tcp.complete return_value=<httpcore._backends.sync.SyncStream object at 0x000002A5FA859400>
+11:36:24 [DEBUG] httpcore.http11: send_request_headers.started request=<Request [b'POST']>
+11:36:24 [DEBUG] httpcore.http11: send_request_headers.complete
+11:36:24 [DEBUG] httpcore.http11: send_request_body.started request=<Request [b'POST']>
+11:36:24 [DEBUG] httpcore.http11: send_request_body.complete
+11:36:24 [DEBUG] httpcore.http11: receive_response_headers.started request=<Request [b'POST']>
+11:36:24 [DEBUG] src.core.engine: Filtering by region: Africa, input shape: (17290, 7)
+11:36:24 [DEBUG] src.core.engine: Region filter applied. Resulting shape: (3835, 7)
+11:36:24 [DEBUG] src.core.engine: Filtering by country: None, input shape: (3835, 7)
+11:36:24 [DEBUG] src.core.engine: No country provided, skipping country filter
+11:36:24 [DEBUG] src.core.engine: Filtering by year: start=2015, end=2020, input shape=(3835, 7)
+11:36:24 [DEBUG] src.core.engine: Filtered by year range 2015-2020, resulting shape=(354, 7)
+11:36:24 [DEBUG] httpcore.http11: receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'date', b'Sun, 01 Mar 2026 06:36:23 GMT'), (b'server', b'uvicorn'), (b'content-length', b'61943'), (b'content-type', b'application/json')])
+11:36:24 [INFO] httpx: HTTP Request: POST http://localhost:8010/run "HTTP/1.1 200 OK"
+11:36:24 [DEBUG] httpcore.http11: receive_response_body.started request=<Request [b'POST']>
+11:36:24 [DEBUG] httpcore.http11: receive_response_body.complete
+11:36:24 [DEBUG] httpcore.http11: response_closed.started
+11:36:24 [DEBUG] httpcore.http11: response_closed.complete
+11:36:24 [DEBUG] httpcore.connection: close.started
+11:36:24 [DEBUG] httpcore.connection: close.complete
+11:36:27 [DEBUG] httpcore.connection: connect_tcp.started host='localhost' port=8010 local_address=None timeout=30 socket_options=None
+11:36:29 [DEBUG] httpcore.connection: connect_tcp.complete return_value=<httpcore._backends.sync.SyncStream object at 0x000002A5FA7E7650>
+11:36:29 [DEBUG] httpcore.http11: send_request_headers.started request=<Request [b'POST']>
+11:36:29 [DEBUG] httpcore.http11: send_request_headers.complete
+11:36:29 [DEBUG] httpcore.http11: send_request_body.started request=<Request [b'POST']>
+11:36:29 [DEBUG] httpcore.http11: send_request_body.complete
+11:36:29 [DEBUG] httpcore.http11: receive_response_headers.started request=<Request [b'POST']>
+11:36:29 [DEBUG] src.core.engine: Filtering by region: None, input shape: (17290, 7)
+11:36:29 [DEBUG] src.core.engine: No region provided, skipping region filter
+11:36:29 [DEBUG] src.core.engine: Filtering by country: None, input shape: (17290, 7)
+11:36:29 [DEBUG] src.core.engine: No country provided, skipping country filter
+11:36:29 [DEBUG] src.core.engine: Filtering by year: start=1960, end=2020, input shape=(17290, 7)
+11:36:29 [DEBUG] src.core.engine: Filtered by year range 1960-2020, resulting shape=(16226, 7)
+11:36:29 [DEBUG] httpcore.http11: receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'date', b'Sun, 01 Mar 2026 06:36:29 GMT'), (b'server', b'uvicorn'), (b'content-length', b'2484476'), (b'content-type', b'application/json')])
+11:36:29 [INFO] httpx: HTTP Request: POST http://localhost:8010/run "HTTP/1.1 200 OK"
+11:36:29 [DEBUG] httpcore.http11: receive_response_body.started request=<Request [b'POST']>
+11:36:29 [DEBUG] httpcore.http11: receive_response_body.complete
+11:36:29 [DEBUG] httpcore.http11: response_closed.started
+11:36:29 [DEBUG] httpcore.http11: response_closed.complete
+11:36:29 [DEBUG] httpcore.connection: close.started
+11:36:29 [DEBUG] httpcore.connection: close.complete
+11:36:32 [DEBUG] httpcore.connection: connect_tcp.started host='localhost' port=8010 local_address=None timeout=30 socket_options=None
+11:36:34 [DEBUG] httpcore.connection: connect_tcp.complete return_value=<httpcore._backends.sync.SyncStream object at 0x000002A5FA7E4FD0>
+11:36:34 [DEBUG] httpcore.http11: send_request_headers.started request=<Request [b'POST']>
+11:36:34 [DEBUG] httpcore.http11: send_request_headers.complete
+11:36:34 [DEBUG] httpcore.http11: send_request_body.started request=<Request [b'POST']>
+11:36:34 [DEBUG] httpcore.http11: send_request_body.complete
+11:36:34 [DEBUG] httpcore.http11: receive_response_headers.started request=<Request [b'POST']>
+11:36:35 [DEBUG] src.core.engine: Filtering by region: None, input shape: (17290, 7)
+11:36:35 [DEBUG] src.core.engine: No region provided, skipping region filter
+11:36:35 [DEBUG] src.core.engine: Filtering by country: None, input shape: (17290, 7)
+11:36:35 [DEBUG] src.core.engine: No country provided, skipping country filter
+11:36:35 [DEBUG] src.core.engine: Filtering by year: start=1960, end=2020, input shape=(17290, 7)
+11:36:35 [DEBUG] src.core.engine: Filtered by year range 1960-2020, resulting shape=(16226, 7)
+11:36:35 [DEBUG] httpcore.http11: receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'date', b'Sun, 01 Mar 2026 06:36:34 GMT'), (b'server', b'uvicorn'), (b'content-length', b'2484476'), (b'content-type', b'application/json')])
+11:36:35 [INFO] httpx: HTTP Request: POST http://localhost:8010/run "HTTP/1.1 200 OK"
+11:36:35 [DEBUG] httpcore.http11: receive_response_body.started request=<Request [b'POST']>
+11:36:35 [DEBUG] httpcore.http11: receive_response_body.complete
+11:36:35 [DEBUG] httpcore.http11: response_closed.started

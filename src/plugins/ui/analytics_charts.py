@@ -14,32 +14,23 @@ from src.plugins.ui.palette import CUSTOM_PALETTE, LAYOUT
 
 # ── helpers ───────────────────────────────────────────────────────────────────
 
+
 def _empty() -> go.Figure:
     fig = go.Figure()
     fig.update_layout(**LAYOUT)
     return fig
 
 
-def _bar(df, x, y, title, color_col=None, text=True):
-    fig = px.bar(
-        df, x=x, y=y,
-        color=color_col or y,
-        color_continuous_scale=CUSTOM_PALETTE,
-        text_auto=".2s" if text else False,
-        title=title,
-    )
-    fig.update_layout(**LAYOUT)
-    fig.update_xaxes(tickangle=-40)
-    return fig
-
-
 # ── 1 & 2 — Top / Bottom Countries ────────────────────────────────────────────
+
 
 def top_bottom_bar(df: pd.DataFrame, title: str) -> go.Figure:
     if df.empty:
         return _empty()
     fig = px.bar(
-        df, x="country", y="gdp",
+        df,
+        x="country",
+        y="gdp",
         color="gdp",
         color_continuous_scale=CUSTOM_PALETTE,
         text_auto=".2s",
@@ -52,20 +43,23 @@ def top_bottom_bar(df: pd.DataFrame, title: str) -> go.Figure:
 
 # ── 3 — GDP Growth Rate ────────────────────────────────────────────────────────
 
+
 def growth_rate_heatmap(df: pd.DataFrame, title: str) -> go.Figure:
     """Country × Year heatmap of growth rate %."""
     if df.empty:
         return _empty()
     pivot = df.pivot(index="country", columns="year", values="growth_rate_pct")
-    fig = go.Figure(data=go.Heatmap(
-        z=pivot.values,
-        x=[str(c) for c in pivot.columns],
-        y=pivot.index.tolist(),
-        colorscale=CUSTOM_PALETTE,
-        text=pivot.values.round(1),
-        texttemplate="%{text}%",
-        hovertemplate="Country: %{y}<br>Year: %{x}<br>Growth: %{z:.2f}%<extra></extra>",
-    ))
+    fig = go.Figure(
+        data=go.Heatmap(
+            z=pivot.values,
+            x=[str(c) for c in pivot.columns],
+            y=pivot.index.tolist(),
+            colorscale=CUSTOM_PALETTE,
+            text=pivot.values.round(1),
+            texttemplate="%{text}%",
+            hovertemplate="Country: %{y}<br>Year: %{x}<br>Growth: %{z:.2f}%<extra></extra>",
+        )
+    )
     layout = {**LAYOUT, "title": title, "height": max(480, len(pivot) * 18)}
     fig.update_layout(**layout)
     return fig
@@ -84,12 +78,14 @@ def growth_rate_line(df: pd.DataFrame, title: str) -> go.Figure:
 
 # ── 4 — Avg GDP by Continent ──────────────────────────────────────────────────
 
+
 def avg_gdp_continent_bar(df: pd.DataFrame) -> go.Figure:
     if df.empty:
         return _empty()
     fig = px.bar(
         df.sort_values("avg_gdp", ascending=False),
-        x="continent", y="avg_gdp",
+        x="continent",
+        y="avg_gdp",
         color="avg_gdp",
         color_continuous_scale=CUSTOM_PALETTE,
         text_auto=".2s",
@@ -100,6 +96,7 @@ def avg_gdp_continent_bar(df: pd.DataFrame) -> go.Figure:
 
 
 # ── 5 — Global GDP Trend ──────────────────────────────────────────────────────
+
 
 def global_gdp_trend_line(df: pd.DataFrame) -> go.Figure:
     if df.empty:
@@ -115,12 +112,14 @@ def global_gdp_trend_line(df: pd.DataFrame) -> go.Figure:
 
 # ── 6 — Fastest Growing Continent ────────────────────────────────────────────
 
+
 def fastest_continent_bar(df: pd.DataFrame) -> go.Figure:
     if df.empty:
         return _empty()
     fig = px.bar(
         df.sort_values("growth_pct", ascending=True),
-        x="growth_pct", y="continent",
+        x="growth_pct",
+        y="continent",
         orientation="h",
         color="growth_pct",
         color_continuous_scale=CUSTOM_PALETTE,
@@ -133,12 +132,14 @@ def fastest_continent_bar(df: pd.DataFrame) -> go.Figure:
 
 # ── 7 — Consistent Decline ────────────────────────────────────────────────────
 
+
 def consistent_decline_bar(df: pd.DataFrame) -> go.Figure:
     if df.empty:
         return _empty()
     fig = px.bar(
         df.sort_values("avg_decline_pct"),
-        x="country", y="avg_decline_pct",
+        x="country",
+        y="avg_decline_pct",
         color="avg_decline_pct",
         color_continuous_scale=CUSTOM_PALETTE[::-1],
         text_auto=".1f",
@@ -151,11 +152,14 @@ def consistent_decline_bar(df: pd.DataFrame) -> go.Figure:
 
 # ── 8 — Continent Share ───────────────────────────────────────────────────────
 
+
 def continent_share_pie(df: pd.DataFrame) -> go.Figure:
     if df.empty:
         return _empty()
     fig = px.pie(
-        df, names="continent", values="share_pct",
+        df,
+        names="continent",
+        values="share_pct",
         color_discrete_sequence=CUSTOM_PALETTE,
         title="Continent Share of Global GDP",
     )
@@ -169,7 +173,8 @@ def continent_share_bar(df: pd.DataFrame) -> go.Figure:
         return _empty()
     fig = px.bar(
         df.sort_values("share_pct", ascending=False),
-        x="continent", y="share_pct",
+        x="continent",
+        y="share_pct",
         color="share_pct",
         color_continuous_scale=CUSTOM_PALETTE,
         text_auto=".1f",

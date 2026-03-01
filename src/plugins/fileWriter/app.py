@@ -668,8 +668,6 @@ class FileOutputSink(OutputSink):
         C_SURF = colors.HexColor("#14171c")
         C_BORDER = colors.HexColor("#1e2329")
 
-        styles = getSampleStyleSheet()
-
         # Custom styles
         def S(name, **kw):
             return ParagraphStyle(name, **kw)

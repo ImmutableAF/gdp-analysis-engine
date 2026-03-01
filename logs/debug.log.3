@@ -1,96 +1,108 @@
-10:46:51 [DEBUG] httpcore.http11: receive_response_headers.started request=<Request [b'GET']>
-10:46:51 [DEBUG] httpcore.http11: receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'date', b'Sun, 01 Mar 2026 05:46:51 GMT'), (b'server', b'uvicorn'), (b'content-length', b'1011'), (b'content-type', b'text/html; charset=utf-8')])
-10:46:51 [INFO] httpx: HTTP Request: GET http://localhost:8010/docs "HTTP/1.1 200 OK"
-10:46:51 [DEBUG] httpcore.http11: receive_response_body.started request=<Request [b'GET']>
-10:46:51 [DEBUG] httpcore.http11: receive_response_body.complete
-10:46:51 [DEBUG] httpcore.http11: response_closed.started
-10:46:51 [DEBUG] httpcore.http11: response_closed.complete
-10:46:51 [DEBUG] httpcore.connection: close.started
-10:46:51 [DEBUG] httpcore.connection: close.complete
-10:46:51 [DEBUG] httpcore.connection: connect_tcp.started host='localhost' port=8011 local_address=None timeout=2 socket_options=None
-10:46:53 [DEBUG] httpcore.connection: connect_tcp.complete return_value=<httpcore._backends.sync.SyncStream object at 0x000001E2BB8EAE90>
-10:46:53 [DEBUG] httpcore.http11: send_request_headers.started request=<Request [b'GET']>
-10:46:53 [DEBUG] httpcore.http11: send_request_headers.complete
-10:46:53 [DEBUG] httpcore.http11: send_request_body.started request=<Request [b'GET']>
-10:46:53 [DEBUG] httpcore.http11: send_request_body.complete
-10:46:53 [DEBUG] httpcore.http11: receive_response_headers.started request=<Request [b'GET']>
-10:46:53 [DEBUG] httpcore.http11: receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'date', b'Sun, 01 Mar 2026 05:46:53 GMT'), (b'server', b'uvicorn'), (b'content-length', b'1016'), (b'content-type', b'text/html; charset=utf-8')])
-10:46:53 [INFO] httpx: HTTP Request: GET http://localhost:8011/docs "HTTP/1.1 200 OK"
-10:46:53 [DEBUG] httpcore.http11: receive_response_body.started request=<Request [b'GET']>
-10:46:53 [DEBUG] httpcore.http11: receive_response_body.complete
-10:46:53 [DEBUG] httpcore.http11: response_closed.started
-10:46:53 [DEBUG] httpcore.http11: response_closed.complete
-10:46:53 [DEBUG] httpcore.connection: close.started
-10:46:53 [DEBUG] httpcore.connection: close.complete
-10:47:50 [INFO] root: Logger initialized. Log file: logs\debug.log, Level: DEBUG
-10:47:50 [DEBUG] plugins.data_loading.loading_manager: Trying to import plugin plugins.data_loaders.csv_loader
-10:47:50 [DEBUG] plugins.data_loading.loader_registry: added <class 'plugins.data_loaders.csv_loader.CsvLoader'> to loaders list
-10:47:50 [DEBUG] plugins.data_loading.loading_manager: Imported pluggin csv_loader successfully
-10:47:50 [DEBUG] plugins.data_loading.loading_manager: Trying to import plugin plugins.data_loaders.excel_loader
-10:47:50 [DEBUG] plugins.data_loading.loader_registry: added <class 'plugins.data_loaders.excel_loader.ExcelLoader'> to loaders list
-10:47:50 [DEBUG] plugins.data_loading.loading_manager: Imported pluggin excel_loader successfully
-10:47:50 [DEBUG] plugins.data_loading.loading_manager: Trying to import plugin plugins.data_loaders.json_loader
-10:47:50 [DEBUG] plugins.data_loading.loader_registry: added <class 'plugins.data_loaders.json_loader.JsonLoader'> to loaders list
-10:47:50 [DEBUG] plugins.data_loading.loading_manager: Imported pluggin json_loader successfully
-10:47:50 [INFO] plugins.data_loading.loader_registry: <plugins.data_loaders.excel_loader.ExcelLoader object at 0x0000010996542120> supports data\gdp_with_continent_filled.xlsx
-10:47:50 [INFO] plugins.data_loading.loading_manager: Using loader ExcelLoader for data\gdp_with_continent_filled.xlsx
-10:47:50 [INFO] plugins.config_handler.config_load: Loading query configuration from C:\Users\19028\OneDrive\Documents\gdp-analysis-engine\src\query_config.json
-10:47:50 [DEBUG] plugins.config_handler.config_load: Query configuration loaded: QueryConfig(region='Asia', country=None, startYear=1980, endYear=2012, operation='avg')
-10:47:50 [DEBUG] plugins.config_handler.handle: Normalized query config: QueryConfig(region='Asia', country=None, startYear=1980, endYear=2012, operation='avg')
-10:47:50 [DEBUG] asyncio: Using proactor: IocpProactor
-10:47:50 [DEBUG] asyncio: Using proactor: IocpProactor
-10:47:50 [DEBUG] httpcore.connection: connect_tcp.started host='localhost' port=8010 local_address=None timeout=2 socket_options=None
-10:47:52 [DEBUG] httpcore.connection: connect_tcp.complete return_value=<httpcore._backends.sync.SyncStream object at 0x0000010997C9E7B0>
-10:47:52 [DEBUG] httpcore.http11: send_request_headers.started request=<Request [b'GET']>
-10:47:52 [DEBUG] httpcore.http11: send_request_headers.complete
-10:47:52 [DEBUG] httpcore.http11: send_request_body.started request=<Request [b'GET']>
-10:47:52 [DEBUG] httpcore.http11: send_request_body.complete
-10:47:52 [DEBUG] httpcore.http11: receive_response_headers.started request=<Request [b'GET']>
-10:47:52 [DEBUG] httpcore.http11: receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'date', b'Sun, 01 Mar 2026 05:47:52 GMT'), (b'server', b'uvicorn'), (b'content-length', b'1011'), (b'content-type', b'text/html; charset=utf-8')])
-10:47:52 [INFO] httpx: HTTP Request: GET http://localhost:8010/docs "HTTP/1.1 200 OK"
-10:47:52 [DEBUG] httpcore.http11: receive_response_body.started request=<Request [b'GET']>
-10:47:52 [DEBUG] httpcore.http11: receive_response_body.complete
-10:47:52 [DEBUG] httpcore.http11: response_closed.started
-10:47:52 [DEBUG] httpcore.http11: response_closed.complete
-10:47:52 [DEBUG] httpcore.connection: close.started
-10:47:52 [DEBUG] httpcore.connection: close.complete
-10:47:53 [DEBUG] httpcore.connection: connect_tcp.started host='localhost' port=8011 local_address=None timeout=2 socket_options=None
-10:47:55 [DEBUG] httpcore.connection: connect_tcp.complete return_value=<httpcore._backends.sync.SyncStream object at 0x0000010997DAAFD0>
-10:47:55 [DEBUG] httpcore.http11: send_request_headers.started request=<Request [b'GET']>
-10:47:55 [DEBUG] httpcore.http11: send_request_headers.complete
-10:47:55 [DEBUG] httpcore.http11: send_request_body.started request=<Request [b'GET']>
-10:47:55 [DEBUG] httpcore.http11: send_request_body.complete
-10:47:55 [DEBUG] httpcore.http11: receive_response_headers.started request=<Request [b'GET']>
-10:47:55 [DEBUG] httpcore.http11: receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'date', b'Sun, 01 Mar 2026 05:47:54 GMT'), (b'server', b'uvicorn'), (b'content-length', b'1016'), (b'content-type', b'text/html; charset=utf-8')])
-10:47:55 [INFO] httpx: HTTP Request: GET http://localhost:8011/docs "HTTP/1.1 200 OK"
-10:47:55 [DEBUG] httpcore.http11: receive_response_body.started request=<Request [b'GET']>
-10:47:55 [DEBUG] httpcore.http11: receive_response_body.complete
-10:47:55 [DEBUG] httpcore.http11: response_closed.started
-10:47:55 [DEBUG] httpcore.http11: response_closed.complete
-10:47:55 [DEBUG] httpcore.connection: close.started
-10:47:55 [DEBUG] httpcore.connection: close.complete
-10:49:23 [INFO] root: Logger initialized. Log file: logs\debug.log, Level: DEBUG
-10:49:23 [DEBUG] plugins.data_loading.loading_manager: Trying to import plugin plugins.data_loaders.csv_loader
-10:49:23 [DEBUG] plugins.data_loading.loader_registry: added <class 'plugins.data_loaders.csv_loader.CsvLoader'> to loaders list
-10:49:23 [DEBUG] plugins.data_loading.loading_manager: Imported pluggin csv_loader successfully
-10:49:23 [DEBUG] plugins.data_loading.loading_manager: Trying to import plugin plugins.data_loaders.excel_loader
-10:49:23 [DEBUG] plugins.data_loading.loader_registry: added <class 'plugins.data_loaders.excel_loader.ExcelLoader'> to loaders list
-10:49:23 [DEBUG] plugins.data_loading.loading_manager: Imported pluggin excel_loader successfully
-10:49:23 [DEBUG] plugins.data_loading.loading_manager: Trying to import plugin plugins.data_loaders.json_loader
-10:49:23 [DEBUG] plugins.data_loading.loader_registry: added <class 'plugins.data_loaders.json_loader.JsonLoader'> to loaders list
-10:49:23 [DEBUG] plugins.data_loading.loading_manager: Imported pluggin json_loader successfully
-10:49:23 [INFO] plugins.data_loading.loader_registry: <plugins.data_loaders.excel_loader.ExcelLoader object at 0x0000026099352270> supports data\gdp_with_continent_filled.xlsx
-10:49:23 [INFO] plugins.data_loading.loading_manager: Using loader ExcelLoader for data\gdp_with_continent_filled.xlsx
-10:49:24 [INFO] plugins.config_handler.config_load: Loading query configuration from C:\Users\19028\OneDrive\Documents\gdp-analysis-engine\src\query_config.json
-10:49:24 [DEBUG] plugins.config_handler.config_load: Query configuration loaded: QueryConfig(region='Asia', country=None, startYear=1980, endYear=2012, operation='avg')
-10:49:24 [DEBUG] plugins.config_handler.handle: Normalized query config: QueryConfig(region='Asia', country=None, startYear=1980, endYear=2012, operation='avg')
-10:49:24 [DEBUG] asyncio: Using proactor: IocpProactor
-10:49:24 [DEBUG] asyncio: Using proactor: IocpProactor
-10:49:24 [DEBUG] httpcore.connection: connect_tcp.started host='localhost' port=8010 local_address=None timeout=2 socket_options=None
-10:49:26 [DEBUG] httpcore.connection: connect_tcp.complete return_value=<httpcore._backends.sync.SyncStream object at 0x000002609ABC0440>
-10:49:26 [DEBUG] httpcore.http11: send_request_headers.started request=<Request [b'GET']>
-10:49:26 [DEBUG] httpcore.http11: send_request_headers.complete
-10:49:26 [DEBUG] httpcore.http11: send_request_body.started request=<Request [b'GET']>
-10:49:26 [DEBUG] httpcore.http11: send_request_body.complete
-10:49:26 [DEBUG] httpcore.http11: receive_response_headers.started request=<Request [b'GET']>
-10:49:26 [DEBUG] httpcore.http11: receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'date', b'Sun, 01 Mar 2026 05:49:26 GMT'), (b'server', b'uvicorn'), (b'content-length', b'1011'), (b'content-type', b'text/html; charset=utf-8')])
+11:35:11 [DEBUG] src.core.engine: Filtering by country: None, input shape: (17290, 7)
+11:35:11 [DEBUG] src.core.engine: No country provided, skipping country filter
+11:35:11 [DEBUG] src.core.engine: Filtering by year: start=2016, end=2020, input shape=(17290, 7)
+11:35:11 [DEBUG] src.core.engine: Filtered by year range 2016-2020, resulting shape=(1330, 7)
+11:35:11 [DEBUG] httpcore.http11: receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'date', b'Sun, 01 Mar 2026 06:35:11 GMT'), (b'server', b'uvicorn'), (b'content-length', b'237066'), (b'content-type', b'application/json')])
+11:35:11 [INFO] httpx: HTTP Request: POST http://localhost:8010/run "HTTP/1.1 200 OK"
+11:35:11 [DEBUG] httpcore.http11: receive_response_body.started request=<Request [b'POST']>
+11:35:11 [DEBUG] httpcore.http11: receive_response_body.complete
+11:35:11 [DEBUG] httpcore.http11: response_closed.started
+11:35:11 [DEBUG] httpcore.http11: response_closed.complete
+11:35:11 [DEBUG] httpcore.connection: close.started
+11:35:11 [DEBUG] httpcore.connection: close.complete
+11:35:14 [DEBUG] httpcore.connection: connect_tcp.started host='localhost' port=8010 local_address=None timeout=30 socket_options=None
+11:35:16 [DEBUG] httpcore.connection: connect_tcp.complete return_value=<httpcore._backends.sync.SyncStream object at 0x000002A5FA7FE250>
+11:35:16 [DEBUG] httpcore.http11: send_request_headers.started request=<Request [b'POST']>
+11:35:16 [DEBUG] httpcore.http11: send_request_headers.complete
+11:35:16 [DEBUG] httpcore.http11: send_request_body.started request=<Request [b'POST']>
+11:35:16 [DEBUG] httpcore.http11: send_request_body.complete
+11:35:16 [DEBUG] httpcore.http11: receive_response_headers.started request=<Request [b'POST']>
+11:35:16 [DEBUG] src.core.engine: Filtering by region: None, input shape: (17290, 7)
+11:35:16 [DEBUG] src.core.engine: No region provided, skipping region filter
+11:35:16 [DEBUG] src.core.engine: Filtering by country: None, input shape: (17290, 7)
+11:35:16 [DEBUG] src.core.engine: No country provided, skipping country filter
+11:35:16 [DEBUG] src.core.engine: Filtering by year: start=1960, end=2020, input shape=(17290, 7)
+11:35:16 [DEBUG] src.core.engine: Filtered by year range 1960-2020, resulting shape=(16226, 7)
+11:35:16 [DEBUG] httpcore.http11: receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'date', b'Sun, 01 Mar 2026 06:35:15 GMT'), (b'server', b'uvicorn'), (b'content-length', b'2484476'), (b'content-type', b'application/json')])
+11:35:16 [INFO] httpx: HTTP Request: POST http://localhost:8010/run "HTTP/1.1 200 OK"
+11:35:16 [DEBUG] httpcore.http11: receive_response_body.started request=<Request [b'POST']>
+11:35:16 [DEBUG] httpcore.http11: receive_response_body.complete
+11:35:16 [DEBUG] httpcore.http11: response_closed.started
+11:35:16 [DEBUG] httpcore.http11: response_closed.complete
+11:35:16 [DEBUG] httpcore.connection: close.started
+11:35:16 [DEBUG] httpcore.connection: close.complete
+11:35:25 [DEBUG] httpcore.connection: connect_tcp.started host='localhost' port=8010 local_address=None timeout=30 socket_options=None
+11:35:26 [DEBUG] httpcore.connection: connect_tcp.started host='localhost' port=8010 local_address=None timeout=30 socket_options=None
+11:35:27 [DEBUG] httpcore.connection: connect_tcp.complete return_value=<httpcore._backends.sync.SyncStream object at 0x000002A5FA7CBC50>
+11:35:27 [DEBUG] httpcore.http11: send_request_headers.started request=<Request [b'POST']>
+11:35:27 [DEBUG] httpcore.http11: send_request_headers.complete
+11:35:27 [DEBUG] httpcore.http11: send_request_body.started request=<Request [b'POST']>
+11:35:27 [DEBUG] httpcore.http11: send_request_body.complete
+11:35:27 [DEBUG] httpcore.http11: receive_response_headers.started request=<Request [b'POST']>
+11:35:27 [DEBUG] src.core.engine: Filtering by region: Africa, input shape: (17290, 7)
+11:35:27 [DEBUG] src.core.engine: Region filter applied. Resulting shape: (3835, 7)
+11:35:27 [DEBUG] src.core.engine: Filtering by country: None, input shape: (3835, 7)
+11:35:27 [DEBUG] src.core.engine: No country provided, skipping country filter
+11:35:27 [DEBUG] src.core.engine: Filtering by year: start=2020, end=2020, input shape=(3835, 7)
+11:35:27 [DEBUG] src.core.engine: Filtered by year range 2020-2020, resulting shape=(59, 7)
+11:35:27 [DEBUG] httpcore.http11: receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'date', b'Sun, 01 Mar 2026 06:35:26 GMT'), (b'server', b'uvicorn'), (b'content-length', b'10290'), (b'content-type', b'application/json')])
+11:35:27 [INFO] httpx: HTTP Request: POST http://localhost:8010/run "HTTP/1.1 200 OK"
+11:35:27 [DEBUG] httpcore.http11: receive_response_body.started request=<Request [b'POST']>
+11:35:27 [DEBUG] httpcore.http11: receive_response_body.complete
+11:35:27 [DEBUG] httpcore.http11: response_closed.started
+11:35:27 [DEBUG] httpcore.http11: response_closed.complete
+11:35:27 [DEBUG] httpcore.connection: close.started
+11:35:27 [DEBUG] httpcore.connection: close.complete
+11:35:28 [DEBUG] httpcore.connection: connect_tcp.complete return_value=<httpcore._backends.sync.SyncStream object at 0x000002A5FA857980>
+11:35:28 [DEBUG] httpcore.http11: send_request_headers.started request=<Request [b'POST']>
+11:35:28 [DEBUG] httpcore.http11: send_request_headers.complete
+11:35:28 [DEBUG] httpcore.http11: send_request_body.started request=<Request [b'POST']>
+11:35:28 [DEBUG] httpcore.http11: send_request_body.complete
+11:35:28 [DEBUG] httpcore.http11: receive_response_headers.started request=<Request [b'POST']>
+11:35:28 [DEBUG] src.core.engine: Filtering by region: Africa, input shape: (17290, 7)
+11:35:28 [DEBUG] src.core.engine: Region filter applied. Resulting shape: (3835, 7)
+11:35:28 [DEBUG] src.core.engine: Filtering by country: None, input shape: (3835, 7)
+11:35:28 [DEBUG] src.core.engine: No country provided, skipping country filter
+11:35:28 [DEBUG] src.core.engine: Filtering by year: start=2020, end=2020, input shape=(3835, 7)
+11:35:28 [DEBUG] src.core.engine: Filtered by year range 2020-2020, resulting shape=(59, 7)
+11:35:28 [DEBUG] httpcore.http11: receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'date', b'Sun, 01 Mar 2026 06:35:27 GMT'), (b'server', b'uvicorn'), (b'content-length', b'10290'), (b'content-type', b'application/json')])
+11:35:28 [INFO] httpx: HTTP Request: POST http://localhost:8010/run "HTTP/1.1 200 OK"
+11:35:28 [DEBUG] httpcore.http11: receive_response_body.started request=<Request [b'POST']>
+11:35:28 [DEBUG] httpcore.http11: receive_response_body.complete
+11:35:28 [DEBUG] httpcore.http11: response_closed.started
+11:35:28 [DEBUG] httpcore.http11: response_closed.complete
+11:35:28 [DEBUG] httpcore.connection: close.started
+11:35:28 [DEBUG] httpcore.connection: close.complete
+11:35:31 [DEBUG] httpcore.connection: connect_tcp.started host='localhost' port=8010 local_address=None timeout=30 socket_options=None
+11:35:33 [DEBUG] httpcore.connection: connect_tcp.complete return_value=<httpcore._backends.sync.SyncStream object at 0x000002A5FA401630>
+11:35:33 [DEBUG] httpcore.http11: send_request_headers.started request=<Request [b'POST']>
+11:35:33 [DEBUG] httpcore.http11: send_request_headers.complete
+11:35:33 [DEBUG] httpcore.http11: send_request_body.started request=<Request [b'POST']>
+11:35:33 [DEBUG] httpcore.http11: send_request_body.complete
+11:35:33 [DEBUG] httpcore.http11: receive_response_headers.started request=<Request [b'POST']>
+11:35:33 [DEBUG] src.core.engine: Filtering by region: Africa, input shape: (17290, 7)
+11:35:33 [DEBUG] src.core.engine: Region filter applied. Resulting shape: (3835, 7)
+11:35:33 [DEBUG] src.core.engine: Filtering by country: None, input shape: (3835, 7)
+11:35:33 [DEBUG] src.core.engine: No country provided, skipping country filter
+11:35:33 [DEBUG] src.core.engine: Filtering by year: start=2020, end=2020, input shape=(3835, 7)
+11:35:33 [DEBUG] src.core.engine: Filtered by year range 2020-2020, resulting shape=(59, 7)
+11:35:33 [DEBUG] httpcore.http11: receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'date', b'Sun, 01 Mar 2026 06:35:33 GMT'), (b'server', b'uvicorn'), (b'content-length', b'10290'), (b'content-type', b'application/json')])
+11:35:33 [INFO] httpx: HTTP Request: POST http://localhost:8010/run "HTTP/1.1 200 OK"
+11:35:33 [DEBUG] httpcore.http11: receive_response_body.started request=<Request [b'POST']>
+11:35:33 [DEBUG] httpcore.http11: receive_response_body.complete
+11:35:33 [DEBUG] httpcore.http11: response_closed.started
+11:35:33 [DEBUG] httpcore.http11: response_closed.complete
+11:35:33 [DEBUG] httpcore.connection: close.started
+11:35:33 [DEBUG] httpcore.connection: close.complete
+11:35:36 [DEBUG] httpcore.connection: connect_tcp.started host='localhost' port=8010 local_address=None timeout=30 socket_options=None
+11:35:38 [DEBUG] httpcore.connection: connect_tcp.complete return_value=<httpcore._backends.sync.SyncStream object at 0x000002A5FA85CBB0>
+11:35:38 [DEBUG] httpcore.http11: send_request_headers.started request=<Request [b'POST']>
+11:35:38 [DEBUG] httpcore.http11: send_request_headers.complete
+11:35:38 [DEBUG] httpcore.http11: send_request_body.started request=<Request [b'POST']>
+11:35:38 [DEBUG] httpcore.http11: send_request_body.complete
+11:35:38 [DEBUG] httpcore.http11: receive_response_headers.started request=<Request [b'POST']>
+11:35:38 [DEBUG] src.core.engine: Filtering by region: Africa, input shape: (17290, 7)
+11:35:38 [DEBUG] src.core.engine: Region filter applied. Resulting shape: (3835, 7)
+11:35:38 [DEBUG] src.core.engine: Filtering by country: None, input shape: (3835, 7)
+11:35:38 [DEBUG] src.core.engine: No country provided, skipping country filter
+11:35:38 [DEBUG] src.core.engine: Filtering by year: start=2015, end=2020, input shape=(3835, 7)
