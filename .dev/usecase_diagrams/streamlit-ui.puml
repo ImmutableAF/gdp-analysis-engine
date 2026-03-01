@@ -1,0 +1,87 @@
+@startuml
+!theme plain
+skinparam linetype ortho
+skinparam nodesep 80
+skinparam ranksep 100
+skinparam actorStyle awesome
+skinparam defaultFontSize 13
+skinparam defaultFontName Helvetica
+skinparam usecase {
+  BackgroundColor #FFFBF0
+  BorderColor #D4860B
+  BorderThickness 1.5
+  FontSize 13
+  ArrowColor #D4860B
+}
+skinparam actor {
+  BorderColor #7D6608
+  BackgroundColor #FEF9E7
+  FontSize 13
+}
+skinparam package {
+  BackgroundColor #FAFAFA
+  BorderColor #F9E79F
+  FontSize 14
+  FontStyle bold
+}
+
+title <size:20><b>Streamlit UI — Use Cases</b></size>
+
+actor "End User" as ST_User
+actor "Core API :8010" as ST_Core
+actor "Analytics API :8011" as ST_Ana
+
+package "Boot" {
+  usecase "Wait for Core API\n(retry loop)" as ST_Boot
+  usecase "Load metadata\n(regions, countries, year range)" as ST_Meta
+}
+
+package "Dashboard Tab" {
+  usecase "Build sidebar\n(region, country, year, operation)" as ST_Sidebar
+  usecase "Fetch filtered data" as ST_Fetch
+  usecase "Render dashboard charts" as ST_Charts
+  usecase "Reload config from file" as ST_ReloadCfg
+  usecase "Export filtered CSV" as ST_ExCSV
+  usecase "Generate & download\nchart PNGs (ZIP)" as ST_ExPNG
+}
+
+package "Analytics Tab" {
+  usecase "Top / Bottom\ncountry rankings" as ST_TopBot
+  usecase "GDP growth rate charts" as ST_GrowthChart
+  usecase "Continent aggregations" as ST_ContAgg
+  usecase "Global GDP trend" as ST_GlobalTrend
+  usecase "Consistent decline countries" as ST_DecChart
+  usecase "Continent GDP share\n(pie + bar)" as ST_ShareChart
+  usecase "Generate & download\nanalytics PNGs (ZIP)" as ST_AnaPNG
+}
+
+ST_User --> ST_Sidebar
+ST_User --> ST_ReloadCfg
+ST_User --> ST_ExCSV
+ST_User --> ST_ExPNG
+ST_User --> ST_TopBot
+ST_User --> ST_GrowthChart
+ST_User --> ST_ContAgg
+ST_User --> ST_GlobalTrend
+ST_User --> ST_DecChart
+ST_User --> ST_ShareChart
+ST_User --> ST_AnaPNG
+
+ST_Boot       --> ST_Core : GET /metadata
+ST_Meta       --> ST_Core : GET /metadata
+ST_Fetch      --> ST_Core : POST /run
+ST_ReloadCfg  --> ST_Core : POST /config/reload
+
+ST_TopBot      --> ST_Ana : GET /top-countries\nGET /bottom-countries
+ST_GrowthChart --> ST_Ana : GET /gdp-growth-rate
+ST_ContAgg     --> ST_Ana : GET /avg-gdp-by-continent
+ST_GlobalTrend --> ST_Ana : GET /global-gdp-trend
+ST_DecChart    --> ST_Ana : GET /consistent-decline
+ST_ShareChart  --> ST_Ana : GET /continent-gdp-share
+
+ST_Sidebar ..> ST_Fetch  : <<include>>
+ST_Fetch   ..> ST_Charts : <<include>>
+ST_ExPNG   ..> ST_Charts : <<extend>>
+ST_AnaPNG  ..> ST_TopBot : <<extend>>
+
+@enduml

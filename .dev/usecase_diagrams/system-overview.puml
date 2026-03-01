@@ -1,0 +1,58 @@
+@startuml
+!theme plain
+skinparam linetype ortho
+skinparam nodesep 60
+skinparam ranksep 80
+skinparam actorStyle awesome
+skinparam defaultFontSize 13
+skinparam defaultFontName Helvetica
+skinparam usecase {
+  BackgroundColor #F8F9FA
+  BorderColor #4A90D9
+  BorderThickness 1.5
+  FontSize 13
+  ArrowColor #4A90D9
+}
+skinparam actor {
+  BorderColor #2C3E50
+  BackgroundColor #ECF0F1
+  FontSize 13
+}
+skinparam package {
+  BackgroundColor #FAFAFA
+  BorderColor #BDC3C7
+  FontSize 14
+  FontStyle bold
+}
+
+title <size:20><b>GDP Analytics Engine — System Overview</b></size>
+
+actor "Operator" as SYS_Op
+
+package "Boot Sequence" {
+  usecase "Load Excel File" as SYS_Load
+  usecase "Clean & Prepare Data" as SYS_Clean
+  usecase "Start Core API  :8010" as SYS_CoreStart
+  usecase "Start Analytics API  :8011" as SYS_AnaStart
+  usecase "Health-probe Both Servers" as SYS_Wait
+  usecase "Select Output Mode" as SYS_Mode
+}
+
+package "Output Sinks" {
+  usecase "UI Mode\n(Streamlit)" as SYS_UI
+  usecase "CLI Mode\n(Terminal)" as SYS_CLI
+  usecase "File Mode\n(JSON / CSV / MD / HTML / PDF)" as SYS_File
+}
+
+SYS_Op --> SYS_Load
+SYS_Load --> SYS_Clean
+SYS_Clean --> SYS_CoreStart
+SYS_Clean --> SYS_AnaStart
+SYS_CoreStart --> SYS_Wait
+SYS_AnaStart --> SYS_Wait
+SYS_Wait --> SYS_Mode
+SYS_Mode --> SYS_UI
+SYS_Mode --> SYS_CLI
+SYS_Mode --> SYS_File
+
+@enduml

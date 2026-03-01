@@ -1,0 +1,68 @@
+@startuml
+!theme plain
+skinparam linetype ortho
+skinparam nodesep 70
+skinparam ranksep 90
+skinparam actorStyle awesome
+skinparam defaultFontSize 13
+skinparam defaultFontName Helvetica
+skinparam usecase {
+  BackgroundColor #F5F0FF
+  BorderColor #8E44AD
+  BorderThickness 1.5
+  FontSize 13
+  ArrowColor #8E44AD
+}
+skinparam actor {
+  BorderColor #4A235A
+  BackgroundColor #E8DAEF
+  FontSize 13
+}
+skinparam package {
+  BackgroundColor #FAFAFA
+  BorderColor #D2B4DE
+  FontSize 14
+  FontStyle bold
+}
+
+title <size:20><b>Analytics API — :8011</b></size>
+
+actor "OutputSink" as ANA_Sink
+actor "Core API :8010" as ANA_Core
+
+package "Country Rankings" {
+  usecase "GET /top-countries\n(continent, year, n)" as ANA_Top
+  usecase "GET /bottom-countries\n(continent, year, n)" as ANA_Bot
+}
+
+package "Growth Analysis" {
+  usecase "GET /gdp-growth-rate\n(continent, startYear, endYear)" as ANA_Growth
+  usecase "GET /fastest-growing-continent\n(startYear, endYear)" as ANA_Fast
+  usecase "GET /consistent-decline\n(lastXYears, referenceYear)" as ANA_Decline
+}
+
+package "Continent Aggregations" {
+  usecase "GET /avg-gdp-by-continent\n(startYear, endYear)" as ANA_Avg
+  usecase "GET /global-gdp-trend\n(startYear, endYear)" as ANA_Trend
+  usecase "GET /continent-gdp-share\n(startYear, endYear)" as ANA_Share
+}
+
+ANA_Sink --> ANA_Top
+ANA_Sink --> ANA_Bot
+ANA_Sink --> ANA_Growth
+ANA_Sink --> ANA_Fast
+ANA_Sink --> ANA_Decline
+ANA_Sink --> ANA_Avg
+ANA_Sink --> ANA_Trend
+ANA_Sink --> ANA_Share
+
+ANA_Top     ..> ANA_Core : <<include>>
+ANA_Bot     ..> ANA_Core : <<include>>
+ANA_Growth  ..> ANA_Core : <<include>>
+ANA_Fast    ..> ANA_Core : <<include>>
+ANA_Decline ..> ANA_Core : <<include>>
+ANA_Avg     ..> ANA_Core : <<include>>
+ANA_Trend   ..> ANA_Core : <<include>>
+ANA_Share   ..> ANA_Core : <<include>>
+
+@enduml

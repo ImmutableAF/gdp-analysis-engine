@@ -1,0 +1,78 @@
+@startuml
+!theme plain
+skinparam linetype ortho
+skinparam nodesep 80
+skinparam ranksep 100
+skinparam actorStyle awesome
+skinparam defaultFontSize 13
+skinparam defaultFontName Helvetica
+skinparam usecase {
+  BackgroundColor #F0FFF4
+  BorderColor #27AE60
+  BorderThickness 1.5
+  FontSize 13
+  ArrowColor #27AE60
+}
+skinparam actor {
+  BorderColor #1E8449
+  BackgroundColor #D5F5E3
+  FontSize 13
+}
+skinparam package {
+  BackgroundColor #FAFAFA
+  BorderColor #A9DFBF
+  FontSize 14
+  FontStyle bold
+}
+
+title <size:20><b>Output Sinks</b></size>
+
+actor "Operator" as SINK_Op
+actor "End User" as SINK_User
+
+package "make_sink() Factory" {
+  usecase "Read output_mode\nfrom config" as SINK_ReadMode
+  usecase "Apply mode_override\n(optional)" as SINK_Override
+  usecase "Instantiate Sink" as SINK_Make
+}
+
+package "UISink" {
+  usecase "Set env vars\n(CORE / ANALYTICS URL)" as SINK_Env
+  usecase "Launch Streamlit\nvia subprocess" as SINK_Launch
+  usecase "Handle Ctrl-C\n(clean exit)" as SINK_CtrlC
+}
+
+package "CliSink" {
+  usecase "Print ANSI banner" as SINK_Banner
+  usecase "Call all 8 endpoints\nsequentially" as SINK_RunAll
+  usecase "Render bars,\nsparklines & tables" as SINK_Render
+}
+
+package "FileOutputSink" {
+  usecase "Interactive format picker\n(arrow keys + Enter)" as SINK_Picker
+  usecase "Collect all 8\nendpoint results" as SINK_Collect
+  usecase "Write output file\n(JSON/CSV/MD/HTML/PDF)" as SINK_Write
+}
+
+SINK_Op --> SINK_ReadMode
+SINK_Op --> SINK_Override
+SINK_ReadMode --> SINK_Make
+SINK_Override --> SINK_Make
+
+SINK_Make   --> SINK_Env    : UI
+SINK_Env    --> SINK_Launch
+SINK_Launch --> SINK_CtrlC
+
+SINK_Make   --> SINK_Banner : CLI
+SINK_Banner --> SINK_RunAll
+SINK_RunAll --> SINK_Render
+
+SINK_Make    --> SINK_Picker : FILE
+SINK_Picker  --> SINK_Collect
+SINK_Collect --> SINK_Write
+
+SINK_User --> SINK_Launch
+SINK_User --> SINK_Render
+SINK_User --> SINK_Write
+
+@enduml

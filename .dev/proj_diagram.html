@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Architecture Diagram</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #050810;
+            --surface: #0c1120;
+            --surface2: #111827;
+            --border: #1e2d4a;
+            --accent1: #00d4ff;
+            --accent2: #7c3aed;
+            --accent3: #10b981;
+            --accent4: #f59e0b;
+            --accent5: #ef4444;
+            --text: #e2e8f0;
+            --muted: #64748b;
+            --glow1: rgba(0, 212, 255, 0.15);
+            --glow2: rgba(124, 58, 237, 0.15);
+            --glow3: rgba(16, 185, 129, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Syne', sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Noise texture */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        header {
+            padding: 60px 80px 40px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header-label {
+            font-family: 'Space Mono', monospace;
+            font-size: 11px;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: var(--accent1);
+            margin-bottom: 16px;
+            opacity: 0;
+            animation: fadeUp 0.6s ease forwards;
+        }
+
+        h1 {
+            font-size: clamp(42px, 6vw, 80px);
+            font-weight: 800;
+            line-height: 0.95;
+            letter-spacing: -3px;
+            background: linear-gradient(135deg, #fff 30%, var(--accent1) 70%, var(--accent2) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            opacity: 0;
+            animation: fadeUp 0.6s 0.1s ease forwards;
+        }
+
+        .subtitle {
+            margin-top: 16px;
+            font-family: 'Space Mono', monospace;
+            font-size: 13px;
+            color: var(--muted);
+            opacity: 0;
+            animation: fadeUp 0.6s 0.2s ease forwards;
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .diagram-canvas {
+            position: relative;
+            z-index: 1;
+            padding: 40px 80px 100px;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 40px;
+            align-items: start;
+        }
+
+        /* === PACKAGES === */
+        .package {
+            position: relative;
+            border-radius: 20px;
+            padding: 36px;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            opacity: 0;
+            animation: slideIn 0.7s ease forwards;
+        }
+
+        .package:hover {
+            transform: translateY(-4px);
+        }
+
+        .package.plugins {
+            grid-column: 1 / 3;
+            border-color: rgba(0, 212, 255, 0.3);
+            box-shadow: 0 0 60px var(--glow1), inset 0 1px 0 rgba(0, 212, 255, 0.1);
+            animation-delay: 0.1s;
+        }
+
+        .package.plugins:hover {
+            box-shadow: 0 20px 80px var(--glow1), inset 0 1px 0 rgba(0, 212, 255, 0.15);
+        }
+
+        .package.util {
+            border-color: rgba(245, 158, 11, 0.3);
+            box-shadow: 0 0 60px var(--glow3), inset 0 1px 0 rgba(245, 158, 11, 0.1);
+            animation-delay: 0.3s;
+        }
+
+        .package.util:hover {
+            box-shadow: 0 20px 80px rgba(245, 158, 11, 0.2), inset 0 1px 0 rgba(245, 158, 11, 0.15);
+        }
+
+        .package.core {
+            grid-column: 1 / 4;
+            border-color: rgba(124, 58, 237, 0.3);
+            box-shadow: 0 0 60px var(--glow2), inset 0 1px 0 rgba(124, 58, 237, 0.1);
+            animation-delay: 0.5s;
+        }
+
+        .package.core:hover {
+            box-shadow: 0 20px 80px var(--glow2), inset 0 1px 0 rgba(124, 58, 237, 0.15);
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .package-label {
+            font-family: 'Space Mono', monospace;
+            font-size: 10px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .plugins .package-label {
+            color: var(--accent1);
+        }
+
+        .util .package-label {
+            color: var(--accent4);
+        }
+
+        .core .package-label {
+            color: var(--accent2);
+        }
+
+        .package-title {
+            font-size: 26px;
+            font-weight: 800;
+            letter-spacing: -1px;
+            margin-bottom: 32px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .package-title .icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .plugins .icon {
+            background: rgba(0, 212, 255, 0.15);
+        }
+
+        .util .icon {
+            background: rgba(245, 158, 11, 0.15);
+        }
+
+        .core .icon {
+            background: rgba(124, 58, 237, 0.15);
+        }
+
+        /* Inner packages grid */
+        .inner-grid {
+            display: grid;
+            gap: 24px;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        }
+
+        .inner-package {
+            background: var(--surface2);
+            border-radius: 14px;
+            padding: 24px;
+            border: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+            transition: border-color 0.3s;
+        }
+
+        .inner-package::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            border-radius: 14px 14px 0 0;
+        }
+
+        .data-loading::before {
+            background: linear-gradient(90deg, var(--accent1), transparent);
+        }
+
+        .data-loaders::before {
+            background: linear-gradient(90deg, var(--accent3), transparent);
+        }
+
+        .config-handle::before {
+            background: linear-gradient(90deg, var(--accent4), transparent);
+        }
+
+        .outputs-box::before {
+            background: linear-gradient(90deg, var(--accent5), transparent);
+        }
+
+        .util-inner::before {
+            background: linear-gradient(90deg, var(--accent4), transparent);
+        }
+
+        .core-inner::before {
+            background: linear-gradient(90deg, var(--accent2), transparent);
+        }
+
+        .inner-title {
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .inner-title .dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .data-loading .dot,
+        .data-loading .class-badge {
+            background: rgba(0, 212, 255, 0.2);
+            color: var(--accent1);
+        }
+
+        .data-loaders .dot,
+        .data-loaders .class-badge {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--accent3);
+        }
+
+        .config-handle .dot,
+        .config-handle .class-badge {
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--accent4);
+        }
+
+        .outputs-box .dot,
+        .outputs-box .class-badge {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--accent5);
+        }
+
+        .util-inner .dot,
+        .util-inner .class-badge {
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--accent4);
+        }
+
+        .core-inner .dot,
+        .core-inner .class-badge {
+            background: rgba(124, 58, 237, 0.2);
+            color: var(--accent2);
+        }
+
+        .classes {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .class-badge {
+            font-family: 'Space Mono', monospace;
+            font-size: 11px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: transform 0.2s;
+            cursor: default;
+        }
+
+        .class-badge:hover {
+            transform: translateX(4px);
+        }
+
+        .class-badge::before {
+            content: '⬡';
+            font-size: 9px;
+            opacity: 0.7;
+        }
+
+        /* Arrows / connections section */
+        .arrow-section {
+            margin-top: 28px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+        }
+
+        .arrow-title {
+            font-family: 'Space Mono', monospace;
+            font-size: 9px;
+            letter-spacing: 2px;
+            color: var(--muted);
+            text-transform: uppercase;
+            margin-bottom: 14px;
+        }
+
+        .arrows {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .arrow-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: 'Space Mono', monospace;
+            font-size: 10px;
+            color: var(--muted);
+        }
+
+        .arrow-from {
+            color: var(--text);
+            opacity: 0.7;
+        }
+
+        .arrow-sym {
+            color: var(--accent2);
+            font-size: 14px;
+        }
+
+        .arrow-to {
+            color: var(--text);
+            opacity: 0.7;
+        }
+
+        /* Main entry node */
+        .main-node {
+            grid-column: 2 / 3;
+            display: flex;
+            justify-content: center;
+            opacity: 0;
+            animation: slideIn 0.7s 0.7s ease forwards;
+        }
+
+        .main-box {
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.2), rgba(0, 212, 255, 0.1));
+            border: 2px solid rgba(124, 58, 237, 0.5);
+            border-radius: 18px;
+            padding: 28px 48px;
+            text-align: center;
+            box-shadow: 0 0 80px rgba(124, 58, 237, 0.25), 0 0 120px rgba(0, 212, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .main-box::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(124, 58, 237, 0.05) 0%, transparent 70%);
+            animation: pulse 4s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 0.5;
+                transform: scale(0.9);
+            }
+
+            50% {
+                opacity: 1;
+                transform: scale(1.1);
+            }
+        }
+
+        .main-label {
+            font-family: 'Space Mono', monospace;
+            font-size: 9px;
+            letter-spacing: 3px;
+            color: var(--accent2);
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .main-title {
+            font-size: 32px;
+            font-weight: 800;
+            letter-spacing: -1.5px;
+            background: linear-gradient(135deg, #fff, var(--accent2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .connector-desc {
+            font-family: 'Space Mono', monospace;
+            font-size: 10px;
+            color: var(--muted);
+            margin-top: 8px;
+        }
+
+        /* Flow arrows between packages */
+        .flow-arrows {
+            grid-column: 1 / 4;
+            display: flex;
+            justify-content: center;
+            gap: 60px;
+            padding: 20px 0;
+            opacity: 0;
+            animation: fadeUp 0.6s 0.8s ease forwards;
+        }
+
+        .flow-arrow {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            font-family: 'Space Mono', monospace;
+            font-size: 10px;
+            color: var(--muted);
+        }
+
+        .flow-line {
+            width: 1px;
+            height: 50px;
+            background: linear-gradient(to bottom, var(--accent2), transparent);
+            position: relative;
+        }
+
+        .flow-line::after {
+            content: '▼';
+            position: absolute;
+            bottom: -14px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 10px;
+            color: var(--accent2);
+        }
+
+        /* Legend */
+        .legend {
+            position: fixed;
+            bottom: 40px;
+            right: 60px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 20px 24px;
+            z-index: 10;
+            opacity: 0;
+            animation: fadeUp 0.6s 1s ease forwards;
+        }
+
+        .legend-title {
+            font-family: 'Space Mono', monospace;
+            font-size: 9px;
+            letter-spacing: 3px;
+            color: var(--muted);
+            text-transform: uppercase;
+            margin-bottom: 14px;
+        }
+
+        .legend-items {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: 'Space Mono', monospace;
+            font-size: 10px;
+            color: var(--muted);
+        }
+
+        .legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 3px;
+        }
+
+        /* Responsive */
+        @media (max-width: 1100px) {
+            .diagram-canvas {
+                grid-template-columns: 1fr 1fr;
+                padding: 30px 40px;
+            }
+
+            .package.plugins {
+                grid-column: 1 / 3;
+            }
+
+            .package.core {
+                grid-column: 1 / 3;
+            }
+
+            .flow-arrows {
+                grid-column: 1 / 3;
+            }
+
+            .main-node {
+                grid-column: 1 / 3;
+            }
+        }
+
+        @media (max-width: 700px) {
+            header {
+                padding: 40px 24px 30px;
+            }
+
+            .diagram-canvas {
+                grid-template-columns: 1fr;
+                padding: 20px 24px;
+                gap: 24px;
+            }
+
+            .package.plugins,
+            .package.core,
+            .package.util,
+            .flow-arrows,
+            .main-node {
+                grid-column: 1;
+            }
+
+            h1 {
+                letter-spacing: -2px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <div class="header-label">System Architecture · v2.0</div>
+        <h1>SRC Module<br>Diagram</h1>
+        <div class="subtitle">// data_loading · config · core · util · plugins</div>
+    </header>
+
+    <div class="diagram-canvas">
+
+        <!-- PLUGINS PACKAGE -->
+        <div class="package plugins">
+            <div class="package-label">Package</div>
+            <div class="package-title">
+                <div class="icon">⟁</div>
+                src.plugins
+            </div>
+            <div class="inner-grid">
+
+                <!-- Data Loading -->
+                <div class="inner-package data-loading">
+                    <div class="inner-title"><span class="dot"></span>data_loading</div>
+                    <div class="classes">
+                        <div class="class-badge">loader_interface</div>
+                        <div class="class-badge">loader_registry</div>
+                        <div class="class-badge">loading_manager</div>
+                    </div>
+                    <div class="arrow-section">
+                        <div class="arrow-title">Relations</div>
+                        <div class="arrows">
+                            <div class="arrow-item"><span class="arrow-from">loader_interface</span><span
+                                    class="arrow-sym">→</span><span class="arrow-to">loader_registry</span></div>
+                            <div class="arrow-item"><span class="arrow-from">loader_interface</span><span
+                                    class="arrow-sym">→</span><span class="arrow-to">loading_manager</span></div>
+                            <div class="arrow-item"><span class="arrow-from">loader_registry</span><span
+                                    class="arrow-sym">→</span><span class="arrow-to">loading_manager</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Data Loaders -->
+                <div class="inner-package data-loaders">
+                    <div class="inner-title"><span class="dot"></span>data_loaders</div>
+                    <div class="classes">
+                        <div class="class-badge">csv_loader</div>
+                        <div class="class-badge">excel_loader</div>
+                        <div class="class-badge">json_loader</div>
+                    </div>
+                    <div class="arrow-section">
+                        <div class="arrow-title">Relations</div>
+                        <div class="arrows">
+                            <div class="arrow-item"><span class="arrow-from">loader_interface</span><span
+                                    class="arrow-sym">→</span><span class="arrow-to">csv_loader</span></div>
+                            <div class="arrow-item"><span class="arrow-from">loader_interface</span><span
+                                    class="arrow-sym">→</span><span class="arrow-to">excel_loader</span></div>
+                            <div class="arrow-item"><span class="arrow-from">loader_interface</span><span
+                                    class="arrow-sym">→</span><span class="arrow-to">json_loader</span></div>
+                            <div class="arrow-item"><span class="arrow-from">loader_registry</span><span
+                                    class="arrow-sym">→</span><span class="arrow-to">data_loaders</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Config Handle -->
+                <div class="inner-package config-handle">
+                    <div class="inner-title"><span class="dot"></span>config_handle</div>
+                    <div class="classes">
+                        <div class="class-badge">config_models</div>
+                        <div class="class-badge">config_load</div>
+                        <div class="class-badge">paths</div>
+                        <div class="class-badge">handle</div>
+                    </div>
+                    <div class="arrow-section">
+                        <div class="arrow-title">Relations</div>
+                        <div class="arrows">
+                            <div class="arrow-item"><span class="arrow-from">config_models</span><span
+                                    class="arrow-sym">→</span><span class="arrow-to">config_load</span></div>
+                            <div class="arrow-item"><span class="arrow-from">paths</span><span
+                                    class="arrow-sym">→</span><span class="arrow-to">handle</span></div>
+                            <div class="arrow-item"><span class="arrow-from">config_load</span><span
+                                    class="arrow-sym">→</span><span class="arrow-to">handle</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Outputs -->
+                <div class="inner-package outputs-box">
+                    <div class="inner-title"><span class="dot"></span>outputs.py</div>
+                    <div class="classes">
+                        <div class="class-badge">cli</div>
+                        <div class="class-badge">ui</div>
+                        <div class="class-badge">fileWriter</div>
+                        <div class="class-badge">output_api</div>
+                    </div>
+                    <div class="arrow-section">
+                        <div class="arrow-title">Relations</div>
+                        <div class="arrows">
+                            <div class="arrow-item"><span class="arrow-from">OutputSink</span><span
+                                    class="arrow-sym">→</span><span class="arrow-to">cli</span></div>
+                            <div class="arrow-item"><span class="arrow-from">OutputSink</span><span
+                                    class="arrow-sym">→</span><span class="arrow-to">ui</span></div>
+                            <div class="arrow-item"><span class="arrow-from">OutputSink</span><span
+                                    class="arrow-sym">→</span><span class="arrow-to">fileWriter</span></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- UTIL PACKAGE -->
+        <div class="package util">
+            <div class="package-label">Package</div>
+            <div class="package-title">
+                <div class="icon">⚙</div>
+                src.util
+            </div>
+            <div class="inner-grid" style="grid-template-columns: 1fr;">
+                <div class="inner-package util-inner">
+                    <div class="inner-title"><span class="dot"></span>utilities</div>
+                    <div class="classes">
+                        <div class="class-badge">cli_parser</div>
+                        <div class="class-badge">logging_contract</div>
+                        <div class="class-badge">logging_setup</div>
+                    </div>
+                    <div class="arrow-section">
+                        <div class="arrow-title">Relations</div>
+                        <div class="arrows">
+                            <div class="arrow-item"><span class="arrow-from">logging_contract</span><span
+                                    class="arrow-sym">→</span><span class="arrow-to">logging_setup</span></div>
+                            <div class="arrow-item"><span class="arrow-from">cli_parser</span><span
+                                    class="arrow-sym">→</span><span class="arrow-to">util</span></div>
+                            <div class="arrow-item"><span class="arrow-from">logging_setup</span><span
+                                    class="arrow-sym">→</span><span class="arrow-to">util</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Flow arrows -->
+        <div class="flow-arrows">
+            <div class="flow-arrow">
+                <span>src.plugins</span>
+                <div class="flow-line"></div>
+                <span>src.main</span>
+            </div>
+            <div class="flow-arrow">
+                <span>src.util</span>
+                <div class="flow-line"></div>
+                <span>src.main</span>
+            </div>
+            <div class="flow-arrow">
+                <span>src.core</span>
+                <div class="flow-line"></div>
+                <span>src.main</span>
+            </div>
+        </div>
+
+        <!-- MAIN Node -->
+        <div class="main-node" style="grid-column: 1/4;">
+            <div class="main-box">
+                <div class="main-label">Entry Point</div>
+                <div class="main-title">src.main</div>
+                <div class="connector-desc">// receives all package outputs</div>
+            </div>
+        </div>
+
+        <!-- CORE PACKAGE -->
+        <div class="package core">
+            <div class="package-label">Package</div>
+            <div class="package-title">
+                <div class="icon">◈</div>
+                src.core
+            </div>
+            <div class="inner-grid">
+                <div class="inner-package core-inner" style="grid-column: 1 / -1;">
+                    <div class="inner-title"><span class="dot"></span>core components</div>
+                    <div class="classes" style="flex-direction: row; flex-wrap: wrap; gap: 10px;">
+                        <div class="class-badge">contracts</div>
+                        <div class="class-badge">engine</div>
+                        <div class="class-badge">core_api</div>
+                        <div class="class-badge">metadata</div>
+                        <div class="class-badge">data_cleaning</div>
+                    </div>
+                    <div class="arrow-section">
+                        <div class="arrow-title">Relations</div>
+                        <div class="arrows" style="flex-direction: row; flex-wrap: wrap; gap: 6px 30px;">
+                            <div class="arrow-item"><span class="arrow-from">contracts</span><span
+                                    class="arrow-sym">→</span><span class="arrow-to">engine</span></div>
+                            <div class="arrow-item"><span class="arrow-from">contracts</span><span
+                                    class="arrow-sym">→</span><span class="arrow-to">core_api</span></div>
+                            <div class="arrow-item"><span class="arrow-from">engine</span><span
+                                    class="arrow-sym">→</span><span class="arrow-to">core_api</span></div>
+                            <div class="arrow-item"><span class="arrow-from">metadata</span><span
+                                    class="arrow-sym">→</span><span class="arrow-to">core_api</span></div>
+                            <div class="arrow-item"><span class="arrow-from">core_api</span><span
+                                    class="arrow-sym">→</span><span class="arrow-to">src.core</span></div>
+                            <div class="arrow-item"><span class="arrow-from">data_cleaning</span><span
+                                    class="arrow-sym">→</span><span class="arrow-to">src.core</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Legend -->
+    <div class="legend">
+        <div class="legend-title">Legend</div>
+        <div class="legend-items">
+            <div class="legend-item">
+                <div class="legend-dot" style="background:var(--accent1);"></div>src.plugins
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot" style="background:var(--accent4);"></div>src.util
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot" style="background:var(--accent2);"></div>src.core
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot" style="background:var(--muted); width:20px; height:1px; border-radius:0;"></div>
+                dependency →
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>

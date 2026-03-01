@@ -1,0 +1,158 @@
+@startuml
+
+' ============================================================
+' SKIN & THEME
+' ============================================================
+
+skinparam backgroundColor #0D1117
+skinparam roundcorner 14
+skinparam shadowing false
+skinparam nodesep 70
+skinparam ranksep 120
+skinparam padding 20
+
+skinparam package {
+    BackgroundColor #161B22
+    BorderColor     #30363D
+    FontColor       #FFFFFF
+    FontSize        17
+    FontStyle       bold
+    BorderThickness 10
+    Padding         20
+}
+
+skinparam class {
+    BackgroundColor       #21262D
+    BorderColor           #58A6FF
+    FontColor             #FFFFFF
+    FontSize              13
+    FontStyle             bold
+    BorderThickness       1
+    HeaderBackgroundColor #2D333B
+    AttributeFontColor    #CDD9E5
+}
+
+skinparam arrow {
+    Color     #58A6FF
+    FontColor #CDD9E5
+    FontSize  11
+    Thickness 2.2
+}
+
+' ============================================================
+' PACKAGES
+' ============================================================
+
+package "src.plugins" #1A2332 {
+
+    package "data_loading" #0D2137 {
+        class loader_interface #112233
+        class loader_registry  #112233
+        class loading_manager  #112233
+    }
+
+    package "data_loaders" #0D2137 {
+        class csv_loader   #112233
+        class excel_loader #112233
+        class json_loader  #112233
+    }
+
+    package "config_handle" #0D2137 {
+        class config_models #112233
+        class config_load   #112233
+        class paths         #112233
+        class handle        #112233
+    }
+
+    class OutputSink as "outputs.py" #0D2137
+    class cli        as "cli"        #0D2137
+    class ui         as "ui"         #0D2137
+    class fileWriter as "fileWriter" #0D2137
+
+    OutputSink --> "src.plugins"
+
+    package "output_api" #0D2137 {
+    }
+
+    "output_api" --> "src.plugins"
+}
+
+package "src.util" #1A2D1A {
+    class cli_parser       #112311
+    class logging_contract #112311
+    class logging_setup    #112311
+}
+
+package "src.core" #1F1A2D {
+    class contracts     #1A1133
+    class engine        #1A1133
+    class core_api      #1A1133
+    class metadata      #1A1133
+    class data_cleaning #1A1133
+}
+
+' ============================================================
+' FLOW 1 — Data Loading  (cyan #58A6FF)
+' ============================================================
+
+loader_interface -[#58A6FF]->  loader_registry
+loader_interface -[#58A6FF]->  loading_manager
+loader_registry  -[#58A6FF]->  loading_manager
+loading_manager  -[#58A6FF]->  data_loading
+data_loading     -[#58A6FF]->  "src.plugins"
+
+' ============================================================
+' FLOW 2 — Data Loaders  (green #3FB950)
+' ============================================================
+
+loader_interface -[#3FB950]->  csv_loader
+loader_interface -[#3FB950]->  excel_loader
+loader_interface -[#3FB950]->  json_loader
+loader_registry  -[#3FB950]--> data_loaders
+
+' ============================================================
+' FLOW 3 — Config Handle  (orange #F0883E)
+' ============================================================
+
+config_models -[#F0883E]->  config_load
+paths         -[#F0883E]->  handle
+config_load   -[#F0883E]->  handle
+handle        -[#F0883E]->  config_handle
+config_handle -[#F0883E]->  "src.plugins"
+
+' ============================================================
+' FLOW 4 — Outputs  (red #FF7B72)
+' ============================================================
+
+OutputSink -[#FF7B72]->  cli
+OutputSink -[#FF7B72]->  ui
+OutputSink -[#FF7B72]->  fileWriter
+
+' ============================================================
+' FLOW 5 — Util  (teal #39D353)
+' ============================================================
+
+logging_contract -[#39D353]->  logging_setup
+cli_parser       -[#39D353]->  "src.util"
+logging_setup    -[#39D353]->  "src.util"
+
+' ============================================================
+' FLOW 6 — Core  (purple #D2A8FF)
+' ============================================================
+
+contracts     -[#D2A8FF]->  engine
+contracts     -[#D2A8FF]->  core_api
+engine        -[#D2A8FF]->  core_api
+metadata      -[#D2A8FF]->  core_api
+core_api      -[#D2A8FF]->  "src.core"
+data_cleaning -[#D2A8FF]->  "src.core"
+
+' ============================================================
+' FLOW 7 — Package → src.main  (bold finals)
+' ============================================================
+
+"src.plugins" -[#58A6FF,bold]--> "src.main"
+"src.util"    -[#39D353,bold]--> "src.main"
+"src.core"    -[#D2A8FF,bold]--> "src.main"
+
+@enduml

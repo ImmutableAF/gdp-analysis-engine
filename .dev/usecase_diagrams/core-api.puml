@@ -1,0 +1,78 @@
+@startuml
+!theme plain
+skinparam linetype ortho
+skinparam nodesep 70
+skinparam ranksep 90
+skinparam actorStyle awesome
+skinparam defaultFontSize 13
+skinparam defaultFontName Helvetica
+skinparam usecase {
+  BackgroundColor #F0F7FF
+  BorderColor #2980B9
+  BorderThickness 1.5
+  FontSize 13
+  ArrowColor #2980B9
+}
+skinparam actor {
+  BorderColor #1A252F
+  BackgroundColor #D6EAF8
+  FontSize 13
+}
+skinparam package {
+  BackgroundColor #FAFAFA
+  BorderColor #AED6F1
+  FontSize 14
+  FontStyle bold
+}
+
+title <size:20><b>Core API — :8010</b></size>
+
+actor "Streamlit UI" as CORE_UI
+actor "Analytics API" as CORE_Ana
+actor "CoreAPIClient" as CORE_Client
+
+package "Config & Metadata" {
+  usecase "GET  /metadata" as CORE_Meta
+  usecase "GET  /config" as CORE_Cfg
+  usecase "POST /config/reload" as CORE_Reload
+}
+
+package "Data" {
+  usecase "GET  /original" as CORE_Orig
+  usecase "POST /run\n(filtered long-format)" as CORE_Run
+}
+
+package "Aggregations" {
+  usecase "POST /aggregate/region" as CORE_AR
+  usecase "POST /aggregate/country" as CORE_AC
+  usecase "POST /aggregate/country-code" as CORE_ACC
+  usecase "POST /aggregate/all" as CORE_AA
+}
+
+package "Internals" {
+  usecase "Resolve Filters\n(body → defaults)" as CORE_Res
+  usecase "Run Pipeline\n(filter + operation)" as CORE_Pipe
+}
+
+CORE_UI     --> CORE_Meta
+CORE_UI     --> CORE_Cfg
+CORE_UI     --> CORE_Reload
+CORE_Client --> CORE_Meta
+CORE_Client --> CORE_Cfg
+CORE_Client --> CORE_Reload
+CORE_Client --> CORE_Run
+CORE_Client --> CORE_Orig
+CORE_Client --> CORE_AR
+CORE_Client --> CORE_AC
+CORE_Client --> CORE_ACC
+CORE_Client --> CORE_AA
+CORE_Ana    --> CORE_Run
+
+CORE_Run  ..> CORE_Res  : <<include>>
+CORE_AR   ..> CORE_Res  : <<include>>
+CORE_AC   ..> CORE_Res  : <<include>>
+CORE_ACC  ..> CORE_Res  : <<include>>
+CORE_AA   ..> CORE_Res  : <<include>>
+CORE_Res  ..> CORE_Pipe : <<include>>
+
+@enduml
