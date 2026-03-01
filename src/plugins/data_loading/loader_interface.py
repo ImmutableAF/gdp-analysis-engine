@@ -34,7 +34,7 @@ from abc import ABC, abstractmethod
 from pandas import DataFrame
 
 
-class DataLoader(ABC):
+class DataLoader(ABC):  # pragma: no cover
     """
     Abstract base class for all data loader plugins.
 
