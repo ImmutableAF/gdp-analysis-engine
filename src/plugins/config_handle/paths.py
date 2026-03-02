@@ -1,6 +1,7 @@
 """
 Purpose:
-Resolves absolute paths to the base and query JSON config files relative to the project root.
+Resolves absolute paths to the base, query, and analytics JSON config files
+relative to the project root.
 
 Description:
 Derives all paths from this file's own location on disk, walking three levels up
@@ -10,23 +11,13 @@ regardless of where the application is launched from.
 Functions
 ---------
 get_config_paths()
-    Return both config file paths as a tuple.
+    Return base and query config file paths as a tuple.
 get_base_config_path()
     Return the path to base_config.json.
 get_query_config_path()
     Return the path to query_config.json.
-
-Notes
------
-- Project root is resolved as three levels up from this file's location.
-- All functions derive their result from get_config_paths() — no paths are hardcoded twice.
-
-Examples
---------
->>> base_path, query_path = get_config_paths()
->>> base_path  = get_base_config_path()
->>> query_path = get_query_config_path()
-
+get_analytics_config_path()
+    Return the path to analytics_config.json.
 """
 
 from pathlib import Path
@@ -35,53 +26,42 @@ from typing import Tuple
 
 def get_config_paths() -> Tuple[Path, Path]:
     """
-    Return absolute paths to both config files as a tuple.
+    Return absolute paths to base and query config files as a tuple.
 
     Returns
     -------
     Tuple[Path, Path]
         (base_config_path, query_config_path) resolved from the project root.
-
-    Examples
-    --------
-    >>> base_path, query_path = get_config_paths()
     """
+    base_dir = Path(__file__).parent.parent.parent.parent
 
-    base_dir = Path(__file__).parent.parent.parent
-
-    base_config_path = base_dir / "base_config.json"
-    query_config_path = base_dir / "query_config.json"
+    base_config_path = base_dir / "src" / "base_config.json"
+    query_config_path = base_dir / "src" / "query_config.json"
 
     return base_config_path, query_config_path
 
 
 def get_base_config_path() -> Path:
-    """
-    Return the absolute path to base_config.json.
-
-    Returns
-    -------
-    Path
-        Absolute path to the base configuration file.
-
-    Examples
-    --------
-    >>> path = get_base_config_path()
-    """
+    """Return the absolute path to base_config.json."""
     return get_config_paths()[0]
 
 
 def get_query_config_path() -> Path:
+    """Return the absolute path to query_config.json."""
+    return get_config_paths()[1]
+
+
+def get_analytics_config_path() -> Path:
     """
-    Return the absolute path to query_config.json.
+    Return the absolute path to analytics_config.json.
+
+    Resolved as src/analytics_config.json relative to the project root,
+    sitting alongside base_config.json and query_config.json.
 
     Returns
     -------
     Path
-        Absolute path to the query configuration file.
-
-    Examples
-    --------
-    >>> path = get_query_config_path()
+        Absolute path to the analytics configuration file.
     """
-    return get_config_paths()[1]
+    base_dir = Path(__file__).parent.parent.parent.parent
+    return base_dir / "src" / "analytics_config.json"

@@ -55,10 +55,10 @@ def initialize_logging(base_config: LogPolicy, debug: bool = False) -> None:
 
     Examples
     --------
-    >>> initialize_logging(base_config, debug=True) 
+    >>> initialize_logging(base_config, debug=True)
     >>> initialize_logging(base_config, debug=False)
     """
-    
+
     base_config.log_dir.mkdir(parents=True, exist_ok=True)
 
     log_file = base_config.log_dir / ("debug.log" if debug else "prod.log")
@@ -68,12 +68,11 @@ def initialize_logging(base_config: LogPolicy, debug: bool = False) -> None:
         log_file,
         maxBytes=getattr(base_config, "max_log_size", 100000),
         backupCount=3,
-        encoding="utf-8"
+        encoding="utf-8",
     )
 
     formatter = logging.Formatter(
-        "%(asctime)s [%(levelname)s] %(name)s: %(message)s",
-        datefmt="%H:%M:%S"
+        "%(asctime)s [%(levelname)s] %(name)s: %(message)s", datefmt="%H:%M:%S"
     )
     handler.setFormatter(formatter)
 
@@ -84,4 +83,6 @@ def initialize_logging(base_config: LogPolicy, debug: bool = False) -> None:
     root_logger.handlers.clear()
     root_logger.addHandler(handler)
 
-    root_logger.info(f"Logger initialized. Log file: {log_file}, Level: {logging.getLevelName(log_level)}")
+    root_logger.info(
+        f"Logger initialized. Log file: {log_file}, Level: {logging.getLevelName(log_level)}"
+    )

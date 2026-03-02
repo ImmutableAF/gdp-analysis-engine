@@ -15,6 +15,7 @@ from src.plugins import (
     analytics_app,
     analytics_server,
 )
+from src.plugins.config_handle import get_analytics_config
 
 CORE_PORT = 8010
 ANALYTICS_PORT = 8011
@@ -22,8 +23,13 @@ CORE_URL = f"http://localhost:{CORE_PORT}"
 ANALYTICS_URL = f"http://localhost:{ANALYTICS_PORT}"
 
 
-def start_core_api(base_df, default_filters, config_loader):
-    app = create_server(base_df, default_filters, config_loader=config_loader)
+def start_core_api(base_df, default_filters, config_loader, analytics_config):
+    app = create_server(
+        base_df,
+        default_filters,
+        config_loader=config_loader,
+        analytics_config=analytics_config,
+    )
     uvicorn.run(app, host="0.0.0.0", port=CORE_PORT, log_level="warning")
 
 
@@ -35,20 +41,17 @@ def _probe(url: str) -> bool:
     """Return True if the URL responds with any non-connection-error status."""
     try:
         httpx.get(url, timeout=2)
-        return True  # any HTTP response means the server is up
+        return True
     except httpx.ConnectError:
-        return False  # server not listening yet — keep waiting
+        return False
     except Exception:
-        return True  # got a response (even 4xx/5xx) means server is up
+        return True
 
 
 def wait_for_servers(
     probes: dict[str, str], timeout: float = 60.0, interval: float = 0.3
 ) -> None:
-    """
-    Block until every probe URL responds.
-    probes: { label: url }
-    """
+    """Block until every probe URL responds. probes: { label: url }"""
     deadline = time.time() + timeout
     pending = dict(probes)
 
@@ -80,10 +83,15 @@ def main():
     default_filters = get_query_config(base_df)
     config_loader = lambda: get_query_config(base_df)
 
+    # Load and sanitize analytics config against actual data year range.
+    # Sanitization happens here once — the result is a plain frozen dataclass
+    # with no None values, passed into create_server and exposed via the API.
+    analytics_config = get_analytics_config(base_df)
+
     # Start core API on :8010
     threading.Thread(
         target=start_core_api,
-        args=(base_df, default_filters, config_loader),
+        args=(base_df, default_filters, config_loader, analytics_config),
         daemon=True,
     ).start()
 
@@ -91,8 +99,6 @@ def main():
     analytics_server.CORE_API_URL = CORE_URL
     threading.Thread(target=start_analytics_api, daemon=True).start()
 
-    # Wait until both servers actually accept connections.
-    # Probe /docs — always present on any FastAPI app, no query params needed.
     wait_for_servers(
         {
             "core": f"{CORE_URL}/docs",

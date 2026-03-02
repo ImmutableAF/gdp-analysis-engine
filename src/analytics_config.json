@@ -1,0 +1,9 @@
+{
+  "continent": "Asia",
+  "defaultYear": 2020,
+  "startYear": 2015,
+  "endYear": 2020,
+  "topN": 12,
+  "consecutiveYears": 3,
+  "referenceYear": 2020
+}

@@ -3,7 +3,7 @@ import pandas as pd
 from fastapi import FastAPI, Body, HTTPException
 from fastapi.responses import Response
 from pydantic import BaseModel
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 from typing import Optional, Callable
 
 from .engine import (
@@ -80,9 +80,33 @@ def create_server(
     base_df: pd.DataFrame,
     default_filters: Filters,
     config_loader: Optional[Callable] = None,
+    analytics_config=None,
 ) -> FastAPI:
+    """
+    Create and return the core FastAPI application.
+
+    Parameters
+    ----------
+    base_df : pd.DataFrame
+        The full cleaned GDP DataFrame.
+    default_filters : Filters
+        Default query filters loaded from query_config.json.
+    config_loader : Callable, optional
+        Called on POST /config/reload to re-read query_config.json from disk.
+    analytics_config : AnalyticsConfig
+        Sanitized analytics chart defaults loaded from analytics_config.json.
+        Exposed via GET /analytics-config.
+        Must NOT be None.
+    """
+
+    if analytics_config is None:
+        raise RuntimeError("analytics_config must not be None")
+
     app = FastAPI(title="GDP Core API")
     meta = get_metadata(base_df)
+
+    # Snapshot as plain dict — guaranteed valid and non-empty
+    _analytics_config_dict: dict = asdict(analytics_config)
 
     @app.get("/metadata")
     def get_meta():
@@ -98,6 +122,15 @@ def create_server(
             raise HTTPException(status_code=501, detail="No config loader registered")
         new_filters = config_loader()
         return _filters_to_dict(new_filters)
+
+    @app.get("/analytics-config")
+    def get_analytics_config():
+        """
+        Return the sanitized analytics chart defaults loaded from
+        analytics_config.json at startup.
+        All values are guaranteed valid.
+        """
+        return _analytics_config_dict
 
     @app.get("/original")
     def get_original():

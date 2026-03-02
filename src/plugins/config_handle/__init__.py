@@ -9,4 +9,4 @@ handle.get_base_config  : Primary entry point for application-level configuratio
 handle.get_query_config : Primary entry point for query parameter configuration.
 """
 
-from .handle import get_base_config, get_query_config
+from .handle import get_base_config, get_query_config, get_analytics_config
