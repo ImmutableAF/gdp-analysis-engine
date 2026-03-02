@@ -5,7 +5,7 @@ import httpx
 import uvicorn
 
 from .core import clean_gdp_data, create_server
-from .util import parse_cli_args, initialize_logging
+from .utils import parse_cli_args, initialize_logging
 from .plugins import (
     load_data,
     get_base_config,

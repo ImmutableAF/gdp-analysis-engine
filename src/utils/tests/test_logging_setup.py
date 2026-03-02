@@ -5,13 +5,14 @@ from pathlib import Path
 from unittest.mock import patch
 from logging.handlers import RotatingFileHandler
 
-from src.util.cli_parser import parse_cli_args
-from src.util.logging_setup import initialize_logging
-from src.util.logging_contract import LogPolicy
+from src.utils.cli_parser import parse_cli_args
+from src.utils.logging_setup import initialize_logging
+from src.utils.logging_contract import LogPolicy
 from dataclasses import dataclass
 
 
 # ── Fake config for logging tests ─────────────────────────────────────────────
+
 
 @dataclass
 class FakeLogConfig:  # pragma: no cover
@@ -20,6 +21,7 @@ class FakeLogConfig:  # pragma: no cover
 
 
 # ── ParseCliArgs ──────────────────────────────────────────────────────────────
+
 
 class TestParseCliArgs:
 
@@ -68,6 +70,7 @@ class TestParseCliArgs:
 
 # ── LogPolicy ─────────────────────────────────────────────────────────────────
 
+
 class TestLogPolicy:
 
     def test_object_with_required_attrs_satisfies_contract(self):
@@ -85,6 +88,7 @@ class TestLogPolicy:
 
 
 # ── InitializeLogging ─────────────────────────────────────────────────────────
+
 
 class TestInitializeLogging:
 
@@ -140,13 +144,21 @@ class TestInitializeLogging:
     def test_handler_uses_max_log_size(self, tmp_path):
         config = FakeLogConfig(log_dir=tmp_path, max_log_size=500000)
         initialize_logging(config, debug=True)
-        handler = next(h for h in logging.getLogger().handlers if isinstance(h, RotatingFileHandler))
+        handler = next(
+            h
+            for h in logging.getLogger().handlers
+            if isinstance(h, RotatingFileHandler)
+        )
         assert handler.maxBytes == 500000
 
     def test_handler_keeps_3_backups(self, tmp_path):
         config = FakeLogConfig(log_dir=tmp_path)
         initialize_logging(config, debug=True)
-        handler = next(h for h in logging.getLogger().handlers if isinstance(h, RotatingFileHandler))
+        handler = next(
+            h
+            for h in logging.getLogger().handlers
+            if isinstance(h, RotatingFileHandler)
+        )
         assert handler.backupCount == 3
 
     def test_returns_none(self, tmp_path):

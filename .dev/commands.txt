@@ -1,8 +1,6 @@
 python -m venv .venv
 ./.venv/Scripts/Activate
 
-sphinx-apidoc -o source ../src/core
-sphinx-apidoc -o source ../src/plugins
 .\make.bat html
 sphinx-autobuild .\source .\build\html
 
@@ -12,7 +10,6 @@ docker-compose -f docker-compose.prod.yml up --build
 pydeps src/
 vulture src/ > .dev/reports/vulture.txt
 radon cc src/ -a > .dev/reports/radon.txt
-
 
 pytest > .dev/reports/pytest_log.txt
 start .dev\reports\tests_coverage\index.html

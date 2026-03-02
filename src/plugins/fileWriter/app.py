@@ -1,13 +1,13 @@
 """
 FileOutputSink — dumps all GDP analytics results to a file.
 
-Supported formats
-─────────────────
-  json      pretty-printed JSON, one object per section
-  csv       one CSV file per section, zipped together
-  markdown  single .md report with tables and sections
-  html      standalone styled HTML report (dark theme)
-  pdf       multi-page PDF report via reportlab
+Supported formats:
+
+- ``json``      — pretty-printed JSON, one object per section
+- ``csv``       — one CSV file per section, zipped together
+- ``markdown``  — single .md report with tables and sections
+- ``html``      — standalone styled HTML report (dark theme)
+- ``pdf``       — multi-page PDF report via reportlab
 """
 
 from __future__ import annotations
@@ -739,7 +739,8 @@ class FileOutputSink(OutputSink):
             Spacer(1, 0.5 * cm),
         ]
 
-        # Summary table
+        # summary table
+
         summary_data = [["Section", "Status", "Rows", "ms"]]
         for r in results:
             status = "✓ OK" if r["ok"] else f"✗ {r['status']}"

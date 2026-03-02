@@ -1,3 +1,25 @@
+"""
+Output Analytics API
+====================
+
+A FastAPI application that exposes GDP analytics as REST endpoints.
+Proxies requests to the Core API (running on port 8010) and returns
+JSON responses.
+
+Base URL: ``http://localhost:8010``
+
+Endpoints
+---------
+- ``GET /top-countries`` — Top N countries by GDP for a given continent and year.
+- ``GET /bottom-countries`` — Bottom N countries by GDP.
+- ``GET /gdp-growth-rate`` — Year-on-year GDP growth rate per country.
+- ``GET /avg-gdp-by-continent`` — Average GDP grouped by continent.
+- ``GET /global-gdp-trend`` — Total global GDP summed per year.
+- ``GET /fastest-growing-continent`` — Continents ranked by GDP growth over a period.
+- ``GET /consistent-decline`` — Countries with consistent GDP decline over X years.
+- ``GET /continent-gdp-share`` — Each continent's share of global GDP as a percentage.
+"""
+
 import httpx
 import pandas as pd
 import orjson
@@ -11,6 +33,18 @@ app = FastAPI(title="GDP Analytics API")
 
 
 def _json(df: pd.DataFrame) -> Response:
+    """Serialize a DataFrame to a JSON HTTP response using orjson.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        The data to serialize.
+
+    Returns
+    -------
+    Response
+        A FastAPI response with ``application/json`` media type.
+    """
     return Response(
         content=orjson.dumps(
             df.to_dict(orient="records"), option=orjson.OPT_SERIALIZE_NUMPY
@@ -20,6 +54,25 @@ def _json(df: pd.DataFrame) -> Response:
 
 
 def _fetch(path: str, payload: dict) -> pd.DataFrame:
+    """POST a query to the Core API and return the result as a DataFrame.
+
+    Parameters
+    ----------
+    path : str
+        The Core API endpoint path, e.g. ``/run``.
+    payload : dict
+        The JSON body to send.
+
+    Returns
+    -------
+    pd.DataFrame
+        Parsed response data.
+
+    Raises
+    ------
+    httpx.HTTPStatusError
+        If the Core API returns a non-2xx status.
+    """
     with httpx.Client() as client:
         r = client.post(f"{CORE_API_URL}{path}", json=payload, timeout=30)
         r.raise_for_status()
@@ -30,6 +83,17 @@ def _fetch(path: str, payload: dict) -> pd.DataFrame:
 def top_countries(
     continent: str = Query(...), year: int = Query(...), n: int = Query(10)
 ):
+    """Return the top N countries by GDP for a given continent and year.
+
+    Parameters
+    ----------
+    continent : str
+        Continent name to filter by.
+    year : int
+        The year to query.
+    n : int
+        Number of countries to return. Defaults to 10.
+    """
     df = _fetch("/run", {"region": continent, "startYear": year, "endYear": year})
     result = (
         df.groupby("Country Name")["Value"]
@@ -45,6 +109,17 @@ def top_countries(
 def bottom_countries(
     continent: str = Query(...), year: int = Query(...), n: int = Query(10)
 ):
+    """Return the bottom N countries by GDP for a given continent and year.
+
+    Parameters
+    ----------
+    continent : str
+        Continent name to filter by.
+    year : int
+        The year to query.
+    n : int
+        Number of countries to return. Defaults to 10.
+    """
     df = _fetch("/run", {"region": continent, "startYear": year, "endYear": year})
     result = (
         df.groupby("Country Name")["Value"]
@@ -60,6 +135,17 @@ def bottom_countries(
 def gdp_growth_rate(
     continent: str = Query(...), startYear: int = Query(...), endYear: int = Query(...)
 ):
+    """Return year-on-year GDP growth rate (%) per country for a continent.
+
+    Parameters
+    ----------
+    continent : str
+        Continent name to filter by.
+    startYear : int
+        First year of the range.
+    endYear : int
+        Last year of the range.
+    """
     df = _fetch(
         "/run", {"region": continent, "startYear": startYear, "endYear": endYear}
     )
@@ -81,6 +167,15 @@ def gdp_growth_rate(
 
 @app.get("/avg-gdp-by-continent")
 def avg_gdp_by_continent(startYear: int = Query(...), endYear: int = Query(...)):
+    """Return average GDP grouped by continent over a year range.
+
+    Parameters
+    ----------
+    startYear : int
+        First year of the range.
+    endYear : int
+        Last year of the range.
+    """
     df = _fetch(
         "/run", {"region": ALL_REGIONS, "startYear": startYear, "endYear": endYear}
     )
@@ -95,6 +190,15 @@ def avg_gdp_by_continent(startYear: int = Query(...), endYear: int = Query(...))
 
 @app.get("/global-gdp-trend")
 def global_gdp_trend(startYear: int = Query(...), endYear: int = Query(...)):
+    """Return total global GDP summed per year over a range.
+
+    Parameters
+    ----------
+    startYear : int
+        First year of the range.
+    endYear : int
+        Last year of the range.
+    """
     df = _fetch(
         "/run", {"region": ALL_REGIONS, "startYear": startYear, "endYear": endYear}
     )
@@ -109,6 +213,20 @@ def global_gdp_trend(startYear: int = Query(...), endYear: int = Query(...)):
 
 @app.get("/fastest-growing-continent")
 def fastest_growing_continent(startYear: int = Query(...), endYear: int = Query(...)):
+    """Return continents ranked by GDP growth percentage between two years.
+
+    Parameters
+    ----------
+    startYear : int
+        Base year for growth calculation.
+    endYear : int
+        End year for growth calculation.
+
+    Raises
+    ------
+    HTTPException
+        400 if either year is not present in the data.
+    """
     df = _fetch(
         "/run", {"region": ALL_REGIONS, "startYear": startYear, "endYear": endYear}
     )
@@ -134,6 +252,15 @@ def fastest_growing_continent(startYear: int = Query(...), endYear: int = Query(
 
 @app.get("/consistent-decline")
 def consistent_decline(lastXYears: int = Query(...), referenceYear: int = Query(...)):
+    """Return countries that have shown consistent GDP decline over the last X years.
+
+    Parameters
+    ----------
+    lastXYears : int
+        Number of consecutive years of decline to check for.
+    referenceYear : int
+        The most recent year in the decline window.
+    """
     start = referenceYear - lastXYears - 1
     df = _fetch(
         "/run", {"region": ALL_REGIONS, "startYear": start, "endYear": referenceYear}
@@ -167,6 +294,15 @@ def consistent_decline(lastXYears: int = Query(...), referenceYear: int = Query(
 
 @app.get("/continent-gdp-share")
 def continent_gdp_share(startYear: int = Query(...), endYear: int = Query(...)):
+    """Return each continent's share of global GDP as a percentage.
+
+    Parameters
+    ----------
+    startYear : int
+        First year of the range.
+    endYear : int
+        Last year of the range.
+    """
     df = _fetch(
         "/run", {"region": ALL_REGIONS, "startYear": startYear, "endYear": endYear}
     )

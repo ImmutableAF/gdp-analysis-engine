@@ -1,37 +1,29 @@
-plugins.data\_loaders package
-=============================
+Data Loaders
+============
 
-Submodules
+CSV Loader
 ----------
-
-plugins.data\_loaders.csv\_loader module
-----------------------------------------
 
 .. automodule:: plugins.data_loaders.csv_loader
    :members:
-   :show-inheritance:
    :undoc-members:
+   :show-inheritance:
+   :no-index:
 
-plugins.data\_loaders.excel\_loader module
-------------------------------------------
+Excel Loader
+------------
 
 .. automodule:: plugins.data_loaders.excel_loader
    :members:
-   :show-inheritance:
    :undoc-members:
+   :show-inheritance:
+   :no-index:
 
-plugins.data\_loaders.json\_loader module
------------------------------------------
+JSON Loader
+-----------
 
 .. automodule:: plugins.data_loaders.json_loader
    :members:
-   :show-inheritance:
    :undoc-members:
-
-Module contents
----------------
-
-.. automodule:: plugins.data_loaders
-   :members:
    :show-inheritance:
-   :undoc-members:
+   :no-index:

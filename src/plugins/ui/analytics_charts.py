@@ -73,9 +73,18 @@ def apply_country_codes(df: pd.DataFrame, code_map: dict[str, str]) -> pd.DataFr
 def top_bottom_bar(df: pd.DataFrame, title: str) -> go.Figure:
     """
     Bar chart of top/bottom N countries by GDP.
-    Expects df pre-processed by apply_country_codes():
-      - 'country'      → ISO code (x-axis)
-      - 'country_name' → full name (hover tooltip)
+
+    Expects df pre-processed by ``apply_country_codes()``:
+
+    - ``country`` — ISO code (x-axis)
+    - ``country_name`` — full name (hover tooltip)
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Pre-processed data with ``country`` and ``gdp`` columns.
+    title : str
+        Chart title.
     """
     if df.empty:
         return _empty()
@@ -219,9 +228,16 @@ def fastest_continent_bar(df: pd.DataFrame) -> go.Figure:
 def consistent_decline_bar(df: pd.DataFrame) -> go.Figure:
     """
     Bar chart of countries with consistent GDP decline.
-    Expects df pre-processed by apply_country_codes():
-      - 'country'      → ISO code (x-axis)
-      - 'country_name' → full name (hover tooltip)
+
+    Expects df pre-processed by ``apply_country_codes()``:
+
+    - ``country`` — ISO code (x-axis)
+    - ``country_name`` — full name (hover tooltip)
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Pre-processed data with ``country`` and ``avg_decline_pct`` columns.
     """
     if df.empty:
         return _empty()

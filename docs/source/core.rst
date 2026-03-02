@@ -1,45 +1,55 @@
-core package
-============
+Core
+====
 
-Subpackages
------------
+The core package contains the engine, data-cleaning pipeline, metadata handling,
+contracts (shared type definitions), and the public-facing core API. No plugin
+or UI code lives here — this layer is intentionally dependency-free.
 
-.. toctree::
-   :maxdepth: 4
+.. contents:: Modules
+   :local:
+   :depth: 1
 
-   core.data_loading
+Core API
+--------
 
-Submodules
-----------
+The ``core_api`` module is the single entry-point through which all external
+callers (CLI, Streamlit UI, REST API) interact with the engine.
 
-core.config\_loading module
----------------------------
-
-.. automodule:: core.config_loading
+.. automodule:: core.core_api
    :members:
-   :show-inheritance:
    :undoc-members:
-
-core.contracts module
----------------------
-
-.. automodule:: core.contracts
-   :members:
    :show-inheritance:
-   :undoc-members:
 
-core.engine module
-------------------
+Engine
+------
 
 .. automodule:: core.engine
    :members:
-   :show-inheritance:
    :undoc-members:
+   :show-inheritance:
 
-Module contents
----------------
+Data Cleaning
+-------------
 
-.. automodule:: core
+.. automodule:: core.data_cleaning
    :members:
-   :show-inheritance:
    :undoc-members:
+   :show-inheritance:
+
+Metadata
+--------
+
+.. automodule:: core.metadata
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Contracts
+---------
+
+Shared dataclasses, protocols, and type aliases used across the whole codebase.
+
+.. automodule:: core.contracts
+   :members:
+   :undoc-members:
+   :show-inheritance:
