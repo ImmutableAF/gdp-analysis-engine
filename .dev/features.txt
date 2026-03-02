@@ -1,0 +1,11 @@
+-> dep graphs (partial, module level, project level)
+-> flamegraph (svg, folded)
+-> profile (.prof)
+-> reports (radon, vulture, pyspy, pytest-cov)
+
+
+pydep for dep diagrams
+radon for branching complexity check
+vulture for dead code checking
+flamegraph.pl for flamegraphs
+snakeviz for visualizing dynamic profile

@@ -1,23 +1,12 @@
-pydep for dep diagrams
-radon for branching complexity check
-vulture for dead code checking
-flamegraph.pl for flamegraphs
-snakeviz for visualizing dynamic profile
-
-file:///C:/Users/19028/OneDrive/Documents/gdp-analysis-engine/flamegraph.svg
-perl flamegraph.pl --width 1535 --height 30 --fontsize 12 flamegraph.folded > flamegraph.svg
-perl flamegraph.pl --width 1235 --height 30 --fontsize 12 --minwidth 36 flamegraph.folded > consise-flamegraph.svg
-python -m run_main
-snakeviz profile.prof
-
 redudency in metadata.py
 get_valid_attr in config handler
 get metadata in main to ui
 
-docs
 testing
 dynamic tracking
 
 metric
 diagrams
 reports
+
+NOT SELECT A COUNTRY IF NOT IN CONTINENT

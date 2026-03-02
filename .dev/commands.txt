@@ -1,18 +1,27 @@
 python -m venv .venv
 ./.venv/Scripts/Activate
 
-.\make.bat html
-sphinx-autobuild .\source .\build\html
-
-docker-compose -f docker-compose.dev.yml up --build
-docker-compose -f docker-compose.prod.yml up --build
-
 pydeps src/
+
 vulture src/ > .dev/reports/vulture.txt
 radon cc src/ -a > .dev/reports/radon.txt
 
 pytest > .dev/reports/pytest_log.txt
 start .dev\reports\tests_coverage\index.html
+
+python -m profile_main
+snakeviz .dev/profile/profile.prof
+snakeviz .dev/profile/profile_filtered.prof
+cd .dev/flamegraph
+perl flamegraph.pl --width 1535 --height 30 --fontsize 12 flamegraph.folded > flamegraph.svg
+perl flamegraph.pl --width 1235 --height 30 --fontsize 12 --minwidth 36 flamegraph.folded > consise-flamegraph.svg
+file:///C:/Users/19028/OneDrive/Documents/gdp-analysis-engine/.dev/flamegraph/flamegraph.svg
+
+.\make.bat html
+sphinx-autobuild .\source .\build\html
+
+docker-compose -f docker-compose.dev.yml up --build
+docker-compose -f docker-compose.prod.yml up --build
 
 # src
 pydeps src/ --max-bacon 3 --cluster --show-cycles --rankdir LR --noshow -o .dev/dep_graphs/project_deps.svg --exclude accessible_pygments alabaster altair annotated_doc annotated_types anyio attrs babel beautifulsoup4 blinker cachetools certifi charset_normalizer choreographer click colorama contourpy coverage cycler defusedxml docutils et_xmlfile fastapi fonttools gitdb git httpcore httpx idna imagesize iniconfig jinja2 jsonschema jsonschema_specifications kaleido kiwisolver logistro mando markupsafe matplotlib narwhals networkx numpy objectgraph odfpy openpyxl orjson packaging pandas patsy pillow plotly pluggy protobuf py_spy pyarrow pydantic pydantic_core pydata_sphinx_theme pydeck pygments pyparsing pytest pytest_cov pytest_timeout python_calamine python_dateutil pytz pyxlsb radon referencing reportlab requests roman_numerals rpds scipy simplejson six smmap snakeviz snowballstemmer soupsieve sphinx sphinx_autobuild sphinx_book_theme sphinxcontrib starlette statsmodels stdlib_list streamlit tenacity toml tornado typing_inspection typing_extensions tzdata urllib3 uvicorn vulture watchdog watchfiles websockets xlrd xlsxwriter yappi src.core.tests src.plugins.config_handler.tests src.plugins.data_loading.tests src.util.tests

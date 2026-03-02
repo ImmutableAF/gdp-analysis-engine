@@ -1,67 +1,80 @@
-import yappi
+# profiler.py
 import os
-import pstats
 import io
+import time
+import threading
+import pstats
+import yappi
+from pathlib import Path
 
-# ── Config ────────────────────────────────────────────────────────────────────
+# ── CONFIG ─────────────────────────────────────────────
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "src"))
-OUTPUT_PROF = "profile.prof"
-OUTPUT_PROF_FILTERED = "profile_filtered.prof"
-OUTPUT_FLAME = "flamegraph.folded"
-# ─────────────────────────────────────────────────────────────────────────────
+OUTPUT_PROF = ".dev/profile/profile.prof"
+OUTPUT_PROF_FILTERED = ".dev/profile/profile_filtered.prof"
+OUTPUT_FLAME = ".dev/flamegraph/flamegraph.folded"
+# ──────────────────────────────────────────────────────
+
+from src.main import main  # import your app AFTER setting paths
 
 
+# ── HELPERS ────────────────────────────────────────────
 def is_project_func(func_stat):
-    """Return True only for functions living inside ./src/"""
-    mod = func_stat.module or ""
-    norm = os.path.normpath(os.path.abspath(mod))
-    if not norm.startswith(PROJECT_ROOT):
+    """Keep only functions defined in ./src/"""
+    if not func_stat.module:
         return False
-    bad = (".venv", "site-packages", "dist-packages", "lib/python")
-    return not any(b in norm for b in bad)
+    norm = os.path.normpath(os.path.abspath(func_stat.module))
+    return norm.startswith(PROJECT_ROOT)
 
 
 def is_project_key(key):
+    """Keep only (file,line,name) entries inside ./src/"""
     file = os.path.normpath(os.path.abspath(key[0]))
-    if not file.startswith(PROJECT_ROOT):
-        return False
-    bad = (".venv", "site-packages", "dist-packages")
-    return not any(b in file for b in bad)
+    return file.startswith(PROJECT_ROOT)
 
 
-# ── Run ───────────────────────────────────────────────────────────────────────
-from src.main import main  # import AFTER defining helpers so path is clean
+# ── RUN MAIN IN THREAD ─────────────────────────────────
+def run_main():
+    """Run main() in a separate thread if it spawns daemons"""
+    t = threading.Thread(target=main, daemon=False)
+    t.start()
+    return t
 
+
+# ── PROFILING ─────────────────────────────────────────
 yappi.set_clock_type("cpu")
 yappi.start()
-main()
+
+# Run your main() and let it do some work
+main_thread = run_main()
+
+# Wait a bit to let daemon threads inside main() execute
+time.sleep(5)  # adjust higher if your APIs take longer to spin up
+
+# Stop profiling
 yappi.stop()
 
-
-# ── Filtered stats ────────────────────────────────────────────────────────────
+# ── EXTRACT STATS ─────────────────────────────────────
 stats = yappi.get_func_stats(filter_callback=is_project_func)
 stats.sort("ttot", "desc")
 
-# Pretty-print top 30
 print(f"\n{'Module':<60} {'Function':<30} {'Calls':>7} {'TTotal':>10} {'TSelf':>10}")
 print("─" * 120)
 for f in stats.get()[:30]:
-    mod = os.path.relpath(f.module, os.path.dirname(PROJECT_ROOT)) if f.module else "?"
+    mod = os.path.relpath(f.module or "?", os.path.dirname(PROJECT_ROOT))
     print(f"{mod:<60} {f.name:<30} {f.ncall:>7} {f.ttot:>10.4f}s {f.tsub:>10.4f}s")
 
-# Save raw pstats first (needed as input for filtering steps below)
+# ── SAVE RAW STATS ────────────────────────────────────
 stats.save(OUTPUT_PROF, type="pstat")
-print(f"\n✓ pstats saved → {OUTPUT_PROF}")
+print(f"✓ Saved raw pstats → {OUTPUT_PROF}")
 
 
-# ── Flamegraph (folded stacks format) ────────────────────────────────────────
+# ── GENERATE FOLDED FLAMEGRAPH ───────────────────────
 def pstats_to_folded(prof_path: str, out_path: str):
     ps = pstats.Stats(prof_path, stream=io.StringIO())
     ps.calc_callees()
-
     raw = ps.stats  # {(file, line, name): (cc, nc, tt, ct, callers)}
 
-    folded: dict[str, float] = {}
+    folded = {}
 
     def label(key):
         file, line, name = key
@@ -72,32 +85,31 @@ def pstats_to_folded(prof_path: str, out_path: str):
         if not is_project_key(callee_key):
             continue
         if not callers:
-            stack = label(callee_key)
-            folded[stack] = folded.get(stack, 0) + tt
+            folded[label(callee_key)] = folded.get(label(callee_key), 0) + tt
         else:
             for caller_key in callers:
-                if not is_project_key(caller_key):
-                    stack = label(callee_key)
-                else:
-                    stack = f"{label(caller_key)};{label(callee_key)}"
+                stack = (
+                    f"{label(caller_key)};{label(callee_key)}"
+                    if is_project_key(caller_key)
+                    else label(callee_key)
+                )
                 folded[stack] = folded.get(stack, 0) + tt
 
     with open(out_path, "w") as fh:
         for stack, t in sorted(folded.items(), key=lambda x: -x[1]):
-            fh.write(f"{stack} {max(1, int(t * 10000))}\n")
+            fh.write(f"{stack} {max(1,int(t*10000))}\n")
 
-    print(f"✓ folded stacks saved → {out_path}")
+    print(f"✓ Saved folded stacks → {out_path}")
 
 
 pstats_to_folded(OUTPUT_PROF, OUTPUT_FLAME)
 
 
-# ── Filtered SnakeViz prof ────────────────────────────────────────────────────
+# ── SAVE FILTERED PS STATS ───────────────────────────
 def save_filtered_prof(input_path: str, output_path: str):
     ps = pstats.Stats(input_path, stream=io.StringIO())
-    raw = ps.stats  # {(file, line, name): (cc, nc, tt, ct, callers)}
+    raw = ps.stats
 
-    # Keep only project keys, strip non-project callers too
     filtered = {}
     for callee_key, (cc, nc, tt, ct, callers) in raw.items():
         if not is_project_key(callee_key):
@@ -108,7 +120,10 @@ def save_filtered_prof(input_path: str, output_path: str):
     ps2 = pstats.Stats(input_path, stream=io.StringIO())
     ps2.stats = filtered
     ps2.dump_stats(output_path)
-    print(f"✓ filtered pstats saved → {output_path}")
+    print(f"✓ Saved filtered pstats → {output_path}")
 
 
 save_filtered_prof(OUTPUT_PROF, OUTPUT_PROF_FILTERED)
+
+# ── DONE ─────────────────────────────────────────────
+print("\nProfiling complete!")

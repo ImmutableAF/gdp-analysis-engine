@@ -1,4 +1,0 @@
--> dep graphs (partial, module level, project level)
--> flamegraph (svg, folded)
--> profile (.prof)
--> reports (radon, vulture, pyspy, pytest-cov)
