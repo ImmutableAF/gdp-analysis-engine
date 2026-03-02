@@ -1,3 +1,4 @@
+version: "3.9"
 services:
   gdp-app:
     build:
@@ -11,8 +12,10 @@ services:
       - ./src:/app/src          # live reload
       - ./data:/app/data
       - ./logs:/app/logs
-      - ./reports:/app/reports  # pytest / radon / vulture outputs land here
+      - ./reports:/app/reports
     environment:
       - CORE_API_URL=http://localhost:8010
       - ANALYTICS_API_URL=http://localhost:8011
+      - STREAMLIT_SERVER_ADDRESS=0.0.0.0
+      - STREAMLIT_SERVER_PORT=8501
     restart: unless-stopped

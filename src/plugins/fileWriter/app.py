@@ -641,79 +641,13 @@ class FileOutputSink(OutputSink):
     # ── PDF ───────────────────────────────────────────────────────────
 
     def _write_pdf(self, results: list[dict]) -> None:
-        from reportlab.lib import colors
         from reportlab.lib.pagesizes import A4
-        from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
         from reportlab.lib.units import cm
-        from reportlab.platypus import (
-            SimpleDocTemplate,
-            Paragraph,
-            Spacer,
-            Table,
-            TableStyle,
-            HRFlowable,
-            PageBreak,
-        )
+        from reportlab.platypus import SimpleDocTemplate, PageBreak
 
+        colours = _pdf_colours()
+        styles = _pdf_styles(colours)
         W, H = A4
-
-        # Colour palette
-        C_BG = colors.HexColor("#0d0f12")
-        C_GOLD = colors.HexColor("#e8a623")
-        C_CYAN = colors.HexColor("#38bdf8")
-        C_GREEN = colors.HexColor("#4ade80")
-        C_RED = colors.HexColor("#f87171")
-        C_TEXT = colors.HexColor("#e2e8f0")
-        C_DIM = colors.HexColor("#64748b")
-        C_SURF = colors.HexColor("#14171c")
-        C_BORDER = colors.HexColor("#1e2329")
-
-        # Custom styles
-        def S(name, **kw):
-            return ParagraphStyle(name, **kw)
-
-        sTitle = S(
-            "sTitle",
-            fontName="Helvetica-Bold",
-            fontSize=22,
-            textColor=C_GOLD,
-            spaceAfter=4,
-        )
-        sSub = S(
-            "sSub", fontName="Helvetica", fontSize=9, textColor=C_DIM, spaceAfter=2
-        )
-        sH2 = S(
-            "sH2",
-            fontName="Helvetica-Bold",
-            fontSize=13,
-            textColor=C_GOLD,
-            spaceBefore=6,
-            spaceAfter=2,
-        )
-        sNote = S(
-            "sNote", fontName="Helvetica", fontSize=8, textColor=C_DIM, spaceAfter=6
-        )
-        sNoData = S(
-            "sNoData", fontName="Helvetica-Oblique", fontSize=9, textColor=C_DIM
-        )
-
-        def _header_footer(canvas, doc):
-            canvas.saveState()
-            canvas.setFillColor(C_GOLD)
-            canvas.setFont("Helvetica-Bold", 7)
-            canvas.drawString(2 * cm, H - 1.2 * cm, "GDP ANALYTICS ENGINE")
-            canvas.setFillColor(C_DIM)
-            canvas.setFont("Helvetica", 7)
-            canvas.drawRightString(
-                W - 2 * cm, H - 1.2 * cm, datetime.now().strftime("%Y-%m-%d %H:%M")
-            )
-            canvas.setFillColor(C_DIM)
-            canvas.drawCentredString(W / 2, 1 * cm, f"Page {doc.page}")
-            canvas.setStrokeColor(C_BORDER)
-            canvas.setLineWidth(0.5)
-            canvas.line(2 * cm, H - 1.5 * cm, W - 2 * cm, H - 1.5 * cm)
-            canvas.line(2 * cm, 1.4 * cm, W - 2 * cm, 1.4 * cm)
-            canvas.restoreState()
 
         doc = SimpleDocTemplate(
             str(self._path),
@@ -723,145 +657,227 @@ class FileOutputSink(OutputSink):
             topMargin=2.2 * cm,
             bottomMargin=2 * cm,
         )
-        story = []
 
-        # ── Cover ────────────────────────────────────────────────────
+        header_footer = _make_header_footer(colours, W, H)
+        story = _pdf_cover(results, styles, colours)
+        story.append(PageBreak())
+        story += _pdf_sections(results, styles, colours, W)
+
+        doc.build(story, onFirstPage=header_footer, onLaterPages=header_footer)
+
+
+# ── PDF helpers ───────────────────────────────────────────────────────────────
+
+
+def _pdf_colours() -> dict:
+    from reportlab.lib import colors
+
+    return {
+        "bg": colors.HexColor("#0d0f12"),
+        "gold": colors.HexColor("#e8a623"),
+        "cyan": colors.HexColor("#38bdf8"),
+        "green": colors.HexColor("#4ade80"),
+        "red": colors.HexColor("#f87171"),
+        "text": colors.HexColor("#e2e8f0"),
+        "dim": colors.HexColor("#64748b"),
+        "surf": colors.HexColor("#14171c"),
+        "border": colors.HexColor("#1e2329"),
+    }
+
+
+def _pdf_styles(c: dict) -> dict:
+    from reportlab.lib.styles import ParagraphStyle
+
+    def S(name, **kw):
+        return ParagraphStyle(name, **kw)
+
+    return {
+        "title": S(
+            "sTitle",
+            fontName="Helvetica-Bold",
+            fontSize=22,
+            textColor=c["gold"],
+            spaceAfter=4,
+        ),
+        "sub": S(
+            "sSub", fontName="Helvetica", fontSize=9, textColor=c["dim"], spaceAfter=2
+        ),
+        "h2": S(
+            "sH2",
+            fontName="Helvetica-Bold",
+            fontSize=13,
+            textColor=c["gold"],
+            spaceBefore=6,
+            spaceAfter=2,
+        ),
+        "note": S(
+            "sNote", fontName="Helvetica", fontSize=8, textColor=c["dim"], spaceAfter=6
+        ),
+        "nodata": S(
+            "sNoData", fontName="Helvetica-Oblique", fontSize=9, textColor=c["dim"]
+        ),
+    }
+
+
+def _make_header_footer(c: dict, W: float, H: float):
+    from reportlab.lib.units import cm
+
+    def _header_footer(canvas, doc):
+        canvas.saveState()
+        canvas.setFillColor(c["gold"])
+        canvas.setFont("Helvetica-Bold", 7)
+        canvas.drawString(2 * cm, H - 1.2 * cm, "GDP ANALYTICS ENGINE")
+        canvas.setFillColor(c["dim"])
+        canvas.setFont("Helvetica", 7)
+        canvas.drawRightString(
+            W - 2 * cm, H - 1.2 * cm, datetime.now().strftime("%Y-%m-%d %H:%M")
+        )
+        canvas.drawCentredString(W / 2, 1 * cm, f"Page {doc.page}")
+        canvas.setStrokeColor(c["border"])
+        canvas.setLineWidth(0.5)
+        canvas.line(2 * cm, H - 1.5 * cm, W - 2 * cm, H - 1.5 * cm)
+        canvas.line(2 * cm, 1.4 * cm, W - 2 * cm, 1.4 * cm)
+        canvas.restoreState()
+
+    return _header_footer
+
+
+def _pdf_cover(results: list[dict], styles: dict, c: dict) -> list:
+    from reportlab.lib.units import cm
+    from reportlab.platypus import Paragraph, Spacer, Table, TableStyle, HRFlowable
+
+    story = [
+        Spacer(1, 3 * cm),
+        Paragraph("GDP ANALYTICS ENGINE", styles["title"]),
+        Paragraph(
+            f"Report generated {datetime.now().strftime('%B %d, %Y at %H:%M')}",
+            styles["sub"],
+        ),
+        Spacer(1, 0.5 * cm),
+        HRFlowable(width="100%", thickness=1, color=c["gold"]),
+        Spacer(1, 0.5 * cm),
+    ]
+
+    summary_data = [["Section", "Status", "Rows", "ms"]]
+    for r in results:
+        status = "✓ OK" if r["ok"] else f"✗ {r['status']}"
+        summary_data.append(
+            [r["title"], status, str(len(r["data"])), str(r["elapsed"])]
+        )
+
+    tbl = Table(summary_data, colWidths=[10 * cm, 2.2 * cm, 1.5 * cm, 1.8 * cm])
+    tbl.setStyle(
+        TableStyle(
+            [
+                ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                ("FONTSIZE", (0, 0), (-1, -1), 8),
+                ("TEXTCOLOR", (0, 0), (-1, 0), c["gold"]),
+                ("TEXTCOLOR", (0, 1), (-1, -1), c["text"]),
+                ("BACKGROUND", (0, 0), (-1, 0), c["surf"]),
+                ("ROWBACKGROUNDS", (0, 1), (-1, -1), [c["bg"], c["surf"]]),
+                ("GRID", (0, 0), (-1, -1), 0.25, c["border"]),
+                ("ALIGN", (1, 0), (-1, -1), "CENTER"),
+                ("TOPPADDING", (0, 0), (-1, -1), 4),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+            ]
+        )
+    )
+    for i, r in enumerate(results, 1):
+        tbl.setStyle(
+            TableStyle(
+                [("TEXTCOLOR", (1, i), (1, i), c["green"] if r["ok"] else c["red"])]
+            )
+        )
+
+    story.append(tbl)
+    return story
+
+
+def _pdf_format_cell(k: str, v: float) -> str:
+    if any(x in k for x in ("pct", "rate", "growth", "share", "decline")):
+        sign = "+" if v >= 0 else ""
+        return f"{sign}{v:.2f}%"
+    if any(x in k for x in ("gdp", "avg", "total")):
+        return _fmt_gdp(v)
+    return f"{v:.3f}"
+
+
+def _pdf_table_style_cmds(rows: list, data: list[dict], keys: list, c: dict) -> list:
+    cmds = []
+    for ri in range(1, len(rows)):
+        cmds.append(
+            ("BACKGROUND", (0, ri), (-1, ri), c["bg"] if ri % 2 == 1 else c["surf"])
+        )
+    for ri, rec in enumerate(data, 1):
+        for ci, k in enumerate(keys):
+            v = rec.get(k)
+            if not isinstance(v, float):
+                continue
+            if any(x in k for x in ("pct", "rate", "growth", "share", "decline")):
+                cmds.append(
+                    (
+                        "TEXTCOLOR",
+                        (ci, ri),
+                        (ci, ri),
+                        c["green"] if v >= 0 else c["red"],
+                    )
+                )
+            elif any(x in k for x in ("gdp", "avg", "total")):
+                cmds.append(("TEXTCOLOR", (ci, ri), (ci, ri), c["cyan"]))
+    return cmds
+
+
+def _pdf_sections(results: list[dict], styles: dict, c: dict, W: float) -> list:
+    from reportlab.lib.units import cm
+    from reportlab.platypus import Paragraph, Spacer, Table, TableStyle, HRFlowable
+
+    story = []
+    for i, r in enumerate(results, 1):
         story += [
-            Spacer(1, 3 * cm),
-            Paragraph("GDP ANALYTICS ENGINE", sTitle),
+            Paragraph(f"{i:02d}.  {r['title']}", styles["h2"]),
             Paragraph(
-                f"Report generated {datetime.now().strftime('%B %d, %Y at %H:%M')}",
-                sSub,
+                f"{r['note']}  ·  HTTP {r['status']}  ·  {len(r['data'])} rows  ·  {r['elapsed']} ms",
+                styles["note"],
             ),
-            Paragraph(f"Source: {self._base}", sSub),
-            Spacer(1, 0.5 * cm),
-            HRFlowable(width="100%", thickness=1, color=C_GOLD),
-            Spacer(1, 0.5 * cm),
+            HRFlowable(width="100%", thickness=0.5, color=c["border"]),
+            Spacer(1, 0.2 * cm),
         ]
 
-        # summary table
+        if not r["ok"] or not r["data"]:
+            story += [
+                Paragraph("No data returned.", styles["nodata"]),
+                Spacer(1, 0.5 * cm),
+            ]
+            continue
 
-        summary_data = [["Section", "Status", "Rows", "ms"]]
-        for r in results:
-            status = "✓ OK" if r["ok"] else f"✗ {r['status']}"
-            summary_data.append(
-                [r["title"], status, str(len(r["data"])), str(r["elapsed"])]
-            )
+        keys = list(r["data"][0].keys())
+        header = [k.replace("_", " ").title() for k in keys]
+        rows = [header] + [
+            [
+                _pdf_format_cell(k, v) if isinstance(v := rec[k], float) else str(v)
+                for k in keys
+            ]
+            for rec in r["data"]
+        ]
 
-        summary_tbl = Table(
-            summary_data, colWidths=[10 * cm, 2.2 * cm, 1.5 * cm, 1.8 * cm]
-        )
-        summary_tbl.setStyle(
+        col_w = [(W - 4 * cm) / len(keys)] * len(keys)
+        tbl = Table(rows, colWidths=col_w, repeatRows=1)
+        tbl.setStyle(
             TableStyle(
                 [
                     ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
-                    ("FONTSIZE", (0, 0), (-1, -1), 8),
-                    ("TEXTCOLOR", (0, 0), (-1, 0), C_GOLD),
-                    ("TEXTCOLOR", (0, 1), (-1, -1), C_TEXT),
-                    ("BACKGROUND", (0, 0), (-1, 0), C_SURF),
-                    ("ROWBACKGROUNDS", (0, 1), (-1, -1), [C_BG, C_SURF]),
-                    ("GRID", (0, 0), (-1, -1), 0.25, C_BORDER),
-                    ("ALIGN", (1, 0), (-1, -1), "CENTER"),
-                    ("TOPPADDING", (0, 0), (-1, -1), 4),
-                    ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+                    ("FONTSIZE", (0, 0), (-1, -1), 7.5),
+                    ("TEXTCOLOR", (0, 0), (-1, 0), c["gold"]),
+                    ("TEXTCOLOR", (0, 1), (-1, -1), c["text"]),
+                    ("BACKGROUND", (0, 0), (-1, 0), c["surf"]),
+                    ("GRID", (0, 0), (-1, -1), 0.25, c["border"]),
+                    ("ALIGN", (0, 0), (-1, -1), "LEFT"),
+                    ("TOPPADDING", (0, 0), (-1, -1), 3),
+                    ("BOTTOMPADDING", (0, 0), (-1, -1), 3),
+                    *_pdf_table_style_cmds(rows, r["data"], keys, c),
                 ]
             )
         )
-        for i, r in enumerate(results, 1):
-            color = C_GREEN if r["ok"] else C_RED
-            summary_tbl.setStyle(TableStyle([("TEXTCOLOR", (1, i), (1, i), color)]))
+        story += [tbl, Spacer(1, 0.8 * cm)]
 
-        story += [summary_tbl, PageBreak()]
-
-        # ── Data sections ────────────────────────────────────────────
-        for i, r in enumerate(results, 1):
-            story += [
-                Paragraph(f"{i:02d}.  {r['title']}", sH2),
-                Paragraph(
-                    r["note"]
-                    + f"  ·  HTTP {r['status']}  ·  {len(r['data'])} rows  ·  {r['elapsed']} ms",
-                    sNote,
-                ),
-                HRFlowable(width="100%", thickness=0.5, color=C_BORDER),
-                Spacer(1, 0.2 * cm),
-            ]
-
-            if not r["ok"] or not r["data"]:
-                story += [Paragraph("No data returned.", sNoData), Spacer(1, 0.5 * cm)]
-                continue
-
-            keys = list(r["data"][0].keys())
-            header = [k.replace("_", " ").title() for k in keys]
-            rows = [header]
-
-            for rec in r["data"]:
-                row = []
-                for k in keys:
-                    v = rec[k]
-                    if isinstance(v, float):
-                        if any(
-                            x in k
-                            for x in ("pct", "rate", "growth", "share", "decline")
-                        ):
-                            sign = "+" if v >= 0 else ""
-                            row.append(f"{sign}{v:.2f}%")
-                        elif any(x in k for x in ("gdp", "avg", "total")):
-                            row.append(_fmt_gdp(v))
-                        else:
-                            row.append(f"{v:.3f}")
-                    else:
-                        row.append(str(v))
-                rows.append(row)
-
-            # Dynamic column widths
-            n = len(keys)
-            avail = W - 4 * cm
-            col_w = [avail / n] * n
-
-            tbl = Table(rows, colWidths=col_w, repeatRows=1)
-
-            # Build alternating row colours
-            row_bg_cmds = []
-            for ri in range(1, len(rows)):
-                bg = C_BG if ri % 2 == 1 else C_SURF
-                row_bg_cmds.append(("BACKGROUND", (0, ri), (-1, ri), bg))
-
-            # Colour numeric columns
-            num_color_cmds = []
-            for ri, rec in enumerate(r["data"], 1):
-                for ci, k in enumerate(keys):
-                    v = rec.get(k)
-                    if isinstance(v, float):
-                        if any(
-                            x in k
-                            for x in ("pct", "rate", "growth", "share", "decline")
-                        ):
-                            col = C_GREEN if v >= 0 else C_RED
-                            num_color_cmds.append(
-                                ("TEXTCOLOR", (ci, ri), (ci, ri), col)
-                            )
-                        elif any(x in k for x in ("gdp", "avg", "total")):
-                            num_color_cmds.append(
-                                ("TEXTCOLOR", (ci, ri), (ci, ri), C_CYAN)
-                            )
-
-            tbl.setStyle(
-                TableStyle(
-                    [
-                        ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
-                        ("FONTSIZE", (0, 0), (-1, -1), 7.5),
-                        ("TEXTCOLOR", (0, 0), (-1, 0), C_GOLD),
-                        ("TEXTCOLOR", (0, 1), (-1, -1), C_TEXT),
-                        ("BACKGROUND", (0, 0), (-1, 0), C_SURF),
-                        ("GRID", (0, 0), (-1, -1), 0.25, C_BORDER),
-                        ("ALIGN", (0, 0), (-1, -1), "LEFT"),
-                        ("TOPPADDING", (0, 0), (-1, -1), 3),
-                        ("BOTTOMPADDING", (0, 0), (-1, -1), 3),
-                        *row_bg_cmds,
-                        *num_color_cmds,
-                    ]
-                )
-            )
-            story += [tbl, Spacer(1, 0.8 * cm)]
-
-        doc.build(story, onFirstPage=_header_footer, onLaterPages=_header_footer)
+    return story

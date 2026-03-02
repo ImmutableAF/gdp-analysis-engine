@@ -159,7 +159,7 @@ def _code_table(
         .reset_index(drop=True)
     )
     table.index += 1
-    st.dataframe(table, width="content=True", height=400)
+    st.dataframe(table, width="stretch", height=400)
 
 
 # ── Shared widgets ────────────────────────────────────────────────────────────

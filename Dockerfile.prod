@@ -1,3 +1,4 @@
+# Production Dockerfile
 FROM python:3.12-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -7,14 +8,16 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
-# Layer 1 – deps (only changes when requirements.prod.txt changes)
+# Install production dependencies
 COPY requirements.prod.txt .
 RUN pip install -r requirements.prod.txt
 
-# Layer 2 – source (changes frequently)
-COPY src/  ./src/
+# Copy source and data
+COPY src/ ./src/
 COPY data/ ./data/
 
+# Expose API and Streamlit ports
 EXPOSE 8010 8011 8501
 
-CMD ["python", "-m", "src.main"]
+# Run main app
+CMD ["streamlit", "run", "src/main.py", "--server.address=0.0.0.0", "--server.port=8501"]

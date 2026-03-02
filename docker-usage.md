@@ -136,3 +136,6 @@ gdp-analysis-engine/
 | flamegraph.pl             | ✗       | ✅     |
 | Sphinx docs               | ✗       | ✅     |
 | Image size                | smaller | larger |
+
+cd /mnt/c/Users/19028/OneDrive/Documents/gdp-analysis-engine
+docker-compose -f docker-compose.prod.yml up --build
