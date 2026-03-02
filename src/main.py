@@ -1,40 +1,37 @@
-import sys
 import threading
 import time
 from pathlib import Path
 import httpx
 import uvicorn
 
-from src.core import clean_gdp_data, create_server
-from src.util import parse_cli_args, initialize_logging
-from src.plugins import (
+from .core import clean_gdp_data, create_server
+from .util import parse_cli_args, initialize_logging
+from .plugins import (
     load_data,
     get_base_config,
     get_query_config,
+    get_analytics_config,
+    get_ports_config,
     make_sink,
     analytics_app,
     analytics_server,
 )
-from src.plugins.config_handle import get_analytics_config
-
-CORE_PORT = 8010
-ANALYTICS_PORT = 8011
-CORE_URL = f"http://localhost:{CORE_PORT}"
-ANALYTICS_URL = f"http://localhost:{ANALYTICS_PORT}"
 
 
-def start_core_api(base_df, default_filters, config_loader, analytics_config):
+def start_core_api(
+    base_df, default_filters, config_loader, analytics_config, port: int
+):
     app = create_server(
         base_df,
         default_filters,
         config_loader=config_loader,
         analytics_config=analytics_config,
     )
-    uvicorn.run(app, host="0.0.0.0", port=CORE_PORT, log_level="warning")
+    uvicorn.run(app, host="0.0.0.0", port=port, log_level="warning")
 
 
-def start_analytics_api():
-    uvicorn.run(analytics_app, host="0.0.0.0", port=ANALYTICS_PORT, log_level="warning")
+def start_analytics_api(port: int):
+    uvicorn.run(analytics_app, host="0.0.0.0", port=port, log_level="warning")
 
 
 def _probe(url: str) -> bool:
@@ -71,6 +68,13 @@ def main():
     base_config = get_base_config()
     initialize_logging(base_config, debug=True)
 
+    # Load ports first — needed before any server thread starts.
+    ports = get_ports_config()
+    core_port = ports.core_port
+    analytics_port = ports.analytics_port
+    core_url = f"http://localhost:{core_port}"
+    analytics_url = f"http://localhost:{analytics_port}"
+
     args = parse_cli_args()
     filepath = (
         args.file_path
@@ -83,30 +87,31 @@ def main():
     default_filters = get_query_config(base_df)
     config_loader = lambda: get_query_config(base_df)
 
-    # Load and sanitize analytics config against actual data year range.
-    # Sanitization happens here once — the result is a plain frozen dataclass
-    # with no None values, passed into create_server and exposed via the API.
     analytics_config = get_analytics_config(base_df)
 
-    # Start core API on :8010
+    # Start core API
     threading.Thread(
         target=start_core_api,
-        args=(base_df, default_filters, config_loader, analytics_config),
+        args=(base_df, default_filters, config_loader, analytics_config, core_port),
         daemon=True,
     ).start()
 
-    # Start analytics API on :8011
-    analytics_server.CORE_API_URL = CORE_URL
-    threading.Thread(target=start_analytics_api, daemon=True).start()
+    # Start analytics API
+    analytics_server.CORE_API_URL = core_url
+    threading.Thread(
+        target=start_analytics_api,
+        args=(analytics_port,),
+        daemon=True,
+    ).start()
 
     wait_for_servers(
         {
-            "core": f"{CORE_URL}/docs",
-            "analytics": f"{ANALYTICS_URL}/docs",
+            "core": f"{core_url}/docs",
+            "analytics": f"{analytics_url}/docs",
         }
     )
 
-    sink = make_sink(base_config, api_url=CORE_URL, analytics_url=ANALYTICS_URL)
+    sink = make_sink(base_config, api_url=core_url, analytics_url=analytics_url)
     sink.start()
 
 

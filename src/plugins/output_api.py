@@ -12,7 +12,9 @@ app = FastAPI(title="GDP Analytics API")
 
 def _json(df: pd.DataFrame) -> Response:
     return Response(
-        content=orjson.dumps(df.to_dict(orient="records"), option=orjson.OPT_SERIALIZE_NUMPY),
+        content=orjson.dumps(
+            df.to_dict(orient="records"), option=orjson.OPT_SERIALIZE_NUMPY
+        ),
         media_type="application/json",
     )
 
@@ -25,7 +27,9 @@ def _fetch(path: str, payload: dict) -> pd.DataFrame:
 
 
 @app.get("/top-countries")
-def top_countries(continent: str = Query(...), year: int = Query(...), n: int = Query(10)):
+def top_countries(
+    continent: str = Query(...), year: int = Query(...), n: int = Query(10)
+):
     df = _fetch("/run", {"region": continent, "startYear": year, "endYear": year})
     result = (
         df.groupby("Country Name")["Value"]
@@ -38,7 +42,9 @@ def top_countries(continent: str = Query(...), year: int = Query(...), n: int = 
 
 
 @app.get("/bottom-countries")
-def bottom_countries(continent: str = Query(...), year: int = Query(...), n: int = Query(10)):
+def bottom_countries(
+    continent: str = Query(...), year: int = Query(...), n: int = Query(10)
+):
     df = _fetch("/run", {"region": continent, "startYear": year, "endYear": year})
     result = (
         df.groupby("Country Name")["Value"]
@@ -51,15 +57,19 @@ def bottom_countries(continent: str = Query(...), year: int = Query(...), n: int
 
 
 @app.get("/gdp-growth-rate")
-def gdp_growth_rate(continent: str = Query(...), startYear: int = Query(...), endYear: int = Query(...)):
-    df = _fetch("/run", {"region": continent, "startYear": startYear, "endYear": endYear})
+def gdp_growth_rate(
+    continent: str = Query(...), startYear: int = Query(...), endYear: int = Query(...)
+):
+    df = _fetch(
+        "/run", {"region": continent, "startYear": startYear, "endYear": endYear}
+    )
     yearly = (
         df.groupby(["Country Name", "Year"])["Value"]
         .sum()
         .unstack("Year")
         .sort_index(axis=1)
     )
-    growth = yearly.pct_change(axis=1).iloc[:, 1:] * 100
+    growth = yearly.pct_change(axis=1, fill_method=None).iloc[:, 1:] * 100
     result = (
         growth.reset_index()
         .melt(id_vars="Country Name", var_name="year", value_name="growth_rate_pct")
@@ -71,7 +81,9 @@ def gdp_growth_rate(continent: str = Query(...), startYear: int = Query(...), en
 
 @app.get("/avg-gdp-by-continent")
 def avg_gdp_by_continent(startYear: int = Query(...), endYear: int = Query(...)):
-    df = _fetch("/run", {"region": ALL_REGIONS, "startYear": startYear, "endYear": endYear})
+    df = _fetch(
+        "/run", {"region": ALL_REGIONS, "startYear": startYear, "endYear": endYear}
+    )
     result = (
         df.groupby("Continent")["Value"]
         .mean()
@@ -83,7 +95,9 @@ def avg_gdp_by_continent(startYear: int = Query(...), endYear: int = Query(...))
 
 @app.get("/global-gdp-trend")
 def global_gdp_trend(startYear: int = Query(...), endYear: int = Query(...)):
-    df = _fetch("/run", {"region": ALL_REGIONS, "startYear": startYear, "endYear": endYear})
+    df = _fetch(
+        "/run", {"region": ALL_REGIONS, "startYear": startYear, "endYear": endYear}
+    )
     result = (
         df.groupby("Year")["Value"]
         .sum()
@@ -95,14 +109,20 @@ def global_gdp_trend(startYear: int = Query(...), endYear: int = Query(...)):
 
 @app.get("/fastest-growing-continent")
 def fastest_growing_continent(startYear: int = Query(...), endYear: int = Query(...)):
-    df = _fetch("/run", {"region": ALL_REGIONS, "startYear": startYear, "endYear": endYear})
+    df = _fetch(
+        "/run", {"region": ALL_REGIONS, "startYear": startYear, "endYear": endYear}
+    )
     boundary = df[df["Year"].isin([startYear, endYear])]
     pivoted = boundary.groupby(["Continent", "Year"])["Value"].sum().unstack("Year")
 
     if startYear not in pivoted.columns or endYear not in pivoted.columns:
-        raise HTTPException(status_code=400, detail="startYear or endYear not found in data")
+        raise HTTPException(
+            status_code=400, detail="startYear or endYear not found in data"
+        )
 
-    pivoted["growth_pct"] = ((pivoted[endYear] - pivoted[startYear]) / pivoted[startYear]) * 100
+    pivoted["growth_pct"] = (
+        (pivoted[endYear] - pivoted[startYear]) / pivoted[startYear]
+    ) * 100
     result = (
         pivoted[["growth_pct"]]
         .reset_index()
@@ -115,7 +135,9 @@ def fastest_growing_continent(startYear: int = Query(...), endYear: int = Query(
 @app.get("/consistent-decline")
 def consistent_decline(lastXYears: int = Query(...), referenceYear: int = Query(...)):
     start = referenceYear - lastXYears - 1
-    df = _fetch("/run", {"region": ALL_REGIONS, "startYear": start, "endYear": referenceYear})
+    df = _fetch(
+        "/run", {"region": ALL_REGIONS, "startYear": start, "endYear": referenceYear}
+    )
     yearly = (
         df.groupby(["Country Name", "Year"])["Value"]
         .sum()
@@ -125,11 +147,15 @@ def consistent_decline(lastXYears: int = Query(...), referenceYear: int = Query(
 
     def all_declining(row):
         vals = row.dropna().values
-        return len(vals) == lastXYears and all(vals[i] > vals[i + 1] for i in range(len(vals) - 1))
+        return len(vals) == lastXYears and all(
+            vals[i] > vals[i + 1] for i in range(len(vals) - 1)
+        )
 
     def avg_decline_pct(row):
         vals = row.dropna().values
-        pct_changes = [(vals[i + 1] - vals[i]) / vals[i] * 100 for i in range(len(vals) - 1)]
+        pct_changes = [
+            (vals[i + 1] - vals[i]) / vals[i] * 100 for i in range(len(vals) - 1)
+        ]
         return sum(pct_changes) / len(pct_changes)
 
     mask = yearly.apply(all_declining, axis=1)
@@ -141,7 +167,9 @@ def consistent_decline(lastXYears: int = Query(...), referenceYear: int = Query(
 
 @app.get("/continent-gdp-share")
 def continent_gdp_share(startYear: int = Query(...), endYear: int = Query(...)):
-    df = _fetch("/run", {"region": ALL_REGIONS, "startYear": startYear, "endYear": endYear})
+    df = _fetch(
+        "/run", {"region": ALL_REGIONS, "startYear": startYear, "endYear": endYear}
+    )
     continent_total = df.groupby("Continent")["Value"].sum()
     global_total = continent_total.sum()
     result = (

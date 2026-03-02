@@ -15,24 +15,27 @@ load_query_config(config_path)
     Parse a JSON file into a QueryConfig object.
 load_analytics_config(config_path)
     Parse a JSON file into an AnalyticsConfig object.
+load_ports_config(config_path)
+    Parse a JSON file into a PortsConfig object.
 load_default_config()
     Return a hardcoded BaseConfig with sensible default values.
 load_default_analytics_config()
     Return a hardcoded AnalyticsConfig with sensible default values.
+load_default_ports_config()
+    Return a hardcoded PortsConfig with sensible default values.
 
 Notes
 -----
 - All functions return validated config model instances, not raw dicts.
-- load_default_config() and load_default_analytics_config() require no file
-  on disk and are safe to call at any time.
-- Missing optional fields in analytics/query configs resolve to None via dict.get().
+- load_default_*() functions require no file on disk and are safe to call at any time.
+- Missing optional fields in analytics/query/ports configs resolve to None via dict.get().
 """
 
 import json
 import logging
 from pathlib import Path
 
-from .config_models import BaseConfig, QueryConfig, AnalyticsConfig
+from .config_models import BaseConfig, QueryConfig, AnalyticsConfig, PortsConfig
 
 logger = logging.getLogger(__name__)
 
@@ -101,7 +104,7 @@ def load_analytics_config(config_path: Path) -> AnalyticsConfig:
     Parse a JSON config file into an AnalyticsConfig object.
 
     All fields are optional — any key absent from the file resolves to None,
-    which causes the views layer to fall back to safe defaults.
+    which causes handle.py to fall back to safe defaults during sanitization.
 
     Parameters
     ----------
@@ -122,8 +125,6 @@ def load_analytics_config(config_path: Path) -> AnalyticsConfig:
     with open(config_path) as f:
         data = json.load(f)
 
-    # Type-check every field that is present — wrong types are caught early
-    # rather than silently producing bad widget defaults.
     int_fields = [
         "defaultYear",
         "startYear",
@@ -136,7 +137,8 @@ def load_analytics_config(config_path: Path) -> AnalyticsConfig:
         value = data.get(field)
         if value is not None and not isinstance(value, int):
             raise ValueError(
-                f"analytics_config.json: field '{field}' must be an integer, got {type(value).__name__!r}"
+                f"analytics_config.json: field '{field}' must be an integer, "
+                f"got {type(value).__name__!r}"
             )
 
     config = AnalyticsConfig(
@@ -149,6 +151,49 @@ def load_analytics_config(config_path: Path) -> AnalyticsConfig:
         referenceYear=data.get("referenceYear"),
     )
     logger.debug(f"Analytics configuration loaded: {config}")
+    return config
+
+
+def load_ports_config(config_path: Path) -> PortsConfig:
+    """
+    Parse a JSON config file into a PortsConfig object.
+
+    All fields are optional — any key absent from the file resolves to None,
+    which causes handle.py to fall back to safe defaults during sanitization.
+
+    Parameters
+    ----------
+    config_path : Path
+        Path to ports_config.json.
+
+    Returns
+    -------
+    PortsConfig
+        Populated ports configuration object. Missing fields default to None.
+
+    Raises
+    ------
+    ValueError
+        If a present field has an incorrect type (e.g. a string where int is expected).
+    """
+    logger.info(f"Loading ports configuration from {config_path}")
+    with open(config_path) as f:
+        data = json.load(f)
+
+    int_fields = ["core_port", "analytics_port"]
+    for field in int_fields:
+        value = data.get(field)
+        if value is not None and not isinstance(value, int):
+            raise ValueError(
+                f"ports_config.json: field '{field}' must be an integer, "
+                f"got {type(value).__name__!r}"
+            )
+
+    config = PortsConfig(
+        core_port=data.get("core_port"),
+        analytics_port=data.get("analytics_port"),
+    )
+    logger.debug(f"Ports configuration loaded: {config}")
     return config
 
 
@@ -189,6 +234,7 @@ def load_default_analytics_config() -> AnalyticsConfig:
     """
     logger.info("Loading default analytics configuration")
     config = AnalyticsConfig(
+        continent=None,
         defaultYear=2020,
         startYear=2015,
         endYear=2020,
@@ -197,4 +243,24 @@ def load_default_analytics_config() -> AnalyticsConfig:
         referenceYear=2020,
     )
     logger.debug(f"Default analytics configuration loaded: {config}")
+    return config
+
+
+def load_default_ports_config() -> PortsConfig:
+    """
+    Return a PortsConfig populated with hardcoded default values.
+
+    Used as a fallback when ports_config.json is missing or invalid.
+
+    Returns
+    -------
+    PortsConfig
+        Default ports configuration.
+    """
+    logger.info("Loading default ports configuration")
+    config = PortsConfig(
+        core_port=8010,
+        analytics_port=8011,
+    )
+    logger.debug(f"Default ports configuration loaded: {config}")
     return config

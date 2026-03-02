@@ -3,9 +3,9 @@ Purpose:
 Immutable dataclasses that hold configuration values used across the package.
 
 Description:
-Frozen dataclasses that represent the three distinct configuration concerns —
-application setup (BaseConfig), query parameters (QueryConfig), and analytics
-chart defaults (AnalyticsConfig).
+Frozen dataclasses that represent the four distinct configuration concerns —
+application setup (BaseConfig), query parameters (QueryConfig), analytics
+chart defaults (AnalyticsConfig), and server port bindings (PortsConfig).
 
 Models
 ------
@@ -15,6 +15,8 @@ QueryConfig
     Query-level filter and aggregation parameters passed to the pipeline.
 AnalyticsConfig
     Default filter values for the analytics tab charts.
+PortsConfig
+    Port numbers for the core and analytics API servers.
 
 Notes
 -----
@@ -22,6 +24,8 @@ Notes
 - All models are constructed once.
 - QueryConfig and AnalyticsConfig fields are all optional; None means no filter
   or default behavior applies.
+- PortsConfig fields are never None — sanitization always resolves them to
+  valid port numbers before the servers start.
 
 Examples
 --------
@@ -34,6 +38,7 @@ Examples
 ... )
 >>> query = QueryConfig(region="Asia", country=None, startYear=2000, endYear=2020, operation="sum")
 >>> analytics = AnalyticsConfig(defaultYear=2020, startYear=2015, endYear=2020, topN=10, consecutiveYears=3, referenceYear=2020)
+>>> ports = PortsConfig(core_port=8010, analytics_port=8011)
 """
 
 from dataclasses import dataclass
@@ -101,23 +106,36 @@ class AnalyticsConfig:
     """
     Default filter values for the analytics tab charts.
 
-    All fields are optional. When None, the views layer falls back to
-    safe hardcoded defaults (e.g. max_year for year fields, 10 for topN).
+    Fields are Optional only to allow partial JSON files on disk — missing
+    keys load as None. However, handle.get_analytics_config() always returns
+    a fully sanitized instance with no None values: year fields are clamped
+    to the actual data range, topN is clamped to [5, 30], and consecutiveYears
+    is clamped to [2, 10]. Never consume a raw AnalyticsConfig from config_load
+    directly — always go through handle.get_analytics_config().
 
     Attributes
     ----------
+    continent : str or None
+        Default continent for continent-picker widgets.
+        None only before sanitization — resolved to a valid region by handle.py.
     defaultYear : int or None
-        Default single-year value used by the Top/Bottom countries picker.
+        Default single-year value for the Top/Bottom countries picker.
+        None only before sanitization — resolved to a valid year by handle.py.
     startYear : int or None
-        Default start of year range used by all range-based charts.
+        Default start of year range for all range-based charts.
+        None only before sanitization — resolved to a valid year by handle.py.
     endYear : int or None
-        Default end of year range used by all range-based charts.
+        Default end of year range for all range-based charts.
+        None only before sanitization — resolved to a valid year by handle.py.
     topN : int or None
         Default N for the Top/Bottom N slider (5–30).
+        None only before sanitization — resolved to 10 by handle.py.
     consecutiveYears : int or None
         Default consecutive years for the Consistent Decline slider (2–10).
+        None only before sanitization — resolved to 3 by handle.py.
     referenceYear : int or None
         Default reference year for the Consistent Decline chart.
+        None only before sanitization — resolved to a valid year by handle.py.
     """
 
     continent: Optional[str]
@@ -127,3 +145,27 @@ class AnalyticsConfig:
     topN: Optional[int]
     consecutiveYears: Optional[int]
     referenceYear: Optional[int]
+
+
+@dataclass(frozen=True)
+class PortsConfig:
+    """
+    Port bindings for the core and analytics API servers.
+
+    Fields are Optional only to allow partial JSON files on disk — missing
+    keys load as None. handle.get_ports_config() always returns a fully
+    resolved instance with no None values. Never consume a raw PortsConfig
+    from config_load directly — always go through handle.get_ports_config().
+
+    Attributes
+    ----------
+    core_port : int or None
+        Port for the core API server (:8010 by default).
+        None only before sanitization — resolved to 8010 by handle.py.
+    analytics_port : int or None
+        Port for the analytics API server (:8011 by default).
+        None only before sanitization — resolved to 8011 by handle.py.
+    """
+
+    core_port: Optional[int]
+    analytics_port: Optional[int]

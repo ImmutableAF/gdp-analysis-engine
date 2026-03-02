@@ -1,7 +1,7 @@
 """
 Purpose:
-Resolves absolute paths to the base, query, and analytics JSON config files
-relative to the project root.
+Resolves absolute paths to the base, query, analytics, and ports JSON config
+files relative to the project root.
 
 Description:
 Derives all paths from this file's own location on disk, walking three levels up
@@ -18,10 +18,17 @@ get_query_config_path()
     Return the path to query_config.json.
 get_analytics_config_path()
     Return the path to analytics_config.json.
+get_ports_config_path()
+    Return the path to ports_config.json.
 """
 
 from pathlib import Path
 from typing import Tuple
+
+
+def _src_dir() -> Path:
+    """Return the absolute path to the src/ directory."""
+    return Path(__file__).parent.parent.parent.parent / "src"
 
 
 def get_config_paths() -> Tuple[Path, Path]:
@@ -33,12 +40,8 @@ def get_config_paths() -> Tuple[Path, Path]:
     Tuple[Path, Path]
         (base_config_path, query_config_path) resolved from the project root.
     """
-    base_dir = Path(__file__).parent.parent.parent.parent
-
-    base_config_path = base_dir / "src" / "base_config.json"
-    query_config_path = base_dir / "src" / "query_config.json"
-
-    return base_config_path, query_config_path
+    src = _src_dir()
+    return src / "configs" / "base_config.json", src / "configs" / "query_config.json"
 
 
 def get_base_config_path() -> Path:
@@ -63,5 +66,19 @@ def get_analytics_config_path() -> Path:
     Path
         Absolute path to the analytics configuration file.
     """
-    base_dir = Path(__file__).parent.parent.parent.parent
-    return base_dir / "src" / "analytics_config.json"
+    return _src_dir() / "configs" / "analytics_config.json"
+
+
+def get_ports_config_path() -> Path:
+    """
+    Return the absolute path to ports_config.json.
+
+    Resolved as src/ports_config.json relative to the project root,
+    sitting alongside all other config files.
+
+    Returns
+    -------
+    Path
+        Absolute path to the ports configuration file.
+    """
+    return _src_dir() / "configs" / "ports_config.json"

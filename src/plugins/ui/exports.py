@@ -118,7 +118,7 @@ def export_charts_as_png():
             "Generate Charts (PNG)",
             disabled=not charts_available,
             help=None if charts_available else "No charts available to export",
-            use_container_width=True,
+            width="content",
         )
 
     if generate_clicked:
@@ -153,5 +153,5 @@ def export_charts_as_png():
             mime="application/zip",
             disabled=not st.session_state.charts_ready,
             help=None if st.session_state.charts_ready else "Generate charts first",
-            use_container_width=True,
+            width="content",
         )

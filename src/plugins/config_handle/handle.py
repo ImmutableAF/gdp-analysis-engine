@@ -9,6 +9,8 @@ early. QueryConfig is sanitized against the actual data — invalid regions,
 out-of-range years, and unrecognized operations are silently reset to None.
 AnalyticsConfig is sanitized against the actual data year range and valid
 slider bounds — out-of-range values are clamped or reset to safe defaults.
+PortsConfig is sanitized against valid TCP port bounds — out-of-range values
+are reset to hardcoded defaults.
 Falls back to hardcoded defaults if any config file is missing or invalid.
 """
 
@@ -23,12 +25,15 @@ from .config_load import (
     load_base_config,
     load_default_analytics_config,
     load_default_config,
+    load_default_ports_config,
+    load_ports_config,
     load_query_config,
 )
-from .config_models import AnalyticsConfig, BaseConfig, QueryConfig
+from .config_models import AnalyticsConfig, BaseConfig, PortsConfig, QueryConfig
 from .paths import (
     get_analytics_config_path,
     get_base_config_path,
+    get_ports_config_path,
     get_query_config_path,
 )
 from src.core.metadata import get_valid_attr
@@ -44,6 +49,13 @@ _TOP_N_DEFAULT = 10
 _CONSEC_MIN = 2
 _CONSEC_MAX = 10
 _CONSEC_DEFAULT = 3
+
+# ── Bounds for port fields ────────────────────────────────────────────────────
+
+_PORT_MIN = 1024
+_PORT_MAX = 65535
+_PORT_CORE_DEFAULT = 8010
+_PORT_ANALYTICS_DEFAULT = 8011
 
 
 # ── Base config ───────────────────────────────────────────────────────────────
@@ -183,12 +195,12 @@ def _sanitize_analytics_config(
         "consecutiveYears",
     )
 
-    # Strict continent validation — no hardcoded fallback
     if config.continent and config.continent in regions:
         continent = config.continent
     elif regions:
         logger.debug(
-            f"Invalid continent '{config.continent}' → defaulting to first available region '{regions[0]}'"
+            f"analytics_config: invalid continent '{config.continent}' "
+            f"→ defaulting to first available region '{regions[0]}'"
         )
         continent = regions[0]
     else:
@@ -204,6 +216,61 @@ def _sanitize_analytics_config(
         referenceYear=ref_year,
     )
     logger.debug(f"Sanitized analytics config: {sanitized}")
+    return sanitized
+
+
+# ── Ports config sanitization ─────────────────────────────────────────────────
+
+
+def _sanitize_port(value: Optional[int], default: int, field: str) -> int:
+    """
+    Resolve a port value to a valid TCP port in [1024, 65535].
+
+    Ports below 1024 are privileged and rejected. None and out-of-range values
+    fall back to the provided default.
+
+    Parameters
+    ----------
+    value : int or None
+        Raw port value from the config file.
+    default : int
+        Fallback port to use if value is None or invalid.
+    field : str
+        Field name used in log messages.
+
+    Returns
+    -------
+    int
+        A valid port number in [1024, 65535].
+    """
+    if value is None:
+        logger.debug(f"ports_config: '{field}' is None → defaulting to {default}")
+        return default
+    if value < _PORT_MIN or value > _PORT_MAX:
+        logger.debug(
+            f"ports_config: '{field}'={value} out of [{_PORT_MIN}, {_PORT_MAX}] "
+            f"→ defaulting to {default}"
+        )
+        return default
+    return value
+
+
+def _sanitize_ports_config(config: PortsConfig) -> PortsConfig:
+    core_port = _sanitize_port(config.core_port, _PORT_CORE_DEFAULT, "core_port")
+    analytics_port = _sanitize_port(
+        config.analytics_port, _PORT_ANALYTICS_DEFAULT, "analytics_port"
+    )
+
+    if core_port == analytics_port:
+        logger.warning(
+            f"ports_config: core_port and analytics_port are both {core_port} — "
+            f"resetting to defaults ({_PORT_CORE_DEFAULT}, {_PORT_ANALYTICS_DEFAULT})"
+        )
+        core_port = _PORT_CORE_DEFAULT
+        analytics_port = _PORT_ANALYTICS_DEFAULT
+
+    sanitized = PortsConfig(core_port=core_port, analytics_port=analytics_port)
+    logger.debug(f"Sanitized ports config: {sanitized}")
     return sanitized
 
 
@@ -246,3 +313,33 @@ def get_analytics_config(df: pd.DataFrame) -> AnalyticsConfig:
 
     regions, year_range = get_valid_attr(df)
     return _sanitize_analytics_config(raw_config, regions, year_range)
+
+
+def get_ports_config() -> PortsConfig:
+    """
+    Load and sanitize ports configuration from ports_config.json.
+
+    Does not require a DataFrame — port validation is purely numeric.
+    Falls back to defaults (8010, 8011) on any failure.
+
+    Returns
+    -------
+    PortsConfig
+        Fully resolved ports config with no None values.
+    """
+    try:
+        raw_config = load_ports_config(get_ports_config_path())
+        logger.info("ports_config.json loaded successfully")
+    except FileNotFoundError:
+        logger.warning("ports_config.json not found — using hardcoded defaults")
+        raw_config = load_default_ports_config()
+    except (ValueError, KeyError, TypeError) as e:
+        logger.warning(f"ports_config.json invalid ({e}) — using hardcoded defaults")
+        raw_config = load_default_ports_config()
+    except Exception as e:
+        logger.warning(
+            f"ports_config.json failed to load ({e}) — using hardcoded defaults"
+        )
+        raw_config = load_default_ports_config()
+
+    return _sanitize_ports_config(raw_config)
