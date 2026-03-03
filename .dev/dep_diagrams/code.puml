@@ -1,0 +1,207 @@
+@startuml System Architecture Overview
+' ============================================================
+' SKIN & THEME
+' ============================================================
+skinparam backgroundColor #F8F9FF
+skinparam roundcorner 12
+skinparam shadowing false
+skinparam nodesep 30
+skinparam ranksep 10
+skinparam padding 8
+skinparam defaultFontName "Fira Code"
+
+skinparam package {
+    BackgroundColor #F0F1FF
+    BorderColor     #818CF8
+    FontColor       #3730A3
+    FontSize        13
+    FontStyle       bold
+    BorderThickness 2
+    Padding         20
+}
+
+skinparam class {
+    BackgroundColor       #FFFFFF
+    BorderColor           #818CF8
+    FontColor             #1E1B4B
+    BorderThickness       1
+    HeaderBackgroundColor #EEF2FF
+    AttributeFontColor    #4338CA
+    FontSize        14
+    FontStyle bold
+}
+
+skinparam class<<service>> {
+    BackgroundColor       #FFF0F9
+    BorderColor           #EC4899
+    FontColor             #831843
+    HeaderBackgroundColor #FCE7F3
+}
+
+skinparam class<<controller>> {
+    BackgroundColor       #FFF7ED
+    BorderColor           #F97316
+    FontColor             #7C2D12
+    HeaderBackgroundColor #FFEDD5
+}
+
+skinparam class<<output>> {
+    BackgroundColor       #F0FDF4
+    BorderColor           #22C55E
+    FontColor             #14532D
+    HeaderBackgroundColor #DCFCE7
+}
+
+skinparam interface {
+    BackgroundColor #FFFBEB
+    BorderColor     #F59E0B
+    FontColor       #78350F
+    BorderThickness 2.5
+}
+
+skinparam protocol {
+    BackgroundColor #EFF6FF
+    BorderColor     #3B82F6
+    FontColor       #1E3A8A
+    BorderThickness 2.5
+}
+
+skinparam abstract {
+    BackgroundColor       #FDF4FF
+    BorderColor           #A855F7
+    FontColor             #581C87
+    HeaderBackgroundColor #F3E8FF
+    BorderThickness       2.5
+}
+
+skinparam arrow {
+    Color     #7C3AED
+    FontColor #6D28D9
+    FontSize  14
+    Thickness 2.2
+    FontStyle bold
+}
+
+skinparam note {
+    BackgroundColor #FFFBEB
+    BorderColor     #F59E0B
+    FontColor       #78350F
+    FontSize        12
+}
+
+' ============================================================
+' TITLE
+' ============================================================
+
+title <color:#4338CA><b>System Architecture Overview</b></color>
+
+' ============================================================
+' PACKAGES
+' ============================================================
+
+package "src.plugins" {
+
+    package "data_loading" {
+        interface loader_interface
+        class loader_registry
+        class loading_manager <<controller>>
+    }
+
+    package "config_handle" {
+        class config_models
+        class config_load
+        class paths
+        class handle <<controller>>
+    }
+
+    abstract class OutputSink as "outputs.py"
+    class cli        as "cli"       <<output>>
+    class ui         as "ui"        <<output>>
+    class fileWriter as "fileWriter" <<output>>
+
+    package "data_loaders" {
+        class csv_loader
+        class excel_loader
+        class json_loader
+    }
+
+    class output_api <<service>>
+    "src.plugins" --> output_api : exposes
+}
+
+package "src.util" {
+    class cli_parser
+    protocol logging_contract
+    class logging_setup
+}
+
+package "src.core" {
+    protocol contracts
+    class engine
+    class core_api <<service>>
+    class metadata
+    class data_cleaning
+}
+
+' ============================================================
+' FLOW 1 — Data Loading
+' ============================================================
+
+loader_registry  -->  loader_interface : conforms to
+loading_manager  -->  loader_registry  : supplies required loader to
+data_loading     -->  loading_manager  : exposes
+
+' ============================================================
+' FLOW 2 — Data Loaders
+' ============================================================
+
+csv_loader   ..|>  loader_interface
+excel_loader ..|>  loader_interface
+json_loader  ..|>  loader_interface
+data_loaders  -->  loader_registry   : auto-registers into
+
+' ============================================================
+' FLOW 3 — Config Handle
+' ============================================================
+
+config_load   -->  config_models  : conforms to
+handle        -->  paths          : uses
+handle        -->  config_load    : extends
+config_handle -->  handle         : exposes
+
+' ============================================================
+' FLOW 4 — Outputs
+' ============================================================
+
+cli         ..|>  OutputSink
+ui          ..|>  OutputSink
+fileWriter  ..|>  OutputSink
+
+' ============================================================
+' FLOW 5 — Util
+' ============================================================
+
+logging_setup  -->  logging_contract : conforms to
+"src.util"     -->  cli_parser       : exposes
+"src.util"     -->  logging_setup
+
+' ============================================================
+' FLOW 6 — Core
+' ============================================================
+
+engine        -->  contracts    : follows
+core_api      -->  contracts    : conforms to
+core_api      -->  engine       : orchestrates
+core_api      -->  metadata     : uses
+"src.core"    -->  core_api     : exposes
+"src.core"    -->  data_cleaning: exposes
+
+' ============================================================
+' FLOW 7 — src.main
+' ============================================================
+
+"src.main"  -->  "src.plugins"  : uses
+"src.main"  -->  "src.util"     : uses
+"src.main"  -->  "src.core"     : uses
+
+@enduml
